@@ -4,6 +4,7 @@ import { arrGeo, newArr, pushWalls } from './mesh.js';
 import { roofShape } from './roofs.js';
 import { rynekFacadeDetails, rynekGlowM } from './rynek-details.js';
 import { RYNEK_H, RYNEK_VARIANTS, rynekFacade } from './rynek-facades.js';
+import { rynekSquare } from './rynek-square.js';
 import { rynekBenches, rynekCafes } from './rynek-street.js';
 import { ringArea2 } from './spatial.js';
 
@@ -100,7 +101,8 @@ export function rynekHouse(f, ring, free, x) {
   return top;
 }
 
-// lukarny mansardowe (lokalnie: +x na zewnątrz, 0 = lico ściany na wysokości okapu), detale elewacji, ławki i ogródki
+// lukarny mansardowe (lokalnie: +x na zewnątrz, 0 = lico ściany na wysokości okapu), detale elewacji, ławki, ogródki,
+// fortepian ze sceną i namioty The Jack
 export function rynekMeshes(kit, add, solid) {
   kit.mats.forEach((m, v) => add(arrGeo(kit.fronts[v]), m));
   const std = o => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85, ...o });
@@ -110,5 +112,5 @@ export function rynekMeshes(kit, add, solid) {
     .rotateY(Math.PI / 2).translate(-20, 0, 0);
   return [instanced(body, std(), kit.dormers, kit.dormerCol), instanced(win, std({ color: 0x34475a, roughness: 0.3 }), kit.dormers),
     instanced(cap, std({ roughness: 0.9 }), kit.dormers, kit.dormerRoof), ...rynekFacadeDetails(kit.faces, kit.glowM),
-    ...rynekBenches(RYNEK, solid), ...rynekCafes(kit.faces, solid)];
+    ...rynekBenches(RYNEK, solid), ...rynekCafes(kit.faces, solid), ...rynekSquare(RYNEK, solid)];
 }

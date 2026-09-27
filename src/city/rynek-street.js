@@ -7,8 +7,10 @@ import { gridPut } from './spatial.js';
 /* ---------- mała architektura Rynku: czerwone ławki na płycie i ogródki kawiarniane pod pierzejami ---------- */
 const std = o => new THREE.MeshStandardMaterial({ roughness: 0.8, ...o });
 const b = (w, h, d, x, y, z, rx = 0) => new THREE.BoxGeometry(w, h, d).rotateX(rx).translate(x, y, z);
+// krzesło kawiarniane (oparcie od strony -z)
+export const chairGeo = () => mergeGeometries([b(3.8, 0.5, 3.8, 0, 4.4, 0), b(3.8, 4.2, 0.4, 0, 6.6, -1.9), ...[[-1.6, -1.6], [1.6, -1.6], [-1.6, 1.6], [1.6, 1.6]].map(([x, z]) => b(0.35, 4.2, 0.35, x, 2.1, z))]);
 // przeszkoda dla auta: prostokąt o środku (x, z), półwymiarach hx (wzdłuż lx, lz) i hz (wzdłuż fx, fz)
-function block(solid, x, z, lx, lz, fx, fz, hx, hz) {
+export function block(solid, x, z, lx, lz, fx, fz, hx, hz) {
   const ring = [];
   for (const [sx, sz] of [[-hx, -hz], [hx, -hz], [hx, hz], [-hx, hz]]) ring.push(x + lx * sx + fx * sz, z + lz * sx + fz * sz);
   const xs = ring.filter((_, i) => i % 2 === 0), zs = ring.filter((_, i) => i % 2 === 1), bb = [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)];
@@ -16,13 +18,14 @@ function block(solid, x, z, lx, lz, fx, fz, hx, hz) {
 }
 
 // ławki (lokalnie: u wzdłuż pierzei NW/SE, v w stronę SE; środek i osie jak RYNEK w rynek.js): rzędy wzdłuż donic
-// z drzewami po obu stronach ratusza, zwrócone do ratusza, i krąg wokół okrągłego trawnika przed jego frontem.
+// z drzewami po obu stronach ratusza, zwrócone do ratusza (po stronie NW tylko za ratuszem: przed nim stoją scena
+// z fortepianem i namioty The Jack), i krąg wokół okrągłego trawnika przed jego frontem.
 // Na zdjęciach Street View: czerwone drewniane siedziska z oparciem na ciemnych nogach.
 const ROWS = [-360, -200, -20, 155, 330], ROW_V = 232, CIRCLE = [-289, -10, 76];
 export function rynekBenches(R, solid) {
   const [ux, uz] = R.u, W = (pu, pv) => [R.c[0] + ux * pu - uz * pv, R.c[1] + uz * pu + ux * pv];
   const spots = [];                                                                      // [pu, pv, kierunek siedzenia (du, dv)]
-  for (const u of ROWS) for (const s of [1, -1]) spots.push([u, s * ROW_V, 0, -s]);
+  for (const u of ROWS) for (const s of u > 0 ? [1, -1] : [1]) spots.push([u, s * ROW_V, 0, -s]);
   for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + Math.PI / 6, cu = Math.cos(a), cv = Math.sin(a); spots.push([CIRCLE[0] + cu * CIRCLE[2], CIRCLE[1] + cv * CIRCLE[2], -cu, -cv]); }
   const mats = [];
   for (const [pu, pv, du, dv] of spots) {
@@ -55,7 +58,6 @@ export function rynekCafes(fronts, solid) {
   const canopy = new THREE.ConeGeometry(19, 5, 4, 1).rotateY(Math.PI / 4).translate(0, 26.5, 0);
   const frame = mergeGeometries([new THREE.CylinderGeometry(0.5, 0.5, 26, 6).translate(0, 13, 0), new THREE.CylinderGeometry(3.6, 3.6, 0.5, 16).translate(0, 7.2, 0),
     new THREE.CylinderGeometry(0.4, 0.4, 7, 6).translate(0, 3.6, 0)]);
-  const chair = mergeGeometries([b(3.8, 0.5, 3.8, 0, 4.4, 0), b(3.8, 4.2, 0.4, 0, 6.6, -1.9), ...[[-1.6, -1.6], [1.6, -1.6], [-1.6, 1.6], [1.6, 1.6]].map(([x, z]) => b(0.35, 4.2, 0.35, x, 2.1, z))]);
   return [instanced(canopy, std({ color: 0xf4f1e8, roughness: 0.9, side: THREE.DoubleSide }), umb), instanced(frame, std({ color: 0x33302c, roughness: 0.5, metalness: 0.4 }), umb),
-    instanced(chair, std({ color: 0x6b4a2e }), seats)];
+    instanced(chairGeo(), std({ color: 0x6b4a2e }), seats)];
 }
