@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { canvasTex } from '../../core/textures.js';
 import { arrGeo, flatGeo, newArr, pushWalls } from '../mesh.js';
 import { gridPut, ringBox } from '../spatial.js';
+import { ARC, arcadeHole, archX, buildArcade } from './ratusz-arcade.js';
 import { archTex, clockTex } from './tower-textures.js';
 
 /* ---------- Ratusz w Kaliszu (Główny Rynek 20, 1920–1925): neoklasycystyczny gmach z wieżą ---------- */
@@ -33,36 +34,28 @@ function ratFacadeTex() {                                                      /
     g.fillStyle = 'rgba(0,0,0,.08)'; g.fillRect(0, Y(147), n, 3);
   });
 }
-// ryzalit frontowy: 5 osi, arkady w parterze, okna z balustradą na I piętrze
-function ratFrontTex() {
+// ryzalit frontowy nad podcieniami: 3 osie nad łukami; I piętro: wysokie okna z gzymsem nadokiennym, II: okna zamknięte łukiem
+function ratFrontTex(L) {
   return canvasTex(512, (g, n) => {
-    const H = RAT.H, Y = y => n - y / H * n, bw = n / 5;
+    const y0 = ARC.top, Y = y => n - (y - y0) / (RAT.H - 2 - y0) * n, k = n / L;
     g.fillStyle = '#f4f1ea'; g.fillRect(0, 0, n, n);
-    g.fillStyle = '#dcd8cf'; g.fillRect(0, Y(5), n, n);
-    g.strokeStyle = 'rgba(0,0,0,.11)'; g.lineWidth = 2;
-    for (let y = 9; y < 52; y += 5.5) { g.beginPath(); g.moveTo(0, Y(y)); g.lineTo(n, Y(y)); g.stroke(); }
-    g.fillStyle = '#e6e2d9'; g.fillRect(0, Y(57), n, Y(52) - Y(57));
-    for (let i = 0; i < 5; i++) {
-      const cx = bw * (i + 0.5);
-      // arkada
-      const aw = bw * 0.62, t = Y(47), b = Y(0);
-      g.fillStyle = '#ebe7de'; g.beginPath(); g.moveTo(cx - aw / 2 - 7, b); g.lineTo(cx - aw / 2 - 7, t + aw / 2); g.arc(cx, t + aw / 2, aw / 2 + 7, Math.PI, 0); g.lineTo(cx + aw / 2 + 7, b); g.fill();
-      g.fillStyle = '#39342e'; g.beginPath(); g.moveTo(cx - aw / 2, b); g.lineTo(cx - aw / 2, t + aw / 2); g.arc(cx, t + aw / 2, aw / 2, Math.PI, 0); g.lineTo(cx + aw / 2, b); g.fill();
-      g.fillStyle = '#e3dfd5'; g.fillRect(cx - 5, t - 4, 10, 9);                // klucz łuku
-      // I piętro: okno z półkolistym nadprożem i balustradką
-      const w1 = bw * 0.46, t1 = Y(108), b1 = Y(68);
-      const gr = g.createLinearGradient(0, t1, 0, b1); gr.addColorStop(0, '#71879a'); gr.addColorStop(1, '#2d3d4c');
-      g.fillStyle = '#e5e1d7'; g.fillRect(cx - w1 / 2 - 6, t1 - 4, w1 + 12, b1 - t1 + 6);
-      g.fillStyle = gr; g.beginPath(); g.moveTo(cx - w1 / 2, b1); g.lineTo(cx - w1 / 2, t1 + w1 / 2); g.arc(cx, t1 + w1 / 2, w1 / 2, Math.PI, 0); g.lineTo(cx + w1 / 2, b1); g.fill();
-      g.fillStyle = '#e9e5dc'; g.fillRect(cx - w1 / 2 - 8, Y(71), w1 + 16, Y(66) - Y(71));
-      for (let k = 0; k < 6; k++) g.fillRect(cx - w1 / 2 + k * w1 / 5 - 2, Y(69), 4, Y(62) - Y(69));   // tralki
-      // II piętro
-      const w2 = bw * 0.42, t2 = Y(140), b2 = Y(119);
-      const gr2 = g.createLinearGradient(0, t2, 0, b2); gr2.addColorStop(0, '#71879a'); gr2.addColorStop(1, '#2d3d4c');
-      g.fillStyle = '#e5e1d7'; g.fillRect(cx - w2 / 2 - 6, t2 - 5, w2 + 12, b2 - t2 + 9);
-      g.fillStyle = gr2; g.fillRect(cx - w2 / 2, t2, w2, b2 - t2);
+    const glass = (t, b) => { const gr = g.createLinearGradient(0, t, 0, b); gr.addColorStop(0, '#71879a'); gr.addColorStop(1, '#2d3d4c'); return gr; };
+    const arched = (cx, w, t, b) => { g.beginPath(); g.moveTo(cx - w / 2, b); g.lineTo(cx - w / 2, t + w / 2); g.arc(cx, t + w / 2, w / 2, Math.PI, 0); g.lineTo(cx + w / 2, b); g.fill(); };
+    for (const c of archX()) {
+      const cx = (c / L + 0.5) * n;
+      // I piętro
+      const w1 = 17 * k, t1 = Y(101), b1 = Y(68);
+      g.fillStyle = '#e5e1d7'; g.fillRect(cx - w1 / 2 - 2 * k, t1 - 4, w1 + 4 * k, b1 - t1 + 4);
+      g.fillStyle = glass(t1, b1); g.fillRect(cx - w1 / 2, t1, w1, b1 - t1);
+      g.fillStyle = '#e9e5dc'; g.fillRect(cx - w1 / 2 - 4 * k, Y(106), w1 + 8 * k, Y(101.5) - Y(106));   // gzyms nadokienny
+      g.fillRect(cx - w1 / 2 - 3 * k, Y(68), w1 + 6 * k, Y(64.5) - Y(68));                            // parapet
+      // II piętro: okno zamknięte łukiem
+      const w2 = 15 * k, t2 = Y(141), b2 = Y(118);
+      g.fillStyle = '#e5e1d7'; arched(cx, w2 + 4 * k, t2 - 2 * k, b2 + 3);
+      g.fillStyle = glass(t2, b2); arched(cx, w2, t2, b2);
       g.strokeStyle = '#f5f3ee'; g.lineWidth = 3; g.beginPath();
-      g.moveTo(cx, t1 + 3); g.lineTo(cx, b1); g.moveTo(cx, t2); g.lineTo(cx, b2); g.stroke();
+      g.moveTo(cx, t1); g.lineTo(cx, b1); g.moveTo(cx - w1 / 2, Y(92)); g.lineTo(cx + w1 / 2, Y(92));
+      g.moveTo(cx, t2 + 2); g.lineTo(cx, b2); g.moveTo(cx - w2 / 2, Y(126)); g.lineTo(cx + w2 / 2, Y(126)); g.stroke();
     }
     g.fillStyle = '#e1ddd3'; g.fillRect(0, Y(158), n, Y(146) - Y(158));
   });
@@ -90,39 +83,47 @@ function railTex() {
 export function buildRatusz(R0, group, solid) {
   const plaster = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.88, emissive: 0xfff0d2, emissiveIntensity: 0 });
   const facadeM = plaster.clone(); facadeM.map = ratFacadeTex();
-  const frontM = plaster.clone(); frontM.map = ratFrontTex();
   const shaftM = plaster.clone(); shaftM.map = ratShaftTex();
   const roofM = new THREE.MeshStandardMaterial({ color: 0x8e9398, roughness: 0.6, metalness: 0.35 });
   const darkM = new THREE.MeshStandardMaterial({ color: 0x2c3234, roughness: 0.5, metalness: 0.35 });
   const goldM = new THREE.MeshStandardMaterial({ color: 0xd4ab4f, roughness: 0.3, metalness: 0.9 });
   const add = (geo, mat, parent = group) => { const m = new THREE.Mesh(geo, mat); parent.add(m); return m; };
 
-  // korpus z dziedzińcem: elewacje z osiami okiennymi, gzyms wieńczący, płaski dach blaszany
+  // układ lokalny frontu: x wzdłuż ryzalitu, +z na zewnątrz (w stronę rynku), 0 = lico ryzalitu
+  const [ax, az, bx, bz] = R0.front, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
+  const F = new THREE.Group(); F.position.set((ax + bx) / 2, 0, (az + bz) / 2); F.rotation.y = Math.atan2(-uz, ux); group.add(F);
+  const toWorld = (x, z) => [F.position.x + x * ux - z * uz, F.position.z + x * uz + z * ux];
+  const [tx0, tz0, TS] = R0.tower;
+  const dx = tx0 - F.position.x, dz = tz0 - F.position.z;
+  const tx = dx * ux + dz * uz, tz = dx * -uz + dz * ux;
+
+  // korpus z dziedzińcem: elewacje z osiami okiennymi, gzyms wieńczący, płaski dach blaszany;
+  // ściany ryzalitu zaczynają się dopiero nad podcieniami
+  const outer = R0.body[0], n = outer.length / 2;
+  const inRis = i => { const j = 2 * (i % n); return (outer[j] - F.position.x) * -uz + (outer[j + 1] - F.position.z) * ux > -ARC.depth - 0.5; };
+  const ris = Array.from({ length: n }, (_, i) => inRis(i) && inRis(i + 1));
   const walls = newArr(false);
-  R0.body.forEach((r, k) => pushWalls(walls, r, k > 0, -2, RAT.H - 8, (u, v) => [u / RAT.bay, (v - 2) / RAT.H]));
+  R0.body.forEach((r, k) => pushWalls(walls, r, k > 0, -2, RAT.H - 8, (u, v) => [u / RAT.bay, (v - 2) / RAT.H], null, k ? null : ris));
+  pushWalls(walls, outer, false, ARC.top, RAT.H - 8, (u, v) => [u / RAT.bay, (v + ARC.top) / RAT.H], null, ris.map(r => !r));
   add(arrGeo(walls), facadeM);
   const cor = newArr(false);
   pushWalls(cor, R0.cornice[0], false, RAT.H - 9, RAT.H, () => [0.5, 0.97]);
   R0.body.slice(1).forEach(r => pushWalls(cor, r, true, RAT.H - 9, RAT.H, () => [0.5, 0.97]));
   add(arrGeo(cor), facadeM);
   add(flatGeo([[R0.cornice[0], ...R0.body.slice(1)]], RAT.H, 1 / 40), roofM);
-  const bb = ringBox(R0.body[0]);
-  gridPut(solid, bb[0], bb[1], bb[2], bb[3], { p: [R0.body[0]], b: bb });
+  const bb = ringBox(outer);                                                     // kolizja korpusu bez przestrzeni pod ryzalitem
+  gridPut(solid, bb[0], bb[1], bb[2], bb[3], { p: [outer, arcadeHole(L).flatMap(([x, z]) => toWorld(x, z))], b: bb });
+  const arcM = buildArcade(F, L, toWorld, solid, plaster);
 
-  // układ lokalny frontu: x wzdłuż ryzalitu, +z na zewnątrz (w stronę rynku), 0 = lico ryzalitu
-  const [ax, az, bx, bz] = R0.front, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
-  const F = new THREE.Group(); F.position.set((ax + bx) / 2, 0, (az + bz) / 2); F.rotation.y = Math.atan2(-uz, ux); group.add(F);
-  const [tx0, tz0, TS] = R0.tower;
-  const dx = tx0 - F.position.x, dz = tz0 - F.position.z;
-  const tx = dx * ux + dz * uz, tz = dx * -uz + dz * ux;
-
-  // ryzalit: lico z arkadami, pilastry wielkiego porządku, belkowanie i tympanon z herbem
-  add(new THREE.PlaneGeometry(L, RAT.H - 2).translate(0, (RAT.H - 2) / 2, 0.6), frontM, F);
-  for (let i = 0; i <= 5; i++) {
-    const x = -L / 2 + i * L / 5 + (i === 0 ? 3 : i === 5 ? -3 : 0);
-    add(new THREE.BoxGeometry(i % 5 ? 6 : 7, 86, 2.4).translate(x, 57 + 43, 1.6), plaster, F);                     // pilaster
-    add(new THREE.BoxGeometry(10, 4, 3.6).translate(x, 145, 2), plaster, F);                                         // głowica
-    add(new THREE.BoxGeometry(9, 3, 3.2).translate(x, 58.5, 1.9), plaster, F);                                       // baza
+  // ryzalit: lico nad podcieniami, pary pilastrów wielkiego porządku nad filarami, belkowanie i tympanon z herbem
+  const frontM = plaster.clone(); frontM.map = ratFrontTex(L);
+  add(new THREE.PlaneGeometry(L, RAT.H - 2 - ARC.top).translate(0, (RAT.H - 2 + ARC.top) / 2, 0.6), frontM, F);
+  const [a0, , a2] = archX();
+  for (const px of [-L / 2 + 7, a0 / 2, a2 / 2, L / 2 - 7]) for (const o of [-4.2, 4.2]) {
+    const x = px + o;
+    add(new THREE.BoxGeometry(5.5, 86, 2.4).translate(x, ARC.top + 43, 1.6), plaster, F);                            // pilaster
+    add(new THREE.BoxGeometry(7.5, 4, 3.6).translate(x, 145, 2), plaster, F);                                        // głowica
+    add(new THREE.BoxGeometry(7, 3, 3.2).translate(x, ARC.top + 1.5, 1.9), plaster, F);                               // baza
   }
   add(new THREE.BoxGeometry(L + 8, 10, 5).translate(0, RAT.H - 5, 1.2), plaster, F);                                 // belkowanie
   const gableW = L / 2 + 4, gableH = 44, gableD = 70;
@@ -171,5 +172,5 @@ export function buildRatusz(R0, group, solid) {
   add(new THREE.BoxGeometry(14, 5, 0.5).translate(4, 560, 0), goldM, Cr);                                             // wiatrowskaz
   add(new THREE.CylinderGeometry(0.4, 0.4, 16, 6).translate(0, 558, 0), goldM, Cr);
 
-  return [plaster, facadeM, frontM, shaftM];
+  return [plaster, facadeM, frontM, shaftM, ...arcM];
 }
