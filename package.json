@@ -4,10 +4,13 @@
   "private": true,
   "description": "Jazda Audi A4 B7 po Kaliszu odtworzonym z danych OpenStreetMap",
   "type": "module",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "build:debug": "node scripts/build.mjs --debug",
+    "lint": "eslint .",
     "serve": "python3 -m http.server 8766 --bind 127.0.0.1 --directory dist",
     "deploy": "./deploy.sh"
   },
@@ -15,6 +18,9 @@
     "three": "0.160.0"
   },
   "devDependencies": {
-    "esbuild": "0.25.10"
+    "@eslint/js": "9.39.5",
+    "esbuild": "0.25.10",
+    "eslint": "9.39.5",
+    "globals": "16.5.0"
   }
 }

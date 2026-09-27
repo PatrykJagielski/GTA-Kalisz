@@ -1,0 +1,81 @@
+import { CAR } from '../car/dimensions.js';
+import { rig, wheelGroups } from '../car/index.js';
+import { camera } from '../core/renderer.js';
+import { thump } from './audio.js';
+import { heightOf, hits, surfaceAt } from './collision.js';
+import { drive, st } from './state.js';
+
+/* ---------- fizyka auta: model rowerowy, opory, zawieszenie, zderzenia ---------- */
+const WB = CAR.axF - CAR.axR;                  // rozstaw osi 26,48 dm
+const REAR = -CAR.axR;                         // środek auta leży 12,88 dm przed tylną osią
+const WHEELS = [[CAR.axF, -CAR.trackZ], [CAR.axF, CAR.trackZ], [CAR.axR, -CAR.trackZ], [CAR.axR, CAR.trackZ]];   // LP, PP, LT, PT
+
+// sterowanie z klawiatury (strzałki, WASD, spacja) i przycisków dotykowych
+export function readInput(k) {
+  return {
+    gas: !!(k.KeyW || k.ArrowUp || k.tgas),
+    brake: !!(k.KeyS || k.ArrowDown || k.tbrake),
+    steer: (k.KeyA || k.ArrowLeft || k.tleft ? 1 : 0) - (k.KeyD || k.ArrowRight || k.tright ? 1 : 0),
+    handbrake: !!k.Space,
+  };
+}
+
+// zawieszenie: wysokość i przechyły z wysokości pod czterema kołami; zwraca udział kół na trawie
+function suspension(cx, cz, dt, jump) {
+  const c = Math.cos(st.psi), s = Math.sin(st.psi);
+  let step = 0, grass = 0;
+  const h = WHEELS.map(([lx, lz], i) => {
+    const x = cx + lx * c + lz * s, z = cz - lx * s + lz * c, k = surfaceAt(x, z), v = heightOf(k, x, z);
+    step = Math.max(step, Math.abs(v - st.wh[i])); if (k === 2) grass++;
+    return v;
+  });
+  if (step > 0.5 && !jump) { st.v *= 0.9; thump(Math.min(1, Math.abs(st.v) / 120 + 0.3)); }
+  st.wh = h;
+  const y = (h[0] + h[1] + h[2] + h[3]) / 4;
+  const pitch = Math.atan(((h[0] + h[1]) - (h[2] + h[3])) / 2 / WB);
+  const roll = Math.atan(((h[0] + h[2]) - (h[1] + h[3])) / 2 / (2 * CAR.trackZ));
+  const k = jump ? 1 : Math.min(1, dt * 14);
+  st.y += (y - st.y) * k; st.pitch += (pitch - st.pitch) * k; st.roll += (roll - st.roll) * k;
+  return grass / 4;
+}
+export function resetCar() {
+  const [x, z, psi0] = drive.city.start, psi = psi0 + Math.PI;                 // start obrócony o 180°
+  Object.assign(st, { x: x - Math.cos(psi) * REAR, z: z + Math.sin(psi) * REAR, psi, v: 0, steer: 0, gear: 1, rpm: 850 });
+  suspension(x, z, 0, true); placeCar();
+  camera.position.set(x - Math.cos(psi) * 90, 34, z + Math.sin(psi) * 90); drive.last.set(x, 0, z);
+}
+export function placeCar() {
+  rig.position.set(st.x + Math.cos(st.psi) * REAR, st.y, st.z - Math.sin(st.psi) * REAR);
+  rig.rotation.order = 'YZX';                                                  // kurs, potem pochylenie, potem przechył
+  rig.rotation.set(st.roll, st.psi, st.pitch);
+}
+// jeden krok fizyki; zwraca środek auta (cx, cz) po kroku
+export function stepCar(dt, input) {
+  const { gas, brake } = input;
+  let a = 0;
+  if (gas) a += st.v >= -1 ? Math.max(0, 32 - Math.abs(st.v) * 0.055) : 90;      // gaz przy cofaniu = hamowanie
+  if (brake) a -= st.v > 1 ? 90 : (st.v > -70 ? 26 : 0);                          // hamulec, potem wsteczny do ~25 km/h
+  if (input.handbrake) a -= Math.sign(st.v) * 70;
+  // trawa: mały opór przy ruszaniu, rosnący z prędkością (maks. ok. 35 km/h), zawsze słabszy niż napęd
+  const drag = Math.sign(st.v) * (6 + 0.00011 * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.12));
+  let v = st.v + (a - drag) * dt;
+  if (!gas && !brake && Math.abs(v) < 3) v = 0;
+  st.v = v;
+  const maxSteer = 0.6 / (1 + Math.abs(v) / 200);
+  st.steer += (input.steer * maxSteer - st.steer) * Math.min(1, dt * 5);
+  const ox = st.x, oz = st.z, op = st.psi;
+  st.psi += v / WB * Math.tan(st.steer) * dt;                                     // model rowerowy: obrót wokół tylnej osi
+  st.x += Math.cos(st.psi) * v * dt; st.z -= Math.sin(st.psi) * v * dt;
+  let cx = st.x + Math.cos(st.psi) * REAR, cz = st.z - Math.sin(st.psi) * REAR;
+  // blokuj tylko wjazd w przeszkodę; jeśli auto już o coś zahacza, zawsze może się wycofać
+  if (hits(cx, cz, st.psi) && !hits(ox + Math.cos(op) * REAR, oz - Math.sin(op) * REAR, op)) {
+    st.x = ox; st.z = oz; st.psi = op; st.v = Math.abs(v) < 8 ? 0 : -v * 0.25;
+    cx = st.x + Math.cos(st.psi) * REAR; cz = st.z - Math.sin(st.psi) * REAR;
+  }
+  drive.grass = suspension(cx, cz, dt, false);
+  placeCar();
+  // koła: obrót i skręt przednich
+  st.spin -= st.v * dt / CAR.wr;
+  for (const { w, spin, front } of wheelGroups) { spin.rotation.z = st.spin; if (front) w.rotation.y = st.steer; }
+  return { cx, cz };
+}

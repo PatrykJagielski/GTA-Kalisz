@@ -25,6 +25,7 @@ case "${1:-}" in
 esac
 
 [ -d node_modules ] || npm ci --no-audit --no-fund
+npm run --silent lint                           # błąd lintera (np. zgubiony import) zatrzymuje wdrożenie
 npm run --silent build
 APP=$(cd dist && ls | grep -E '^app\.[0-9a-f]+\.js$')
 CITY=$(cd dist && ls | grep -E '^kalisz\.[0-9a-f]+\.json$')

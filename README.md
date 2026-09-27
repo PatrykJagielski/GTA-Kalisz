@@ -6,20 +6,25 @@ Adres: https://gta.patrykjagielski.tech
 
 ## Struktura
 
-| Ścieżka | Zawartość |
+Kod gry to moduły ES w `src/` (jednostka świata = 1 dm; x = wschód, z = południe, (0, 0) = Główny Rynek). Punkt wejścia `src/main.js` buduje auto, podpina interfejs, uruchamia pętlę i wczytuje miasto. Moduły nie robią nic przy imporcie poza tworzeniem renderera i stałych — resztę uruchamia `main.js` (`buildCar`, `init*`, `startLoop`, `loadCity`).
+
+| Katalog | Zawartość |
 | --- | --- |
-| `src/0-strona.html` | HTML, style, menu startowe, pauza, HUD; w `<head>` strażnik startu (komunikat, gdy gra nie może ruszyć) |
-| `src/1-scena.js` | renderer Three.js, światła, wspólny stan, pomocnicze bryły |
-| `src/2-auto.js` | model Audi A4 B7 (nadwozie, wnętrze, koła) |
-| `src/3-miasto.js` | budowanie Kalisza z danych miasta: ulice, budynki, drzewa, zabytki (ratusz, fontanna Noce i Dnie, kolegiata, kościół garnizonowy, mural, pomnik Jana Pawła II, kamienica na rogu) |
-| `src/4-jazda.js` | fizyka, kolizje, kamery, minimapa, dźwięk diesla, dzień i noc |
-| `src/5-gra.js` | wczytywanie mapy, menu, pauza, klawiatura i dotyk, utrata kontekstu WebGL, pętla gry |
+| `src/index.html` | HTML, style, menu startowe, pauza, HUD; w `<head>` strażnik startu (komunikat, gdy gra nie może ruszyć) |
+| `src/core/` | renderer, scena, kamera i światła (`renderer.js`), stan gry, DOM, motyw, pomocnicze bryły (`geometry.js`), tekstury canvas, RNG |
+| `src/car/` | Audi A4 B7: wymiary, profile nadwozia, materiały, tablice, dekale, `buildBody`, `buildInterior`, `buildWheels`; `index.js` składa auto (`rig`) |
+| `src/city/` | Kalisz z danych miasta: `build.js` (`buildCity`), indeks przestrzenny, siatki z wielokątów OSM, elewacje, nazwy ulic, niebo dzień/noc |
+| `src/city/landmarks/` | zabytki: ratusz, fontanna Noce i Dnie, kolegiata, kościół garnizonowy, mural (sgraffito), Plac św. Józefa z pomnikiem Jana Pawła II, kamienica na rogu |
+| `src/drive/` | jazda: fizyka i zawieszenie, kolizje, skrzynia biegów, kamery, HUD, minimapa, dźwięk silnika; `index.js` = jeden krok jazdy |
+| `src/game/` | wczytywanie mapy, start i pauza, klawiatura i dotyk, przyciski, dzień/noc, ustawienie dźwięku, utrata kontekstu WebGL, pętla |
 | `scripts/build.mjs` | build: bundel esbuild, nazwy z hashem, CSP, sprawdzenie `kalisz.json`, pliki `.gz` |
 | `public/kalisz.json` | dane miasta (wynik `dane/build.py`) |
 | `dane/` | skrypt i zapytania Overpass, z których powstaje `kalisz.json` (`pip install -r dane/requirements.txt`) |
 | `deploy/` | `docker-compose.yml` i konfiguracja nginx dla Mikrusa |
 
-Pliki `src/1…5` są sklejane w kolejności numerów w jeden moduł ES, a esbuild dokleja do niego Three.js 0.160 z `node_modules` (wersje przypięte w `package-lock.json`). Gra nie pobiera skryptów z zewnętrznych CDN; z zewnątrz przychodzą tylko fonty Google (z zapasowymi fontami systemowymi).
+esbuild dokleja Three.js 0.160 z `node_modules` (wersje przypięte w `package-lock.json`). Gra nie pobiera skryptów z zewnętrznych CDN; z zewnątrz przychodzą tylko fonty Google (z zapasowymi fontami systemowymi).
+
+ESLint (`npm run lint`) pilnuje nieużywanych i niezdefiniowanych nazw oraz długości plików: moduł ponad 250 linii kodu to błąd — znak, że trzeba go podzielić. `deploy.sh` nie wdroży kodu, który nie przechodzi lintera.
 
 ## Budowanie i uruchamianie
 
@@ -46,11 +51,11 @@ Podgląd lokalny:
 npm run serve
 ```
 
-`npm run build:debug` buduje bez minifikacji, z mapą źródeł i `window.__gta` (stan auta, kamera, funkcje kolizji) do testów w konsoli.
+`npm run build:debug` buduje bez minifikacji, z mapą źródeł i `window.__gta` (stan auta, kamera, funkcje kolizji, `updateDrive`) do testów w konsoli; w wersji produkcyjnej ten kod jest usuwany.
 
 ### Bezpieczeństwo
 
-`index.html` ma Content-Security-Policy w `<meta>`: skrypty tylko z własnej domeny plus hash jedynego skryptu inline, style z hashem bloku `<style>` i Google Fonts, `fetch` tylko do własnej domeny. Hashe wylicza build, więc po edycji skryptu lub stylów w `src/0-strona.html` wystarczy przebudować. Nie dodawaj atrybutów `style="…"` ani `on…="…"` w HTML, bo CSP je zablokuje. Resztę nagłówków (`frame-ancestors`, `nosniff`, HSTS, Referrer-Policy, Permissions-Policy) ustawia nginx.
+`index.html` ma Content-Security-Policy w `<meta>`: skrypty tylko z własnej domeny plus hash jedynego skryptu inline, style z hashem bloku `<style>` i Google Fonts, `fetch` tylko do własnej domeny. Hashe wylicza build, więc po edycji skryptu lub stylów w `src/index.html` wystarczy przebudować. Nie dodawaj atrybutów `style="…"` ani `on…="…"` w HTML, bo CSP je zablokuje. Resztę nagłówków (`frame-ancestors`, `nosniff`, HSTS, Referrer-Policy, Permissions-Policy) ustawia nginx.
 
 ## Wdrożenie
 
