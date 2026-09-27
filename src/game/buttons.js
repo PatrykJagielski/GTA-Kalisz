@@ -1,5 +1,6 @@
 import { $ } from '../core/dom.js';
 import { cycleCam } from '../drive/camera.js';
+import { toggleCar } from '../foot/index.js';
 import { loadCity } from './loader.js';
 import { pauseGame, restartGame, startGame } from './session.js';
 import { toggleSound } from './sound.js';
@@ -12,6 +13,7 @@ export function bindButtons() {
   $('pRestart').onclick = restartGame;
   $('dPause').onclick = pauseGame;
   $('dCam').onclick = cycleCam;
+  $('dDoor').onclick = toggleCar;
   $('dSound').onclick = toggleSound;
   $('pSound').onclick = toggleSound;
 }

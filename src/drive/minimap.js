@@ -1,13 +1,18 @@
 import { $ } from '../core/dom.js';
-import { drive, st } from './state.js';
+import { drive } from './state.js';
 
-/* ---------- minimapa: gotowy plan miasta obracany za autem, strzałka auta i kierunek północy ---------- */
+/* ---------- minimapa: gotowy plan miasta obracany za graczem, strzałka gracza, auto (gdy idzie pieszo) i północ ---------- */
 const mapCanvas = $('minimap'), mapG = mapCanvas.getContext('2d');
-export function drawMinimap(cx, cz) {
-  const g = mapG, C = drive.city, n = mapCanvas.width, rot = st.psi - Math.PI / 2;
+// car = środek zaparkowanego auta { cx, cz }, jeśli gracz wysiadł
+export function drawMinimap(cx, cz, psi, car) {
+  const g = mapG, C = drive.city, n = mapCanvas.width, rot = psi - Math.PI / 2;
   g.fillStyle = '#7b8a63'; g.fillRect(0, 0, n, n);
   g.save(); g.translate(n / 2, n / 2); g.rotate(rot);
   g.drawImage(C.map, -(cx - C.bounds[0]) * C.MS, -(cz - C.bounds[1]) * C.MS);
+  if (car) {
+    g.fillStyle = '#e8eef3'; g.strokeStyle = '#1b1300'; g.lineWidth = 2;
+    g.beginPath(); g.arc((car.cx - cx) * C.MS, (car.cz - cz) * C.MS, 7, 0, 7); g.fill(); g.stroke();
+  }
   g.restore();
   g.save(); g.translate(n / 2, n / 2);
   g.fillStyle = '#e09a12'; g.strokeStyle = '#1b1300'; g.lineWidth = 2;

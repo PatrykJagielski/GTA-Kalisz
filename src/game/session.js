@@ -6,6 +6,7 @@ import { applyCameraMode } from '../drive/camera.js';
 import { resetStreetName } from '../drive/hud.js';
 import { resetCar } from '../drive/physics.js';
 import { drive } from '../drive/state.js';
+import { enterCar } from '../foot/index.js';
 
 /* ---------- przebieg gry: start z menu, pauza, powrót na start ---------- */
 function showHud(on) { $('driveHud').hidden = !on; }
@@ -29,6 +30,6 @@ export function pauseGame() {
   $('pResume').focus({ preventScroll: true });
 }
 export function restartGame() {
-  resetCar(); resetStreetName();
+  enterCar(true); resetCar(); resetStreetName();
   if (S.paused) startGame();
 }
