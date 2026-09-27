@@ -158,8 +158,8 @@ export function buildFountain(FD, group, solid, posts) {
   const lo = [], hi = [];
   for (const p of pts) { while (lo.length > 1 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
   for (const p of pts.slice().reverse()) { while (hi.length > 1 && cross(hi[hi.length - 2], hi[hi.length - 1], p) <= 0) hi.pop(); hi.push(p); }
-  const ring = lo.slice(0, -1).concat(hi.slice(0, -1)).flat(), bb = ringBox(ring);
-  gridPut(solid, bb[0], bb[1], bb[2], bb[3], { p: [ring], b: bb });
+  const ring = lo.slice(0, -1).concat(hi.slice(0, -1)).flat(), bb = ringBox(ring), hull = { p: [ring], b: bb };
+  gridPut(solid, bb[0], bb[1], bb[2], bb[3], hull);
   // pergole też stoją na drodze
   for (const ang of [-1.05, -1.55]) for (const x of [-15, 15]) for (const z of [-14, 14]) {
     const px = Math.cos(ang) * 150, pz = Math.sin(ang) * 150, r = -ang + Math.PI / 2;
@@ -172,5 +172,24 @@ export function buildFountain(FD, group, solid, posts) {
     for (const j of jets) { const s = j.userData.h * (0.86 + 0.14 * Math.sin(t * 3.1 + j.userData.ph) + 0.05 * Math.sin(t * 11 + j.userData.ph * 2)); j.scale.set(1, s, 1); }
     dand.rotation.y = t * 0.15;
   };
-  return { mats: [water, jetM, dand.children[0].material], anim, c: [cx, cz], r: FD.r };
+  return { mats: [water, jetM, dand.children[0].material], anim, c: [cx, cz], r: FD.r, hull, floorAt: fountainFloor(FD, y0) };
+}
+
+// pieszy na fontannie (auto zatrzymuje cała otoczka): wysokość, na której stoi, albo null poza fontanną;
+// korona murków, dno niecek 30 cm pod wodą (brodzi), trzonek dmuchawca jako ściana
+function fountainFloor(FD, y0) {
+  const [cx, cz] = FD.c, T = FD.tips;
+  const c0 = [(T[0][0] + T[1][0] + T[2][0]) / 3, (T[0][1] + T[1][1] + T[2][1]) / 3];
+  const inner = T.map(([x, z]) => { const d = Math.hypot(x - c0[0], z - c0[1]), k = 1 - 4.5 / d; return [c0[0] + (x - c0[0]) * k, c0[1] + (z - c0[1]) * k]; });
+  const side = (a, b, x, z) => (b[0] - a[0]) * (z - a[1]) - (b[1] - a[1]) * (x - a[0]);
+  const inTri = (P, x, z) => { const s0 = side(P[0], P[1], x, z), s1 = side(P[1], P[2], x, z), s2 = side(P[2], P[0], x, z); return (s0 >= 0 && s1 >= 0 && s2 >= 0) || (s0 <= 0 && s1 <= 0 && s2 <= 0); };
+  return (x, z) => {
+    const d = Math.hypot(x - cx, z - cz);
+    if (d < 2.5) return y0 + 40;
+    if (inTri(inner, x, z)) return y0 + 7.6;                                    // górna niecka: woda 10,6
+    if (inTri(T, x, z)) return y0 + 12;                                        // murek trójkąta
+    if (d < 58.8) return y0 + 2;                                               // dolna niecka: woda 5
+    if (d < 64.2) return y0 + 7.6;                                             // korona okrągłego murka
+    return null;
+  };
 }

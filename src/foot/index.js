@@ -3,27 +3,25 @@ import { $ } from '../core/dom.js';
 import { V } from '../core/geometry.js';
 import { camera, controls } from '../core/renderer.js';
 import { startEngineSound, stopEngineSound } from '../drive/audio.js';
-import { heightOf, surfaceAt } from '../drive/collision.js';
 import { drive, st } from '../drive/state.js';
-import { HEAD, R, blocked, carGap, carPoint, placePerson, showPerson } from './person.js';
+import { HEAD, R, blocked, carGap, carPoint, groundAt, placePerson, showPerson } from './person.js';
 
 /* ================= pieszo: wysiadanie i wsiadanie, chodzenie, bieg, skok ================= */
 // me: x, z = stopy postaci (dm), y = wysokość stóp, vy = prędkość w pionie, psi = kurs, air = w powietrzu
 export const me = { x: 0, z: 0, y: 0, vy: 0, psi: 0, air: false };
 const WALK = 20 / 0.36, RUN = 30 / 0.36, BACK = 7 / 0.36;   // dm/s: chód 20 km/h, bieg 30 km/h, cofanie 7 km/h
 const TURN = 2.8;                              // rad/s
-const JUMP = 36, GRAVITY = 98;                 // wyskok ok. 66 cm
+const JUMP = 51, GRAVITY = 98;                 // wyskok ok. 1,3 m: wystarczy na murki fontanny (76 cm i 1,2 m)
 const REACH = 14;                              // z tej odległości od auta (dm) da się wsiąść
 const door = $('dDoor');
 const tmp = V();
-const ground = (x, z) => heightOf(surfaceAt(x, z), x, z);
 
 // wysiadanie: najpierw od strony kierowcy (lewej), potem pasażera, z tyłu i z przodu auta
 function exitSpot() {
   const [hx, hz] = active.model.hit.box, off = R + 1.5;
   for (const [lx, lz] of [[2, -hz - off], [2, hz + off], [-hx - off, 0], [hx + off, 0]]) {
     const [x, z] = carPoint(lx, lz);
-    if (!blocked(x, z)) return [x, z];
+    if (!blocked(x, z, st.y)) return [x, z];
   }
   return null;
 }
@@ -32,7 +30,7 @@ export function leaveCar() {
   const spot = exitSpot();
   if (!spot) return;                                                             // auto zakleszczone: nie ma jak wysiąść
   const [x, z] = spot;
-  Object.assign(me, { x, z, y: ground(x, z), vy: 0, psi: st.psi, air: false });
+  Object.assign(me, { x, z, y: groundAt(x, z), vy: 0, psi: st.psi, air: false });
   drive.onFoot = true;
   showPerson(true); placePerson(me, me.y);
   stopEngineSound();
@@ -55,11 +53,12 @@ function walk(dt, k) {
   if (v) {
     const x = me.x + Math.cos(me.psi) * v * dt, z = me.z - Math.sin(me.psi) * v * dt;
     // po ścianie się ślizga: jeśli nie da się iść na ukos, idzie wzdłuż jednej osi; z zakleszczenia zawsze wyjdzie
-    if (!blocked(x, z) || blocked(me.x, me.z)) { me.x = x; me.z = z; }
-    else if (!blocked(x, me.z)) me.x = x;
-    else if (!blocked(me.x, z)) me.z = z;
+    const b = (bx, bz) => blocked(bx, bz, me.y);
+    if (!b(x, z) || b(me.x, me.z)) { me.x = x; me.z = z; }
+    else if (!b(x, me.z)) me.x = x;
+    else if (!b(me.x, z)) me.z = z;
   }
-  const g = ground(me.x, me.z);
+  const g = groundAt(me.x, me.z);
   if (!me.air && (k.Space || k.tjump)) { me.air = true; me.vy = JUMP; }
   if (me.air || me.y > g + 0.6) {                                                // skok albo zejście z krawężnika
     me.air = true; me.vy -= GRAVITY * dt; me.y += me.vy * dt;
