@@ -145,6 +145,8 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
   .dh-touch button:active{background:var(--accent);color:var(--accent-ink)}
   .dh-gauge{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
 }
+/* pieszo: bez prędkościomierza, przycisk skoku zamiast niczego */
+.on-foot .dh-gauge,.on-foot .help-car,.drive-hud:not(.on-foot) .help-foot,.drive-hud:not(.on-foot) .dh-touch .jump{display:none}
 @media (max-width:560px){
   .menu{justify-content:flex-end;gap:16px;background:linear-gradient(0deg,rgba(6,9,12,.9) 0,rgba(6,9,12,.6) 55%,rgba(6,9,12,.1) 100%)}
   .m-acts .tbtn{padding:11px 14px;font-size:16px}
@@ -180,7 +182,8 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
     </div>
     <div class="keys">
       <b>Sterowanie:</b> <kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> <kbd>←</kbd> <kbd>→</kbd> skręt ·
-      <kbd>Spacja</kbd> ręczny · <kbd>C</kbd> kamera · <kbd>R</kbd> powrót na start · <kbd>N</kbd> dzień i noc · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> pauza
+      <kbd>Spacja</kbd> ręczny · <kbd>F</kbd> wysiądź i wsiądź · pieszo <kbd>Shift</kbd> bieg, <kbd>Spacja</kbd> skok ·
+      <kbd>C</kbd> kamera · <kbd>R</kbd> powrót na start · <kbd>N</kbd> dzień i noc · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> pauza
     </div>
     <p class="keys touch-only">Na ekranie dotykowym sterujesz przyciskami w rogach ekranu.</p>
     <small class="credit">Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">współtwórcy OpenStreetMap</a> · budynki i zabytki odtworzone w przybliżeniu</small>
@@ -208,17 +211,18 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
         <small class="dh-osm">Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></small>
       </div>
       <div class="dh-btns">
+        <button class="tbtn" id="dDoor">Wysiądź</button>
         <button class="tbtn" id="dCam">Kamera: za autem</button>
         <button class="tbtn" id="dSound" aria-pressed="false">Dźwięk: wył.</button>
         <button class="tbtn" id="dNight" aria-pressed="false"></button>
         <button class="tbtn primary" id="dPause">Pauza</button>
       </div>
     </div>
-    <div class="dh-help"><kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt<br><kbd>Spacja</kbd> ręczny · <kbd>C</kbd> kamera · <kbd>R</kbd> start · <kbd>N</kbd> noc · <kbd>Esc</kbd> pauza</div>
+    <div class="dh-help"><span class="help-car"><kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny</span><span class="help-foot"><kbd>W</kbd> <kbd>S</kbd> naprzód i wstecz · <kbd>A</kbd> <kbd>D</kbd> obrót · <kbd>Shift</kbd> bieg · <kbd>Spacja</kbd> skok</span><br><kbd>F</kbd> wysiądź i wsiądź · <kbd>C</kbd> kamera · <kbd>R</kbd> start · <kbd>N</kbd> noc · <kbd>Esc</kbd> pauza</div>
     <div class="dh-gauge"><b id="dSpeed">0</b><span class="u">km/h</span><div class="dh-rpm"><i id="dRpm"></i></div><span id="dGear">1 · 850 obr/min</span></div>
     <div class="dh-touch">
       <div><button data-k="tleft" aria-label="W lewo">◀</button><button data-k="tright" aria-label="W prawo">▶</button></div>
-      <div><button data-k="tbrake" aria-label="Hamulec">▼</button><button data-k="tgas" aria-label="Gaz">▲</button></div>
+      <div><button class="jump" data-k="tjump" aria-label="Skok">⤒</button><button data-k="tbrake" aria-label="Hamulec">▼</button><button data-k="tgas" aria-label="Gaz">▲</button></div>
     </div>
   </div>
 </main>

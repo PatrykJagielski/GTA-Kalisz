@@ -6,6 +6,7 @@ import { hits, surfaceAt } from './drive/collision.js';
 import { updateDrive } from './drive/index.js';
 import { placeCar, resetCar } from './drive/physics.js';
 import { drive, st } from './drive/state.js';
+import { me } from './foot/index.js';
 import { bindButtons } from './game/buttons.js';
 import { initCars, selectCar } from './game/cars.js';
 import { initInput } from './game/input.js';
@@ -22,6 +23,7 @@ import { initContextLoss } from './game/webgl.js';
 //   car/    auta: wspólne nadwozie z profili, wnętrze, koła; modele w car/models/ (Audi A4 B7, BMW E63)
 //   city/   Kalisz z danych OpenStreetMap i zabytki (city/landmarks/)
 //   drive/  fizyka, skrzynia, kamery, HUD, minimapa, dźwięk silnika
+//   foot/   pieszo: postać bez animacji, chodzenie, bieg, skok, wysiadanie i wsiadanie
 //   game/   wczytywanie, menu i pauza, sterowanie, pętla
 initCars();
 initSound();
@@ -35,5 +37,5 @@ loadCity();
 
 // build --debug: stan gry w konsoli (usuwane z wersji produkcyjnej)
 if (__DEBUG__) {
-  window.__gta = { S, st, drive, rig, active, selectCar, camera, controls, renderer, scene, resetCar, placeCar, hits, surfaceAt, streetAt, startGame, pauseGame, updateDrive };
+  window.__gta = { S, st, drive, rig, active, selectCar, camera, controls, renderer, scene, resetCar, placeCar, hits, surfaceAt, streetAt, startGame, pauseGame, updateDrive, me };
 }
