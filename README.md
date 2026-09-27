@@ -2,7 +2,7 @@
 
 Jazda po Kaliszu odtworzonym z danych OpenStreetMap. Do wyboru dwa auta: Audi A4 B7 1.9 TDI (PKA 02209) i BMW 645Ci E63 coupé (V8, ciemnoczerwony metalik). Gra powstała z trybu „Jazda testowa” projektu *Audi A4* i nie zawiera modelu silnika rozkładanego na części.
 
-Adres: https://gta.patrykjagielski.tech
+Adres: https://gta.patrykjagielski.tech (staging z gałęzi `release`: https://gta-staging.patrykjagielski.tech)
 
 ## Struktura
 
@@ -61,23 +61,41 @@ npm run serve
 
 ## Wdrożenie
 
+Są dwa środowiska na tym samym Mikrusie:
+
+| | Gałąź | Adres | Katalog na serwerze | Kontener, port |
+| --- | --- | --- | --- | --- |
+| produkcja | `main` | https://gta.patrykjagielski.tech | `/root/gtakalisz` | `gtakalisz-web`, 8083 |
+| staging | `release` | https://gta-staging.patrykjagielski.tech | `/root/gtakalisz-staging` | `gtakalisz-staging-web`, 8084 |
+
+Push do `main` wdraża produkcję. Żeby sprawdzić zmianę na stagingu, zanim trafi do `main`, wypchnij ją do `release`:
+
 ```bash
-./deploy.sh
+git push --force-with-lease origin <gałąź>:release
 ```
 
-Skrypt buduje grę, wysyła `dist/` na Mikrusa i wdraża ją bez przerwy w działaniu: najpierw nowe pliki z hashem, potem atomowa podmiana `index.html`, na końcu usuwa wersje starsze niż 2 dni, których nowa już nie używa. Kończy się błędem, jeśli serwer nie oddaje nowej wersji.
+Staging korzysta na razie z tych samych sekretów (środowisko GitHub `production`) co produkcja.
 
-Po zmianie `deploy/docker-compose.yml` lub `deploy/nginx/site.conf` (i przy pierwszym wdrożeniu):
+Ręcznie, z własnego komputera:
 
 ```bash
-./deploy.sh --config
+./deploy.sh              # produkcja
+./deploy.sh --staging    # staging
 ```
 
-Konfiguracja nginx jest najpierw sprawdzana (`nginx -t`) w osobnym kontenerze, dopiero potem podmieniana.
+Skrypt buduje grę, wysyła `dist/` na Mikrusa i wdraża ją bez przerwy w działaniu: najpierw nowe pliki z hashem, potem atomowa podmiana `index.html`, na końcu usuwa wersje starsze niż 2 dni, których nowa już nie używa. Kończy się błędem, jeśli serwer nie oddaje nowej wersji. Staging dostaje `robots.txt`, który blokuje indeksowanie.
+
+Po zmianie `deploy/docker-compose.yml` lub `deploy/nginx/site.conf` (przy pierwszym wdrożeniu do danego katalogu włącza się samo):
+
+```bash
+./deploy.sh --config             # albo: ./deploy.sh --staging --config
+```
+
+Konfiguracja nginx jest najpierw sprawdzana (`nginx -t`) w osobnym kontenerze, dopiero potem podmieniana. Oba środowiska używają tego samego `docker-compose.yml`; nazwę kontenera i port zapisuje `deploy.sh --config` w `.env` obok niego.
 
 ### Automatycznie (GitHub Actions)
 
-Workflow `.github/workflows/deploy.yml` uruchamia `./deploy.sh` po każdym pushu do `main`, a z `--config`, jeśli push zmienił coś w `deploy/`. Można go też uruchomić ręcznie: Actions → Deploy → Run workflow (z opcją `--config`). W pull requestach robi tylko lint i build. Wdrożenia idą po kolei, nigdy dwa naraz; nieudany lint lub build zatrzymuje wdrożenie, zanim cokolwiek trafi na serwer.
+Workflow `.github/workflows/deploy.yml` po każdym pushu do `main` uruchamia `./deploy.sh`, a po pushu do `release` `./deploy.sh --staging`; w obu przypadkach z `--config`, jeśli push zmienił coś w `deploy/`. Można go też uruchomić ręcznie: Actions → Deploy → Run workflow (gałąź `main` wdraża produkcję, `release` staging; opcja `--config`). W pull requestach robi tylko lint i build. Wdrożenia do jednego środowiska idą po kolei, nigdy dwa naraz; nieudany lint lub build zatrzymuje wdrożenie, zanim cokolwiek trafi na serwer.
 
 Jednorazowo trzeba dodać sekrety w Settings → Secrets and variables → Actions:
 
@@ -97,7 +115,7 @@ ssh-keyscan -p <port> <host>                                       # -> MIKRUS_K
 
 Zawartość `gta-deploy` wklej do `MIKRUS_SSH_KEY`, a lokalną kopię usuń.
 
-Kontener `gtakalisz-web` (nginx, system plików tylko do odczytu, bez dodatkowych uprawnień, limit 64 MB RAM) nasłuchuje tylko na `127.0.0.1:8083` i `172.17.0.1:8083`. Ruch publiczny wchodzi przez tunel Cloudflare `warta-tunnel` z trasą `gta.patrykjagielski.tech → http://172.17.0.1:8083`.
+Kontener `gtakalisz-web` (nginx, system plików tylko do odczytu, bez dodatkowych uprawnień, limit 64 MB RAM) nasłuchuje tylko na `127.0.0.1:8083` i `172.17.0.1:8083`, a `gtakalisz-staging-web` tak samo na porcie 8084. Ruch publiczny wchodzi przez tunel Cloudflare `warta-tunnel` z trasami `gta.patrykjagielski.tech → http://172.17.0.1:8083` i `gta-staging.patrykjagielski.tech → http://172.17.0.1:8084`.
 
 ## Sterowanie
 
