@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="GTA Kalisz: jazda Audi A4 B7 1.9 TDI po Kaliszu odtworzonym z danych OpenStreetMap.">
+<meta name="description" content="GTA Kalisz: jazda Audi A4 B7 albo BMW serii 6 (E63) po Kaliszu odtworzonym z danych OpenStreetMap.">
 <meta name="theme-color" content="#0d1115">
 <title>GTA Kalisz</title>
 <script>
@@ -85,6 +85,10 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
   -webkit-text-stroke:2px #000;paint-order:stroke fill;text-shadow:0 4px 0 #000}
 .car-line{font:600 clamp(15px,2vw,19px)/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .car-line b{color:var(--ink);font-weight:600}
+.cars{display:flex;gap:8px;flex-wrap:wrap}
+.cars .tbtn{min-height:40px;padding:8px 12px;font-size:15px}
+.cars .tbtn[aria-checked="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.p-acts .cars .tbtn{flex:1;padding:9px 10px;font-size:15px}
 .m-load{display:flex;flex-direction:column;gap:8px;max-width:360px}
 .m-bar{height:5px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
 .m-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s ease}
@@ -162,7 +166,8 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
 
   <section class="menu busy" id="mMenu" aria-labelledby="logo">
     <h1 class="logo" id="logo"><b>GTA</b><span>KALISZ</span></h1>
-    <div class="car-line"><b>Audi A4 B7</b> · 1.9 TDI · PKA 02209</div>
+    <div class="car-line" id="mCar"><b>Audi A4 B7</b> · 1.9 TDI · PKA 02209</div>
+    <div class="cars" id="mCars" role="radiogroup" aria-label="Wybór auta"></div>
     <div class="m-load" aria-live="polite">
       <div class="m-bar"><i id="mBar"></i></div>
       <span id="mStatus">Wczytywanie Kalisza…</span>
@@ -189,6 +194,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
         <button class="tbtn primary" id="pResume">Wznów</button>
         <button class="tbtn" id="pRestart">Wróć na start</button>
         <div class="row"><button class="tbtn" id="pSound" aria-pressed="false">Dźwięk</button><button class="tbtn" id="pNight" aria-pressed="false"></button></div>
+        <div class="cars" id="pCars" role="radiogroup" aria-label="Wybór auta"></div>
       </div>
       <div class="keys"><kbd>Esc</kbd> wznów · <kbd>R</kbd> start · <kbd>N</kbd> dzień i noc</div>
     </div>

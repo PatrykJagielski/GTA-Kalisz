@@ -1,4 +1,4 @@
-import { rig } from '../car/index.js';
+import { active, rig } from '../car/index.js';
 import { V } from '../core/geometry.js';
 import { camera, controls } from '../core/renderer.js';
 import { hud } from './hud.js';
@@ -16,8 +16,9 @@ export function updateCamera(dt, cx, cz) {
     camera.lookAt(cx + fx * 25, 9 + st.y, cz + fz * 25);
   } else if (drive.cam === 'driver') {
     rig.updateMatrixWorld(true);
-    camera.position.copy(rig.localToWorld(tmpA.set(0.2, 11.2, -3.7)));
-    camera.lookAt(rig.localToWorld(tmpB.set(40, 9.6, -3.4)));
+    const [eye, look] = active.model.eye;
+    camera.position.copy(rig.localToWorld(tmpA.set(...eye)));
+    camera.lookAt(rig.localToWorld(tmpB.set(...look)));
   } else {
     camera.position.add(tmpC.set(cx, 0, cz).sub(drive.last));
     controls.target.set(cx, 7, cz); controls.update();

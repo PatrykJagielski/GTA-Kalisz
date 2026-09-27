@@ -1,18 +1,14 @@
-import { CAR } from '../car/dimensions.js';
-import { rig, wheelGroups } from '../car/index.js';
+import { active, rig, wheelGroups } from '../car/index.js';
 import { camera } from '../core/renderer.js';
 import { thump } from './audio.js';
 import { heightOf, hits, surfaceAt } from './collision.js';
+import { KMH } from './gearbox.js';
 import { drive, st } from './state.js';
 
 /* ---------- fizyka auta: model rowerowy, opory, zawieszenie, zderzenia ---------- */
-const WB = CAR.axF - CAR.axR;                  // rozstaw osi 26,48 dm
-const REAR = -CAR.axR;                         // środek auta leży 12,88 dm przed tylną osią
-const WHEELS = [[CAR.axF, -CAR.trackZ], [CAR.axF, CAR.trackZ], [CAR.axR, -CAR.trackZ], [CAR.axR, CAR.trackZ]];   // LP, PP, LT, PT
-// napęd i opory (dm/s²): 0–50 km/h 3 s, 0–100 km/h 10 s, prędkość maksymalna ok. 212 km/h
-const GRIP = 55.5;                             // przy ruszaniu przyspieszenie ogranicza przyczepność opon,
-const POWER = 5550;                            // potem stała moc silnika (przyspieszenie = moc / prędkość)
-const ROLL = 6, AIR = 9.55e-6;                 // opór toczenia i powietrza
+// wymiary (rozstaw osi WB, położenie środka auta REAR, koła WHEELS) i osiągi pochodzą z wybranego modelu: active w car/index.js
+// napęd: przy ruszaniu przyspieszenie ogranicza przyczepność opon (grip), potem stała moc silnika (power / prędkość);
+// opory: toczenia (roll) i powietrza (air · v²); vmax = ogranicznik prędkości (km/h), jeśli model go ma
 const CURB_LOSS = 0.98;                        // każde uderzenie kół o krawężnik zabiera 2% prędkości
 const MAX_STEP = 5;                            // najdłuższy krok ruchu (dm): przy dużej prędkości krok dzieli się na części,
                                                // żeby auto nie przeskoczyło przez wąską przeszkodę
@@ -29,7 +25,7 @@ export function readInput(k) {
 
 // zawieszenie: wysokość i przechyły z wysokości pod czterema kołami; zwraca udział kół na trawie
 function suspension(cx, cz, dt, jump) {
-  const c = Math.cos(st.psi), s = Math.sin(st.psi);
+  const { WB, WHEELS } = active.geo, c = Math.cos(st.psi), s = Math.sin(st.psi);
   let step = 0, grass = 0;
   const h = WHEELS.map(([lx, lz], i) => {
     const x = cx + lx * c + lz * s, z = cz - lx * s + lz * c, k = surfaceAt(x, z), v = heightOf(k, x, z);
@@ -40,18 +36,19 @@ function suspension(cx, cz, dt, jump) {
   st.wh = h;
   const y = (h[0] + h[1] + h[2] + h[3]) / 4;
   const pitch = Math.atan(((h[0] + h[1]) - (h[2] + h[3])) / 2 / WB);
-  const roll = Math.atan(((h[0] + h[2]) - (h[1] + h[3])) / 2 / (2 * CAR.trackZ));
+  const roll = Math.atan(((h[0] + h[2]) - (h[1] + h[3])) / 2 / (2 * active.model.dims.trackZ));
   const k = jump ? 1 : Math.min(1, dt * 14);
   st.y += (y - st.y) * k; st.pitch += (pitch - st.pitch) * k; st.roll += (roll - st.roll) * k;
   return grass / 4;
 }
 export function resetCar() {
-  const [x, z, psi0] = drive.city.start, psi = psi0 + Math.PI;                 // start obrócony o 180°
-  Object.assign(st, { x: x - Math.cos(psi) * REAR, z: z + Math.sin(psi) * REAR, psi, v: 0, steer: 0, gear: 1, rpm: 850 });
+  const { REAR } = active.geo, [x, z, psi0] = drive.city.start, psi = psi0 + Math.PI;   // start obrócony o 180°
+  Object.assign(st, { x: x - Math.cos(psi) * REAR, z: z + Math.sin(psi) * REAR, psi, v: 0, steer: 0, gear: 1, rpm: active.model.gears.idle });
   suspension(x, z, 0, true); placeCar();
   camera.position.set(x - Math.cos(psi) * 90, 34, z + Math.sin(psi) * 90); drive.last.set(x, 0, z);
 }
 export function placeCar() {
+  const { REAR } = active.geo;
   rig.position.set(st.x + Math.cos(st.psi) * REAR, st.y, st.z - Math.sin(st.psi) * REAR);
   rig.rotation.order = 'YZX';                                                  // kurs, potem pochylenie, potem przechył
   rig.rotation.set(st.roll, st.psi, st.pitch);
@@ -63,18 +60,22 @@ export function stepCar(dt, input) {
   for (let i = 0; i < n; i++) c = move(dt / n, input);
   placeCar();
   // koła: obrót i skręt przednich
-  st.spin -= st.v * dt / CAR.wr;
+  st.spin -= st.v * dt / active.model.dims.wr;
   for (const { w, spin, front } of wheelGroups) { spin.rotation.z = st.spin; if (front) w.rotation.y = st.steer; }
   return c;
 }
 function move(dt, input) {
-  const { gas, brake } = input;
+  const { gas, brake } = input, { WB, REAR } = active.geo, { grip, power, roll, air, vmax } = active.model.perf;
   let a = 0;
-  if (gas) a += st.v >= -1 ? Math.min(GRIP, POWER / Math.max(st.v, 1)) : 90;   // gaz przy cofaniu = hamowanie
+  if (gas && st.v < -1) a += 90;                                                  // gaz przy cofaniu = hamowanie
+  else if (gas) {
+    a += Math.min(grip, power / Math.max(st.v, 1));
+    if (vmax) a *= Math.min(1, Math.max(0, (vmax - st.v * KMH) / 4));             // ogranicznik: napęd słabnie w ostatnich 4 km/h
+  }
   if (brake) a -= st.v > 1 ? 90 : (st.v > -70 ? 26 : 0);                          // hamulec, potem wsteczny do ~25 km/h
   if (input.handbrake) a -= Math.sign(st.v) * 70;
   // trawa: mały opór przy ruszaniu, rosnący z prędkością (maks. ok. 38 km/h), zawsze słabszy niż napęd
-  const drag = Math.sign(st.v) * (ROLL + AIR * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.37));
+  const drag = Math.sign(st.v) * (roll + air * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.37));
   let v = st.v + (a - drag) * dt;
   if (!gas && !brake && Math.abs(v) < 3) v = 0;
   st.v = v;

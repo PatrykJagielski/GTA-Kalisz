@@ -1,11 +1,13 @@
+import { active } from '../car/index.js';
 import { CURB } from '../city/config.js';
 import { GRID, cellOf, inGrid } from '../city/spatial.js';
 import { drive } from './state.js';
 
 /* ---------- kolizje i podłoże ---------- */
-// punkty obrysu auta w układzie lokalnym (x wzdłuż auta, z w bok), sprawdzane z budynkami, wodą i granicą mapy
-const CP = [[22.9, 8.4], [22.9, -8.4], [-22.9, 8.4], [-22.9, -8.4], [11, 8.8], [11, -8.8], [0, 8.8], [0, -8.8], [-11, 8.8], [-11, -8.8], [23, 0], [-23, 0]];
+// obrys auta (hit w modelu): punkty w układzie lokalnym (x wzdłuż auta, z w bok) sprawdzane z budynkami, wodą
+// i granicą mapy oraz prostokąt [pół długości, pół szerokości] sprawdzany ze słupkami
 export function hits(cx, cz, psi) {
+  const { cp: CP, box: [hx, hz] } = active.model.hit;
   const C = drive.city, [bx0, bz0, bx1, bz1] = C.bounds, c = Math.cos(psi), s = Math.sin(psi);
   for (const [lx, lz] of CP) {
     const x = cx + lx * c + lz * s, z = cz - lx * s + lz * c;
@@ -16,7 +18,7 @@ export function hits(cx, cz, psi) {
       const dx = px - cx, dz = pz - cz;
       if (Math.abs(dx) > 30 || Math.abs(dz) > 30) continue;
       const lx = dx * c - dz * s, lz = dx * s + dz * c;
-      if (Math.abs(lx) < 23 + r && Math.abs(lz) < 8.9 + r) return true;
+      if (Math.abs(lx) < hx + r && Math.abs(lz) < hz + r) return true;
     }
   }
   return false;

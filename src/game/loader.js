@@ -33,7 +33,7 @@ export async function loadCity() {
     drive.city = buildCity(data);
     bar.style.width = '100%';
     resetCar(); applySky(drive.city);
-    status.textContent = 'Gotowe. Audi czeka na Placu Jana Pawła II.';
+    status.textContent = 'Gotowe. Auto czeka na Placu Jana Pawła II.';
     $('mPlay').disabled = false; $('mMenu').classList.remove('busy');
     $('mPlay').focus({ preventScroll: true });
   } catch (e) {

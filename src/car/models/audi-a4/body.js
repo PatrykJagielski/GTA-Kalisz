@@ -1,14 +1,14 @@
 import * as THREE from 'three';
-import { rbox, rodBetween } from '../core/geometry.js';
-import { circle, decalsOn, rect, strip } from './decals.js';
-import { CAR } from './dimensions.js';
-import { loft } from './loft.js';
-import { amberM, chromeM, glassM, lampM, paint, plateFrontM, plateRearM, redM, reflM, trimM } from './materials.js';
-import { ROOF_FRONT, glassHalf, lowerHalf, sideZ, surfX } from './profile.js';
+import { rbox, rodBetween } from '../../../core/geometry.js';
+import { circle, decalsOn, rect, strip } from '../../decals.js';
+import { loft } from '../../loft.js';
+import { amberM, chromeM, glassM, lampM, redM, reflM, trimM } from '../../materials.js';
+import { paint, plateFrontM, plateRearM } from './materials.js';
 
-/* ---------- nadwozie: bryła z szybami, grill, lampy, pierścienie, lusterka, wycieraczki ---------- */
-export function buildBody(car) {
-  const { faceDecal, sideDecal } = decalsOn(car);
+/* ---------- nadwozie Audi: bryła z szybami, grill, lampy, pierścienie, lusterka, wycieraczki ---------- */
+export function buildBody(car, P) {
+  const { C: CAR, roofFront: ROOF_FRONT, glassHalf, lowerHalf, sideZ, surfX } = P;
+  const { faceDecal, sideDecal } = decalsOn(car, P);
   // kabina otwarta od góry między szybami, żeby przez okna było widać wnętrze
   const hiddenM = new THREE.MeshBasicMaterial({ visible: false });
   const inCabin = x => x > -16.2 && x < 9.2;

@@ -1,22 +1,23 @@
 # GTA Kalisz
 
-Jazda Audi A4 B7 1.9 TDI (PKA 02209) po Kaliszu odtworzonym z danych OpenStreetMap. Gra powstała z trybu „Jazda testowa” projektu *Audi A4* i nie zawiera modelu silnika rozkładanego na części.
+Jazda po Kaliszu odtworzonym z danych OpenStreetMap. Do wyboru dwa auta: Audi A4 B7 1.9 TDI (PKA 02209) i BMW 645Ci E63 coupé (V8, ciemnoczerwony metalik). Gra powstała z trybu „Jazda testowa” projektu *Audi A4* i nie zawiera modelu silnika rozkładanego na części.
 
 Adres: https://gta.patrykjagielski.tech
 
 ## Struktura
 
-Kod gry to moduły ES w `src/` (jednostka świata = 1 dm; x = wschód, z = południe, (0, 0) = Główny Rynek). Punkt wejścia `src/main.js` buduje auto, podpina interfejs, uruchamia pętlę i wczytuje miasto. Moduły nie robią nic przy imporcie poza tworzeniem renderera i stałych — resztę uruchamia `main.js` (`buildCar`, `init*`, `startLoop`, `loadCity`).
+Kod gry to moduły ES w `src/` (jednostka świata = 1 dm; x = wschód, z = południe, (0, 0) = Główny Rynek). Punkt wejścia `src/main.js` buduje wybrane auto, podpina interfejs, uruchamia pętlę i wczytuje miasto. Moduły nie robią nic przy imporcie poza tworzeniem renderera i stałych — resztę uruchamia `main.js` (`initCars`, `init*`, `startLoop`, `loadCity`).
 
 | Katalog | Zawartość |
 | --- | --- |
 | `src/index.html` | HTML, style, menu startowe, pauza, HUD; w `<head>` strażnik startu (komunikat, gdy gra nie może ruszyć) |
 | `src/core/` | renderer, scena, kamera i światła (`renderer.js`), stan gry, DOM, motyw, pomocnicze bryły (`geometry.js`), tekstury canvas, RNG |
-| `src/car/` | Audi A4 B7: wymiary, profile nadwozia, materiały, tablice, dekale, `buildBody`, `buildInterior`, `buildWheels`; `index.js` składa auto (`rig`) |
+| `src/car/` | część wspólna aut: bryła z profili (`makeProfile`, `loft`), dekale, wnętrze i koła z parametrami, tablice; `index.js` = lista aut, auto na scenie (`rig`) i aktywny model (`active`) |
+| `src/car/models/` | modele: `audi-a4/` i `bmw-e63/`; każdy opisuje wymiary, krzywe nadwozia, osiągi, skrzynię, brzmienie silnika, kamerę kierowcy i obrys kolizji oraz buduje własne detale (grill, lampy, felgi) |
 | `src/city/` | Kalisz z danych miasta: `build.js` (`buildCity`), indeks przestrzenny, siatki z wielokątów OSM, elewacje, nazwy ulic, niebo dzień/noc |
 | `src/city/landmarks/` | zabytki: ratusz, fontanna Noce i Dnie, kolegiata, kościół garnizonowy, mural (sgraffito), Plac św. Józefa z pomnikiem Jana Pawła II, kamienica na rogu |
 | `src/drive/` | jazda: fizyka i zawieszenie, kolizje, skrzynia biegów, kamery, HUD, minimapa, dźwięk silnika; `index.js` = jeden krok jazdy |
-| `src/game/` | wczytywanie mapy, start i pauza, klawiatura i dotyk, przyciski, dzień/noc, ustawienie dźwięku, utrata kontekstu WebGL, pętla |
+| `src/game/` | wczytywanie mapy, wybór auta (`cars.js`), start i pauza, klawiatura i dotyk, przyciski, dzień/noc, ustawienie dźwięku, utrata kontekstu WebGL, pętla |
 | `scripts/build.mjs` | build: bundel esbuild, nazwy z hashem, CSP, sprawdzenie `kalisz.json`, pliki `.gz` |
 | `public/kalisz.json` | dane miasta (wynik `dane/build.py`) |
 | `dane/` | skrypt i zapytania Overpass, z których powstaje `kalisz.json` (`pip install -r dane/requirements.txt`) |
@@ -78,5 +79,15 @@ Kontener `gtakalisz-web` (nginx, system plików tylko do odczytu, bez dodatkowyc
 ## Sterowanie
 
 <kbd>W</kbd>/<kbd>↑</kbd> gaz · <kbd>S</kbd>/<kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny · <kbd>C</kbd> kamera · <kbd>R</kbd> powrót na start · <kbd>N</kbd> dzień/noc · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> pauza. Na telefonie są przyciski dotykowe.
+
+Auto wybiera się w menu startowym albo w pauzie (zmiana w pauzie następuje w miejscu, w którym auto stoi); wybór zostaje zapamiętany w przeglądarce.
+
+| | Audi A4 B7 1.9 TDI | BMW 645Ci (E63) |
+| --- | --- | --- |
+| 0–50 km/h | 3,0 s | 2,5 s |
+| 0–100 km/h | 10,0 s | 5,6 s |
+| prędkość maks. | ok. 212 km/h | 250 km/h (ogranicznik) |
+| skrzynia | automat, 5 biegów | automat, 6 biegów |
+| silnik (dźwięk) | 4 cylindry, diesel z turbo | V8 |
 
 Mapa: © współtwórcy OpenStreetMap (ODbL).

@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 
 // polska tablica rejestracyjna 520 × 114 mm: pasek UE z „PL”, czarne znaki; tylna z naklejką legalizacyjną
-export const PLATE = 'PKA 02209';
 export function plateTexture(text, sticker) {
   const c = document.createElement('canvas'); c.width = 1040; c.height = 228;
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;

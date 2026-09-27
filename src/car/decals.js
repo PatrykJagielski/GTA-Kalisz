@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
 import { V } from '../core/geometry.js';
-import { sideZ, surfX } from './profile.js';
 
 /* ---------- dekale: płaskie obrysy dopasowane do powierzchni nadwozia (grill, lampy, szczeliny drzwi) ---------- */
 const tess = new TessellateModifier(0.22, 8);
@@ -9,7 +8,9 @@ function outlineGeom(outline) {
   const g = new THREE.ShapeGeometry(new THREE.Shape(outline.map(([a, b]) => new THREE.Vector2(a, b))), 4);
   return tess.modify(g);
 }
-export function decalsOn(car) {
+// P = profil nadwozia z makeProfile (surfX, sideZ)
+export function decalsOn(car, P) {
+  const { surfX, sideZ } = P;
   // dekal na przodzie (front=true) lub tyle; outline w rzucie [z, y]; off = odsunięcie wzdłuż normalnej
   function faceDecal(outline, front, off, mat, mirror = true, uvBox = null) {
     const make = (sgn) => {
