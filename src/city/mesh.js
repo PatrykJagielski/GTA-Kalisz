@@ -21,8 +21,8 @@ export function flatGeo(list, y, uvScale) {
   g.setAttribute('normal', new THREE.BufferAttribute(n, 3));
   return g;
 }
-// ściany wzdłuż pierścienia, skierowane na zewnątrz wielokąta (w dziurach: do środka dziury)
-export function pushWalls(A, ring, hole, y0, y1, uvFn, col) {
+// ściany wzdłuż pierścienia, skierowane na zewnątrz wielokąta (w dziurach: do środka dziury); skip[k] pomija krawędź k
+export function pushWalls(A, ring, hole, y0, y1, uvFn, col, skip = null) {
   const f = (ringArea2(ring) > 0 ? 1 : -1) * (hole ? -1 : 1);
   let u = 0;
   for (let i = 0; i < ring.length; i += 2) {
@@ -30,6 +30,7 @@ export function pushWalls(A, ring, hole, y0, y1, uvFn, col) {
     const dx = x1 - x0, dz = z1 - z0, len = Math.hypot(dx, dz);
     if (len < 0.01) continue;
     const nx = f * dz / len, nz = -f * dx / len, u1 = u + len;
+    if (skip && skip[i / 2]) { u = u1; continue; }
     const a = [x0, y0, z0, u, 0], b = [x1, y0, z1, u1, 0], c = [x1, y1, z1, u1, y1 - y0], d = [x0, y1, z0, u, y1 - y0];
     for (const v of f > 0 ? [a, c, b, a, d, c] : [a, b, c, a, c, d]) {
       A.pos.push(v[0], v[1], v[2]); A.nor.push(nx, 0, nz);

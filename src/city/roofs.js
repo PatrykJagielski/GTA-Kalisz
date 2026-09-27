@@ -66,8 +66,10 @@ function clip(poly, wx, wz, c) {
 const polyArea = P => Math.abs(area2(P)) / 2;
 
 // ring = [x0, z0, x1, z1, ...], free[i] dla krawędzi i; base = wysokość okapu; slope = tg kąta; rise = najwyższa kalenica
-// zwraca { faces: [{ pts: [[x, y, z]], n: [nx, ny, nz], uv: [[u, v]] }], gables: [[[x, y, z] x 4]], top: [[x, y, z]] }
-export function roofShape(ring, free0, base, slope, rise) {
+// brk = { d, s2 }: dach mansardowy — połać o nachyleniu slope do odległości d od ściany, dalej łagodniejsza s2
+// (podział na połacie ten sam co w dachu prostym, bo wysokość rośnie z odległością od ściany tak samo dla każdej połaci)
+// zwraca { faces: [{ pts: [[x, y, z]], n: [nx, ny, nz], uv: [[u, v]], edge, low }], gables: [[[x, y, z] x 4]], top: [[x, y, z]] }
+export function roofShape(ring, free0, base, slope, rise, brk = null) {
   let P = []; for (let i = 0; i < ring.length; i += 2) P.push([ring[i], ring[i + 1]]);
   [P, free0] = clean(P, free0.slice());
   // najwyżej jedna wolna ściana (kamienica wciśnięta między sąsiadów): tylna ściana też podnosi połać,
@@ -81,7 +83,11 @@ export function roofShape(ring, free0, base, slope, rise) {
     P.forEach((_, i) => { const [x, z] = dir(i), d = x * fx + z * fz; if (i !== f && d < bestDot) { bestDot = d; back = i; } });
     free0[f] = true; if (back >= 0) free0[back] = true;
   }
-  const faces = [], gables = [], top = [], capD = rise / slope, k = Math.hypot(1, slope);
+  const faces = [], gables = [], top = [], k = Math.hypot(1, slope);
+  const dm = brk && rise > slope * brk.d ? brk.d : Infinity, s2 = brk ? brk.s2 : slope, k2 = Math.hypot(1, s2);
+  const capD = dm < Infinity ? dm + (rise - slope * dm) / s2 : rise / slope;
+  const hAt = d => (d <= dm ? slope * d : slope * dm + s2 * (d - dm));                   // wysokość połaci w odległości d od ściany
+  const vAt = d => (d <= dm ? d * k : dm * k + (d - dm) * k2);                           // długość po połaci (tekstura)
   if (P.length < 3) return { faces, gables, top };
   for (const part of convexParts(P)) {
     const Q = part.map(i => P[i]), n = Q.length, first = faces.length;
@@ -103,8 +109,11 @@ export function roofShape(ring, free0, base, slope, rise) {
         poly = clip(poly, wx, wz, e.c - f.c);
       });
       if (poly.length < 3 || polyArea(poly) < 0.5) return;
-      const nn = [-slope * e.nx / k, 1 / k, -slope * e.nz / k];
-      faces.push({ pts: poly.map(p => lift(p, slope * d(e, p))), n: nn, uv: poly.map(p => [(p[0] * e.tx + p[1] * e.tz) / 15, d(e, p) * k / 15]), edge: e });
+      const parts = dm < Infinity ? [[clip(poly, e.nx, e.nz, e.c + dm), slope, k, true], [clip(poly, -e.nx, -e.nz, -(e.c + dm)), s2, k2, false]] : [[poly, slope, k, true]];
+      for (const [pp, s, kk, low] of parts) {
+        if (pp.length < 3 || polyArea(pp) < 0.5) continue;
+        faces.push({ pts: pp.map(p => lift(p, hAt(d(e, p)))), n: [-s * e.nx / kk, 1 / kk, -s * e.nz / kk], uv: pp.map(p => [(p[0] * e.tx + p[1] * e.tz) / 15, vAt(d(e, p)) / 15]), edge: e, low });
+      }
     });
     let flat = Q;                                                                         // płaski wierzch głębokich budynków
     for (const e of planes) flat = flat.length ? clip(flat, -e.nx, -e.nz, -(capD + e.c)) : flat;

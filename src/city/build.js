@@ -60,7 +60,7 @@ export function buildCity(D) {
   group.add(instanced(new THREE.PlaneGeometry(5, 26).rotateX(-Math.PI / 2), paintM, zebra));
 
   // budynki: ściany z oknami, dachy (spadziste nad kamienicami i domami), lukarny, kominy; kolizja dla wszystkiego, co stoi na ziemi
-  const { facM, glassM, oldM, narRing, solid, meshes } = buildBuildings(D, R, add);
+  const { facM, glassM, oldM, rynekM, narRing, solid, meshes } = buildBuildings(D, R, add);
   group.add(...meshes);
   const ratM = (D.ratusz ? buildRatusz(D.ratusz, group, solid) : []).concat(D.kolegiata ? buildKolegiata(D.kolegiata, group, solid) : [], D.garnizon ? buildGarnizon(D.garnizon, group, solid) : [], buildMural(group));
   const posts = new Map();
@@ -144,6 +144,6 @@ export function buildCity(D) {
 
   scene.add(group);
   const start = D.start;
-  return { group, solid, posts, segs, names: D.names, lampHeadM, facM, glassM, oldM, ratM, fountain, map, MS, bounds: D.bounds,
+  return { group, solid, posts, segs, names: D.names, lampHeadM, facM, glassM, oldM, rynekM, ratM, fountain, map, MS, bounds: D.bounds,
     blockG: indexPolys(D.blocks), greenG: indexPolys(D.green), start };
 }
