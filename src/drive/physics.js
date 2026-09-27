@@ -9,6 +9,12 @@ import { drive, st } from './state.js';
 const WB = CAR.axF - CAR.axR;                  // rozstaw osi 26,48 dm
 const REAR = -CAR.axR;                         // środek auta leży 12,88 dm przed tylną osią
 const WHEELS = [[CAR.axF, -CAR.trackZ], [CAR.axF, CAR.trackZ], [CAR.axR, -CAR.trackZ], [CAR.axR, CAR.trackZ]];   // LP, PP, LT, PT
+// napęd i opory (dm/s²): 0–50 km/h ok. 5,6 s, 0–100 km/h ok. 12,5 s, prędkość maksymalna ok. 213 km/h
+const ENGINE = 33, ENGINE_FADE = 0.025;       // siła napędu słabnąca z prędkością
+const ROLL = 6, AIR = 3.45e-5;                 // opór toczenia i powietrza
+const CURB_LOSS = 0.98;                        // każde uderzenie kół o krawężnik zabiera 2% prędkości
+const MAX_STEP = 5;                            // najdłuższy krok ruchu (dm): przy dużej prędkości krok dzieli się na części,
+                                               // żeby auto nie przeskoczyło przez wąską przeszkodę
 
 // sterowanie z klawiatury (strzałki, WASD, spacja) i przycisków dotykowych
 export function readInput(k) {
@@ -29,7 +35,7 @@ function suspension(cx, cz, dt, jump) {
     step = Math.max(step, Math.abs(v - st.wh[i])); if (k === 2) grass++;
     return v;
   });
-  if (step > 0.5 && !jump) { st.v *= 0.9; thump(Math.min(1, Math.abs(st.v) / 120 + 0.3)); }
+  if (step > 0.5 && !jump) { st.v *= CURB_LOSS; thump(Math.min(1, Math.abs(st.v) / 120 + 0.3)); }
   st.wh = h;
   const y = (h[0] + h[1] + h[2] + h[3]) / 4;
   const pitch = Math.atan(((h[0] + h[1]) - (h[2] + h[3])) / 2 / WB);
@@ -51,13 +57,23 @@ export function placeCar() {
 }
 // jeden krok fizyki; zwraca środek auta (cx, cz) po kroku
 export function stepCar(dt, input) {
+  const n = Math.max(1, Math.ceil(Math.abs(st.v) * dt / MAX_STEP));
+  let c;
+  for (let i = 0; i < n; i++) c = move(dt / n, input);
+  placeCar();
+  // koła: obrót i skręt przednich
+  st.spin -= st.v * dt / CAR.wr;
+  for (const { w, spin, front } of wheelGroups) { spin.rotation.z = st.spin; if (front) w.rotation.y = st.steer; }
+  return c;
+}
+function move(dt, input) {
   const { gas, brake } = input;
   let a = 0;
-  if (gas) a += st.v >= -1 ? Math.max(0, 32 - Math.abs(st.v) * 0.055) : 90;      // gaz przy cofaniu = hamowanie
+  if (gas) a += st.v >= -1 ? Math.max(0, ENGINE - Math.abs(st.v) * ENGINE_FADE) : 90;   // gaz przy cofaniu = hamowanie
   if (brake) a -= st.v > 1 ? 90 : (st.v > -70 ? 26 : 0);                          // hamulec, potem wsteczny do ~25 km/h
   if (input.handbrake) a -= Math.sign(st.v) * 70;
   // trawa: mały opór przy ruszaniu, rosnący z prędkością (maks. ok. 35 km/h), zawsze słabszy niż napęd
-  const drag = Math.sign(st.v) * (6 + 0.00011 * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.12));
+  const drag = Math.sign(st.v) * (ROLL + AIR * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.17));
   let v = st.v + (a - drag) * dt;
   if (!gas && !brake && Math.abs(v) < 3) v = 0;
   st.v = v;
@@ -73,9 +89,5 @@ export function stepCar(dt, input) {
     cx = st.x + Math.cos(st.psi) * REAR; cz = st.z - Math.sin(st.psi) * REAR;
   }
   drive.grass = suspension(cx, cz, dt, false);
-  placeCar();
-  // koła: obrót i skręt przednich
-  st.spin -= st.v * dt / CAR.wr;
-  for (const { w, spin, front } of wheelGroups) { spin.rotation.z = st.spin; if (front) w.rotation.y = st.steer; }
   return { cx, cz };
 }

@@ -10,7 +10,9 @@ const tmpA = V(), tmpB = V(), tmpC = V();             // wektory robocze: bez al
 export function updateCamera(dt, cx, cz) {
   const fx = Math.cos(st.psi), fz = -Math.sin(st.psi);
   if (drive.cam === 'chase') {
-    camera.position.lerp(tmpA.set(cx - fx * 80, 30, cz - fz * 80), 1 - Math.exp(-dt * 3.5));
+    // kamera goni auto; powyżej ~110 km/h szybciej, żeby nie zostawała dalej niż przy tej prędkości
+    const follow = 3.5 * Math.max(1, Math.abs(st.v) / 300);
+    camera.position.lerp(tmpA.set(cx - fx * 80, 30, cz - fz * 80), 1 - Math.exp(-dt * follow));
     camera.lookAt(cx + fx * 25, 9 + st.y, cz + fz * 25);
   } else if (drive.cam === 'driver') {
     rig.updateMatrixWorld(true);
