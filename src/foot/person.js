@@ -3,13 +3,15 @@ import { active } from '../car/index.js';
 import { createShadow } from '../car/shadow.js';
 import { box } from '../core/geometry.js';
 import { scene } from '../core/renderer.js';
-import { GRID, cellOf, inGrid } from '../city/spatial.js';
+import { GRID, cellOf, polyHas } from '../city/spatial.js';
+import { heightOf, surfaceAt } from '../drive/collision.js';
 import { drive, st } from '../drive/state.js';
 
 /* ---------- postać pieszego: prosta bryła bez animacji, kolizje z miastem i autem ---------- */
 // układ postaci jak auta: x = przód, z = w bok; obrót wokół osi Y o kurs psi
 export const R = 2.2;                          // promień obrysu postaci (dm)
 export const HEAD = 16.5;                      // wysokość oczu (kamera z pierwszej osoby)
+const STEP = 2;                                // bez skoku postać wchodzi na stopień do 20 cm (krawężnik ma 14)
 let body = null, shadow = null;
 
 function buildPerson() {
@@ -52,12 +54,27 @@ export function carPoint(lx, lz) {
   return [cx + lx * c + lz * s, cz - lx * s + lz * c];
 }
 
-// budynki, woda, granica mapy, słupki, drzewa, latarnie i auto
+// wysokość, na której stoi postać: jezdnia, chodnik, trawnik albo murki i niecki fontanny
+export function groundAt(x, z) {
+  const f = drive.city.fountain, h = f && f.floorAt(x, z);
+  return h === null || h === undefined ? heightOf(surfaceAt(x, z), x, z) : h;
+}
+// bryły miasta bez fontanny: na nią da się wskoczyć (wysokość z groundAt)
+function solidAt(x, z) {
+  const hull = drive.city.fountain?.hull;
+  for (const it of cellOf(drive.city.solid, x, z)) {
+    const b = it.b;
+    if (it !== hull && x > b[0] && x < b[2] && z > b[1] && z < b[3] && polyHas(it.p, x, z)) return true;
+  }
+  return false;
+}
+// budynki, woda, granica mapy, słupki, drzewa, latarnie, auto i za wysoki stopień (y = wysokość stóp)
 const RING = [[R, 0], [-R, 0], [0, R], [0, -R], [0.7 * R, 0.7 * R], [0.7 * R, -0.7 * R], [-0.7 * R, 0.7 * R], [-0.7 * R, -0.7 * R]];
-export function blocked(x, z) {
+export function blocked(x, z, y) {
   const C = drive.city, [bx0, bz0, bx1, bz1] = C.bounds;
   if (x < bx0 + 4 || x > bx1 - 4 || z < bz0 + 4 || z > bz1 - 4) return true;
-  for (const [ox, oz] of RING) if (inGrid(C.solid, x + ox, z + oz)) return true;
+  if (groundAt(x, z) > y + STEP) return true;
+  for (const [ox, oz] of RING) if (solidAt(x + ox, z + oz)) return true;
   for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
     for (const [px, pz, r] of cellOf(C.posts, x + i * GRID, z + j * GRID)) {
       if ((px - x) ** 2 + (pz - z) ** 2 < (r + R) ** 2) return true;
