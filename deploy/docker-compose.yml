@@ -5,8 +5,12 @@
 # publiczny wchodzi przez istniejący tunel Cloudflare (warta-tunnel, sieć hosta):
 #   gta.patrykjagielski.tech -> http://172.17.0.1:8083
 #
+# Gra online: kontener net (Node, server/gta-net.cjs z buildu) bez portów na hoście; nginx przekazuje do niego /ws
+# przez sieć Dockera tego projektu (produkcja i staging mają osobne sieci, więc każdy nginx widzi swój serwer).
+#
 # Ten sam plik obsługuje staging (/root/gtakalisz-staging). Nazwę kontenera i port bierze z .env,
 # które zapisuje deploy.sh --config; bez .env (stare wdrożenie produkcji) zostają wartości produkcji.
+# GTA_ORIGIN = adres gry: serwer online przyjmuje połączenia tylko ze strony pod tym adresem.
 #   gta-staging.patrykjagielski.tech -> http://172.17.0.1:8084
 services:
   gta:
@@ -36,6 +40,35 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+  net:
+    image: node:22-alpine
+    container_name: ${GTA_NET_CONTAINER:-gtakalisz-net}
+    command: ["node", "/app/gta-net.cjs"]
+    user: node
+    volumes:
+      - ./server:/app:ro
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    mem_limit: 96m
+    pids_limit: 32
+    environment:
+      TZ: Europe/Warsaw
+      PORT: "8080"
+      ALLOWED_ORIGINS: ${GTA_ORIGIN:-https://gta.patrykjagielski.tech}
+      NODE_ENV: production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3

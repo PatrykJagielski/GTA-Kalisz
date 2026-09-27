@@ -98,6 +98,10 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
 .m-acts .tbtn{padding:12px 18px;font-size:18px}
 #mPlay{min-width:170px;justify-content:center;font-size:22px;letter-spacing:.12em}
 #mPlay:disabled{opacity:.45;filter:grayscale(.6)}
+.m-online{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:430px;font-size:13px;color:var(--muted)}
+.m-online::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:#7b8590}
+.m-online[data-status="on"]::before{background:#3fbf6a;box-shadow:0 0 6px #3fbf6a}
+.m-online span{flex:1 1 180px;overflow-wrap:anywhere}
 .keys{max-width:430px;font-size:13px;line-height:1.95;color:var(--muted)}
 .keys b{color:var(--ink);font-weight:500}
 .credit{position:absolute;right:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));font-size:11px;color:rgba(255,255,255,.7);text-shadow:0 1px 2px #000}
@@ -113,6 +117,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
 .p-acts .row .tbtn{flex:1}
 .p-box .keys{text-align:center}
 .p-note{margin:0;text-align:center;font-size:13px;color:var(--ink)}
+#pOnline{color:var(--muted);overflow-wrap:anywhere}
 
 /* ---------- HUD jazdy ---------- */
 .drive-hud{position:absolute;inset:0;pointer-events:none}
@@ -121,6 +126,8 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
 #minimap{width:190px;height:190px;border-radius:50%;border:3px solid rgba(10,12,15,.85);box-shadow:var(--shadow);background:#222}
 .dh-street{max-width:230px;padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--hud);box-shadow:var(--shadow);
   font:700 17px/1.1 var(--f-display);letter-spacing:.02em}
+.dh-net{padding:4px 9px;border-radius:6px;border:1px solid var(--line);background:var(--hud);box-shadow:var(--shadow);
+  font:600 13px/1.1 var(--f-display);letter-spacing:.08em;text-transform:uppercase}
 .dh-osm{font-size:10.5px;color:rgba(255,255,255,.75);text-shadow:0 1px 2px #000;padding-left:2px}
 .dh-osm a{color:inherit}
 .dh-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;pointer-events:auto}
@@ -170,6 +177,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
     <h1 class="logo" id="logo"><b>GTA</b><span>KALISZ</span></h1>
     <div class="car-line" id="mCar"><b>Audi A4 B7</b> · 1.9 TDI · PKA 02209</div>
     <div class="cars" id="mCars" role="radiogroup" aria-label="Wybór auta"></div>
+    <div class="m-online" id="mNet"><span id="mOnline" aria-live="polite">Online: łączenie…</span><button class="tbtn" id="mInvite">Zaproś znajomych</button></div>
     <div class="m-load" aria-live="polite">
       <div class="m-bar"><i id="mBar"></i></div>
       <span id="mStatus">Wczytywanie Kalisza…</span>
@@ -198,7 +206,9 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
         <button class="tbtn" id="pRestart">Wróć na start</button>
         <div class="row"><button class="tbtn" id="pSound" aria-pressed="false">Dźwięk</button><button class="tbtn" id="pNight" aria-pressed="false"></button></div>
         <div class="cars" id="pCars" role="radiogroup" aria-label="Wybór auta"></div>
+        <button class="tbtn" id="pInvite">Zaproś znajomych</button>
       </div>
+      <p class="p-note" id="pOnline" aria-live="polite"></p>
       <div class="keys"><kbd>Esc</kbd> wznów · <kbd>R</kbd> start · <kbd>N</kbd> dzień i noc</div>
     </div>
   </section>
@@ -208,6 +218,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
       <div class="dh-map">
         <canvas id="minimap" width="340" height="340" aria-label="Mapa Kalisza"></canvas>
         <div class="dh-street" id="dStreet" aria-live="polite">Kalisz</div>
+        <div class="dh-net" id="dNet" hidden></div>
         <small class="dh-osm">Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></small>
       </div>
       <div class="dh-btns">

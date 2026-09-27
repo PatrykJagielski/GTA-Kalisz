@@ -4,6 +4,7 @@ import { camera, controls, renderer, scene, view } from '../core/renderer.js';
 import { S } from '../core/state.js';
 import { updateDrive } from '../drive/index.js';
 import { drive } from '../drive/state.js';
+import { updateNet } from '../net/index.js';
 
 /* ---------- pętla gry: rozmiar płótna, kamera menu, klatka ---------- */
 const clock = new THREE.Clock();
@@ -25,6 +26,7 @@ function frame() {
   try {
     const dt = Math.min(clock.getDelta(), 0.05);
     updateDrive(dt);
+    updateNet(dt);
     if (!S.driving) {
       menuCamera(dt);
       if (drive.city && drive.city.fountain) drive.city.fountain.anim(performance.now() / 1000);

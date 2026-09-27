@@ -3,6 +3,7 @@
 //   app.<hash>.js            src/main.js ze wszystkimi modułami i Three.js, zminifikowany
 //   kalisz.<hash>.json       dane miasta (sprawdzone przed wdrożeniem)
 //   *.gz                     wersje skompresowane dla gzip_static w nginx
+//   dist-server/gta-net.cjs  serwer gry online (server/index.mjs z biblioteką ws) dla kontenera Node na Mikrusie
 // Nazwy z hashem treści można cache'ować na zawsze; index.html przeglądarka sprawdza przy każdym wejściu.
 //
 //   node scripts/build.mjs          wersja do wdrożenia
@@ -15,13 +16,16 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync, constants as zlib } from 'node:zlib';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SRC = join(ROOT, 'src'), DIST = join(ROOT, 'dist');
+const SRC = join(ROOT, 'src'), DIST = join(ROOT, 'dist'), DIST_SERVER = join(ROOT, 'dist-server');
 const DEBUG = process.argv.includes('--debug');
 
 const fail = msg => { console.error(`build: ${msg}`); process.exit(1); };
 const hash = buf => createHash('sha256').update(buf).digest('hex').slice(0, 10);
 const cspHash = text => `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
 const kB = n => `${(n / 1024).toFixed(0)} kB`;
+// gra online łączy się z /ws na własnej domenie; 'self' obejmuje ws/wss nie we wszystkich przeglądarkach (Safari),
+// więc adresy są podane wprost; lokalny serwer (npm run server) tylko w wersji debug
+const WS_ORIGINS = ['wss://gta.patrykjagielski.tech', 'wss://gta-staging.patrykjagielski.tech', ...(DEBUG ? ['ws://127.0.0.1:*', 'ws://localhost:*'] : [])];
 
 /* ---------- dane miasta ---------- */
 // kształt kalisz.json, na którym polega buildCity (src/city/build.js); zły plik ma zatrzymać build, a nie grę u gracza
@@ -81,12 +85,26 @@ const csp = [
   `style-src 'self' ${inline('style').join(' ')} https://fonts.googleapis.com`,
   'font-src https://fonts.gstatic.com',
   "img-src 'self' data: blob:",
-  "connect-src 'self'",
+  `connect-src 'self' ${WS_ORIGINS.join(' ')}`,
   "base-uri 'none'",
   "form-action 'none'",
 ].join('; ');
 html = html.replace('<meta charset="utf-8">', `<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="${csp}">`);
 if (!html.includes('Content-Security-Policy')) fail('src/index.html: brak <meta charset="utf-8"> (tam trafia CSP)');
+
+/* ---------- serwer gry online ---------- */
+const server = await build({
+  entryPoints: [join(ROOT, 'server/index.mjs')],
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  target: 'node22',
+  external: ['bufferutil', 'utf-8-validate'],  // opcjonalne przyspieszenia ws: bez nich ws działa w czystym JS
+  legalComments: 'none',
+  write: false,
+  outfile: join(DIST_SERVER, 'gta-net.cjs'),
+  logLevel: 'warning',
+}).catch(() => fail('esbuild (serwer) zgłosił błędy (wyżej)'));
 
 /* ---------- zapis ---------- */
 rmSync(DIST, { recursive: true, force: true });
@@ -96,8 +114,12 @@ for (const [name, buf] of Object.entries(files)) {
   writeFileSync(join(DIST, name), buf);
   writeFileSync(join(DIST, `${name}.gz`), gzipSync(buf, { level: zlib.Z_BEST_COMPRESSION }));
 }
+rmSync(DIST_SERVER, { recursive: true, force: true });
+mkdirSync(DIST_SERVER, { recursive: true });
+writeFileSync(join(DIST_SERVER, 'gta-net.cjs'), server.outputFiles[0].contents);
 for (const f of readdirSync(DIST).filter(f => !f.endsWith('.gz'))) {
   const size = statSync(join(DIST, f)).size, gz = statSync(join(DIST, `${f}.gz`)).size;
   console.log(`dist/${f.padEnd(24)} ${kB(size).padStart(8)}  gzip ${kB(gz).padStart(7)}`);
 }
+console.log(`dist-server/gta-net.cjs   ${kB(server.outputFiles[0].contents.length).padStart(8)}`);
 if (DEBUG) console.log('tryb debug: window.__gta dostępne w konsoli');

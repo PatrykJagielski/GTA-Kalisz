@@ -16,8 +16,8 @@ const built = new Map();                       // zbudowane auta: przy zmianie w
 let shadow = null;
 
 export const modelById = id => MODELS.find(m => m.id === id) || MODELS[0];
-export function buildCar(model) {
-  if (active.model === model) return;
+// zbudowane auto { car, wheels }: to samo dla gracza i (jako kopia, zob. net/remote.js) dla innych graczy
+export function carParts(model) {
   let entry = built.get(model.id);
   if (!entry) {
     const car = new THREE.Group(), P = makeProfile(model);
@@ -25,6 +25,11 @@ export function buildCar(model) {
     entry = { car, wheels: buildWheels(car, model.dims, model.wheels) };
     built.set(model.id, entry);
   }
+  return entry;
+}
+export function buildCar(model) {
+  if (active.model === model) return;
+  const entry = carParts(model);
   shadow = shadow || createShadow();
   shadow.scale.set(model.shadow[0], model.shadow[1], 1);
   rig.clear(); rig.add(entry.car, shadow);

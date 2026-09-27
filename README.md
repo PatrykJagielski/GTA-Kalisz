@@ -20,10 +20,12 @@ Kod gry to moduły ES w `src/` (jednostka świata = 1 dm; x = wschód, z = połu
 | `src/drive/` | jazda: fizyka i zawieszenie, kolizje, skrzynia biegów, kamery, HUD, minimapa, dźwięk silnika; `index.js` = jeden krok jazdy |
 | `src/foot/` | pieszo: postać bez animacji (`person.js`: bryła, kolizje z budynkami, słupkami i drzewami, wysokość podłoża), wierzch auta, na który da się wskoczyć (`car-top.js`), schody i piętra wieży ratusza (posadzka zależna od wysokości stóp, w środku kamera z oczu postaci), wysiadanie i wsiadanie (`F`), chodzenie, bieg (`Shift`), skok (`Spacja`), kamera za postacią (`index.js`) |
 | `src/game/` | wczytywanie mapy, wybór auta (`cars.js`), start i pauza, klawiatura i dotyk, przyciski, dzień/noc, ustawienie dźwięku, utrata kontekstu WebGL, pętla |
-| `scripts/build.mjs` | build: bundel esbuild, nazwy z hashem, CSP, sprawdzenie `kalisz.json`, pliki `.gz` |
+| `src/net/` | gra online: połączenie z serwerem i wysyłanie własnego stanu 15 razy na sekundę (`index.js`), auta innych graczy z płynnym ruchem między stanami (`remote.js`), pokój z linku, stan połączenia i „Zaproś znajomych” (`ui.js`) |
+| `server/` | serwer gry online (Node + `ws`): pokoje i przekazywanie stanów graczy; `static.mjs` tylko do testów lokalnych |
+| `scripts/build.mjs` | build: bundel esbuild, nazwy z hashem, CSP, sprawdzenie `kalisz.json`, pliki `.gz`; serwer online do `dist-server/gta-net.cjs` |
 | `public/kalisz.json` | dane miasta (wynik `dane/build.py`) |
 | `dane/` | skrypt i zapytania Overpass, z których powstaje `kalisz.json` (`pip install -r dane/requirements.txt`) |
-| `deploy/` | `docker-compose.yml` i konfiguracja nginx dla Mikrusa |
+| `deploy/` | `docker-compose.yml` (nginx z grą i Node z serwerem online) i konfiguracja nginx dla Mikrusa |
 
 esbuild dokleja Three.js 0.160 z `node_modules` (wersje przypięte w `package-lock.json`). Gra nie pobiera skryptów z zewnętrznych CDN; z zewnątrz przychodzą tylko fonty Google (z zapasowymi fontami systemowymi).
 
@@ -54,11 +56,20 @@ Podgląd lokalny:
 npm run serve
 ```
 
+Z grą online (gra i serwer pod jednym adresem, http://127.0.0.1:8766; pokój z linku, np. `/#pokoj=test`):
+
+```bash
+npm run build:debug
+npm run server
+```
+
+Drugi gracz to druga karta albo drugie okno. `npm run serve` (sam Python) też działa, ale wtedy menu pokazuje, że online jest niedostępne.
+
 `npm run build:debug` buduje bez minifikacji, z mapą źródeł i `window.__gta` (stan auta, kamera, funkcje kolizji, `updateDrive`) do testów w konsoli; w wersji produkcyjnej ten kod jest usuwany.
 
 ### Bezpieczeństwo
 
-`index.html` ma Content-Security-Policy w `<meta>`: skrypty tylko z własnej domeny plus hash jedynego skryptu inline, style z hashem bloku `<style>` i Google Fonts, `fetch` tylko do własnej domeny. Hashe wylicza build, więc po edycji skryptu lub stylów w `src/index.html` wystarczy przebudować. Nie dodawaj atrybutów `style="…"` ani `on…="…"` w HTML, bo CSP je zablokuje. Resztę nagłówków (`frame-ancestors`, `nosniff`, HSTS, Referrer-Policy, Permissions-Policy) ustawia nginx.
+`index.html` ma Content-Security-Policy w `<meta>`: skrypty tylko z własnej domeny plus hash jedynego skryptu inline, style z hashem bloku `<style>` i Google Fonts, `fetch` tylko do własnej domeny, WebSocket tylko do `wss://` produkcji i stagingu (w wersji debug też do `ws://127.0.0.1`). Hashe wylicza build, więc po edycji skryptu lub stylów w `src/index.html` wystarczy przebudować. Nie dodawaj atrybutów `style="…"` ani `on…="…"` w HTML, bo CSP je zablokuje. Resztę nagłówków (`frame-ancestors`, `nosniff`, HSTS, Referrer-Policy, Permissions-Policy) ustawia nginx.
 
 ## Wdrożenie
 
@@ -116,7 +127,15 @@ ssh-keyscan -p <port> <host>                                       # -> MIKRUS_K
 
 Zawartość `gta-deploy` wklej do `MIKRUS_SSH_KEY`, a lokalną kopię usuń.
 
-Kontener `gtakalisz-web` (nginx, system plików tylko do odczytu, bez dodatkowych uprawnień, limit 64 MB RAM) nasłuchuje tylko na `127.0.0.1:8083` i `172.17.0.1:8083`, a `gtakalisz-staging-web` tak samo na porcie 8084. Ruch publiczny wchodzi przez tunel Cloudflare `warta-tunnel` z trasami `gta.patrykjagielski.tech → http://172.17.0.1:8083` i `gta-staging.patrykjagielski.tech → http://172.17.0.1:8084`.
+### Gra online
+
+Każdy gracz liczy fizykę swojego auta u siebie i 15 razy na sekundę wysyła stan (położenie, kurs, przechyły, skręt, prędkość). Serwer (`server/index.mjs`, kontener `gtakalisz-net` / `gtakalisz-staging-net`) nie liczy fizyki: trzyma ostatni stan każdego gracza i 15 razy na sekundę rozsyła stan pokoju. Przeglądarka pokazuje cudze auto ok. 150 ms za nadawcą i wygładza ruch między dwoma stanami, więc nierówne odstępy między pakietami nie szarpią autem. Auta innych graczy są kopiami tych samych brył (bez dodatkowej pamięci na geometrię) i nie zderzają się z nikim.
+
+Bez `#pokoj=…` w adresie gracz trafia do pokoju wspólnego; „Zaproś znajomych” zakłada pokój z losową nazwą i kopiuje link do niego. Pokój mieści 16 graczy, serwer do 300 połączeń i do 6 z jednego IP, przyjmuje połączenia tylko ze strony gry (`GTA_ORIGIN`), wiadomości do 512 B i do 40 na sekundę od gracza.
+
+nginx przekazuje `/ws` do kontenera `net` przez sieć Dockera danego środowiska (produkcja i staging mają osobne serwery). `deploy.sh` wysyła `dist-server/gta-net.cjs` do `server/` i restartuje kontener tylko, gdy kod serwera się zmienił (gracze łączą się wtedy ponownie sami); na końcu sprawdza, czy `/ws` odpowiada.
+
+Kontener `gtakalisz-web` (nginx, system plików tylko do odczytu, bez dodatkowych uprawnień, limit 64 MB RAM) nasłuchuje tylko na `127.0.0.1:8083` i `172.17.0.1:8083`, a `gtakalisz-staging-web` tak samo na porcie 8084. Kontener serwera online (Node, tylko do odczytu, użytkownik `node`, limit 96 MB RAM) nie ma portów na hoście. Ruch publiczny wchodzi przez tunel Cloudflare `warta-tunnel` z trasami `gta.patrykjagielski.tech → http://172.17.0.1:8083` i `gta-staging.patrykjagielski.tech → http://172.17.0.1:8084`.
 
 ## Sterowanie
 
