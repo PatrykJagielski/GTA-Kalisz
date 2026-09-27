@@ -14,6 +14,8 @@ HOST=mikrus
 DIR=/root/gtakalisz
 SSH="ssh -o BatchMode=yes -o ConnectTimeout=15"
 export COPYFILE_DISABLE=1                       # tar z macOS bez plików ._* z atrybutami rozszerzonymi
+TAR_OUT="tar --no-xattrs --no-mac-metadata"
+tar --version | grep -q bsdtar || TAR_OUT="tar"   # GNU tar (Linux) nie zna tych opcji i nie potrzebuje ich
 
 CONFIG=0
 case "${1:-}" in
@@ -29,9 +31,9 @@ CITY=$(cd dist && ls | grep -E '^kalisz\.[0-9a-f]+\.json$')
 
 echo "wysyłanie: $APP, $CITY"
 $SSH "$HOST" "mkdir -p '$DIR/site' '$DIR/nginx' && rm -rf '$DIR/.staging' && mkdir '$DIR/.staging'"
-tar -C dist -cf - . | $SSH "$HOST" "tar -C '$DIR/.staging' -xf -"
+$TAR_OUT -C dist -cf - . | $SSH "$HOST" "tar -C '$DIR/.staging' -xf -"
 if [ "$CONFIG" = 1 ]; then
-  tar -C deploy -cf - docker-compose.yml nginx/site.conf | $SSH "$HOST" "mkdir -p '$DIR/.staging/.config' && tar -C '$DIR/.staging/.config' -xf -"
+  $TAR_OUT -C deploy -cf - docker-compose.yml nginx/site.conf | $SSH "$HOST" "mkdir -p '$DIR/.staging/.config' && tar -C '$DIR/.staging/.config' -xf -"
 fi
 
 $SSH "$HOST" sh -s -- "$DIR" "$APP" "$CITY" "$CONFIG" <<'REMOTE'
@@ -44,7 +46,7 @@ cd "$DIR"
 put() { cp "$STAGE/$1" "site/.$1.tmp" && mv -f "site/.$1.tmp" "site/$1"; }
 
 if [ "$CONFIG" = 1 ]; then
-  docker run --rm -v "$STAGE/.config/nginx/site.conf:/etc/nginx/conf.d/default.conf:ro" nginx:1.27-alpine nginx -t -q
+  docker run --rm --entrypoint nginx -v "$STAGE/.config/nginx/site.conf:/etc/nginx/conf.d/default.conf:ro" nginx:1.27-alpine -t -q
   # zapis w miejscu, nie mv: plik jest zamontowany w kontenerze, a bind mount trzyma się i-węzła
   cat "$STAGE/.config/nginx/site.conf" > nginx/site.conf
   cp "$STAGE/.config/docker-compose.yml" docker-compose.yml
