@@ -6,6 +6,7 @@ import { scene } from '../core/renderer.js';
 import { GRID, cellOf, polyHas } from '../city/spatial.js';
 import { heightOf, surfaceAt } from '../drive/collision.js';
 import { drive, st } from '../drive/state.js';
+import { carTopAt } from './car-top.js';
 
 /* ---------- postać pieszego: prosta bryła bez animacji, kolizje z miastem i autem ---------- */
 // układ postaci jak auta: x = przód, z = w bok; obrót wokół osi Y o kurs psi
@@ -54,10 +55,16 @@ export function carPoint(lx, lz) {
   return [cx + lx * c + lz * s, cz - lx * s + lz * c];
 }
 
-// wysokość, na której stoi postać: jezdnia, chodnik, trawnik albo murki i niecki fontanny
+const RING = [[R, 0], [-R, 0], [0, R], [0, -R], [0.7 * R, 0.7 * R], [0.7 * R, -0.7 * R], [-0.7 * R, 0.7 * R], [-0.7 * R, -0.7 * R]];
+// wysokość, na której stoi postać: jezdnia, chodnik, trawnik, murki i niecki fontanny albo wierzch auta
+// (auto: najwyższy punkt pod obrysem postaci, żeby nie wchodziła w karoserię i mogła stać na krawędzi dachu)
 export function groundAt(x, z) {
   const f = drive.city.fountain, h = f && f.floorAt(x, z);
-  return h === null || h === undefined ? heightOf(surfaceAt(x, z), x, z) : h;
+  const g = h === null || h === undefined ? heightOf(surfaceAt(x, z), x, z) : h;
+  if (carGap(x, z) > R) return g;
+  let top = carTopAt(x, z);
+  for (const [ox, oz] of RING) top = Math.max(top, carTopAt(x + ox, z + oz));
+  return Math.max(g, top);
 }
 // bryły miasta bez fontanny: na nią da się wskoczyć (wysokość z groundAt)
 function solidAt(x, z) {
@@ -68,8 +75,7 @@ function solidAt(x, z) {
   }
   return false;
 }
-// budynki, woda, granica mapy, słupki, drzewa, latarnie, auto i za wysoki stopień (y = wysokość stóp)
-const RING = [[R, 0], [-R, 0], [0, R], [0, -R], [0.7 * R, 0.7 * R], [0.7 * R, -0.7 * R], [-0.7 * R, 0.7 * R], [-0.7 * R, -0.7 * R]];
+// budynki, woda, granica mapy, słupki, drzewa, latarnie i za wysoki stopień, także auto (y = wysokość stóp)
 export function blocked(x, z, y) {
   const C = drive.city, [bx0, bz0, bx1, bz1] = C.bounds;
   if (x < bx0 + 4 || x > bx1 - 4 || z < bz0 + 4 || z > bz1 - 4) return true;
@@ -80,5 +86,5 @@ export function blocked(x, z, y) {
       if ((px - x) ** 2 + (pz - z) ** 2 < (r + R) ** 2) return true;
     }
   }
-  return carGap(x, z) < R;
+  return false;
 }
