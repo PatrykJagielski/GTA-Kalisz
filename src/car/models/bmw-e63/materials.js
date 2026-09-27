@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { bodyMat, plateMats } from '../../materials.js';
 
 /* ---------- materiały BMW: lakier, felgi, logo, wnętrze z pomarańczowym podświetleniem ---------- */
-export const PLATE = 'PKA 645EC';
+export const PLATE = 'S E6T';
 export const paint = bodyMat({ color: 0x7a1424, metalness: 0.7, roughness: 0.28 });          // ciemnoczerwony metalik
 export const rimM = bodyMat({ color: 0xc3c8cd, metalness: 0.95, roughness: 0.2 });
 export const roofGlassM = bodyMat({ color: 0x0b0e12, metalness: 0.6, roughness: 0.05 });       // szklany szyberdach

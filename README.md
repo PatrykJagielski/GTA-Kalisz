@@ -84,8 +84,8 @@ Auto wybiera się w menu startowym albo w pauzie (zmiana w pauzie następuje w m
 
 | | Audi A4 B7 1.9 TDI | BMW 645Ci (E63) |
 | --- | --- | --- |
-| 0–50 km/h | 3,0 s | 2,5 s |
-| 0–100 km/h | 10,0 s | 5,6 s |
+| 0–50 km/h | 3,0 s | 2,0 s |
+| 0–100 km/h | 10,0 s | 5,0 s |
 | prędkość maks. | ok. 212 km/h | 250 km/h (ogranicznik) |
 | skrzynia | automat, 5 biegów | automat, 6 biegów |
 | silnik (dźwięk) | 4 cylindry, diesel z turbo | V8 |

@@ -23,8 +23,8 @@ export const BMW_E63 = {
     nose: [18.0, 6.1, 3.0], tail: [17.6, 6.5, 2.6],
     glass: { inset: 1.05, tumble: 1.6, tumbleK: 0.38, crown: 0.5, crownK: 0.2 },
   },
-  // 0–50 km/h 2,5 s, 0–100 km/h 5,6 s, 0–200 km/h ok. 22 s, elektroniczny ogranicznik 250 km/h
-  perf: { grip: 61.5, power: 11100, roll: 6, air: 1.37e-5, vmax: 250 },
+  // 0–50 km/h 2 s, 0–100 km/h 5 s, 0–200 km/h ok. 21 s, elektroniczny ogranicznik 250 km/h
+  perf: { grip: 75.5, power: 11100, roll: 6, air: 1.37e-5, vmax: 250 },
   // 6 biegów; zmiana w górę przy 6000 obr/min: 51, 89, 133, 180, 221 km/h
   gears: { ratios: [8.5, 14.8, 22.2, 30, 36.9, 43.4], up: 6000, down: 2000, idle: 700, max: 6500, launch: 1800, reverse: 8 },
   // dźwięk V8 z wałem krzyżowym: 8 zapłonów na cykl na przemian z dwóch rzędów, niski pomruk, bez turbo i klekotu
