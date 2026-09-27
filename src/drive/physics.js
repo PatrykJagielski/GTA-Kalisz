@@ -9,9 +9,10 @@ import { drive, st } from './state.js';
 const WB = CAR.axF - CAR.axR;                  // rozstaw osi 26,48 dm
 const REAR = -CAR.axR;                         // środek auta leży 12,88 dm przed tylną osią
 const WHEELS = [[CAR.axF, -CAR.trackZ], [CAR.axF, CAR.trackZ], [CAR.axR, -CAR.trackZ], [CAR.axR, CAR.trackZ]];   // LP, PP, LT, PT
-// napęd i opory (dm/s²): 0–50 km/h ok. 5,6 s, 0–100 km/h ok. 12,5 s, prędkość maksymalna ok. 213 km/h
-const ENGINE = 33, ENGINE_FADE = 0.025;       // siła napędu słabnąca z prędkością
-const ROLL = 6, AIR = 3.45e-5;                 // opór toczenia i powietrza
+// napęd i opory (dm/s²): 0–50 km/h 3 s, 0–100 km/h 10 s, prędkość maksymalna ok. 212 km/h
+const GRIP = 55.5;                             // przy ruszaniu przyspieszenie ogranicza przyczepność opon,
+const POWER = 5550;                            // potem stała moc silnika (przyspieszenie = moc / prędkość)
+const ROLL = 6, AIR = 9.55e-6;                 // opór toczenia i powietrza
 const CURB_LOSS = 0.98;                        // każde uderzenie kół o krawężnik zabiera 2% prędkości
 const MAX_STEP = 5;                            // najdłuższy krok ruchu (dm): przy dużej prędkości krok dzieli się na części,
                                                // żeby auto nie przeskoczyło przez wąską przeszkodę
@@ -69,11 +70,11 @@ export function stepCar(dt, input) {
 function move(dt, input) {
   const { gas, brake } = input;
   let a = 0;
-  if (gas) a += st.v >= -1 ? Math.max(0, ENGINE - Math.abs(st.v) * ENGINE_FADE) : 90;   // gaz przy cofaniu = hamowanie
+  if (gas) a += st.v >= -1 ? Math.min(GRIP, POWER / Math.max(st.v, 1)) : 90;   // gaz przy cofaniu = hamowanie
   if (brake) a -= st.v > 1 ? 90 : (st.v > -70 ? 26 : 0);                          // hamulec, potem wsteczny do ~25 km/h
   if (input.handbrake) a -= Math.sign(st.v) * 70;
-  // trawa: mały opór przy ruszaniu, rosnący z prędkością (maks. ok. 35 km/h), zawsze słabszy niż napęd
-  const drag = Math.sign(st.v) * (ROLL + AIR * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.17));
+  // trawa: mały opór przy ruszaniu, rosnący z prędkością (maks. ok. 38 km/h), zawsze słabszy niż napęd
+  const drag = Math.sign(st.v) * (ROLL + AIR * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.37));
   let v = st.v + (a - drag) * dt;
   if (!gas && !brake && Math.abs(v) < 3) v = 0;
   st.v = v;
