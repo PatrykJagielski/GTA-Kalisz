@@ -4,15 +4,16 @@ import { canvasTex } from '../core/textures.js';
 /* ---------- elewacje frontowe kamienic przy Głównym Rynku (odbudowa 1919–1933, klasycyzm „około 1800”) ---------- */
 // Tekstura = 4 osie okienne na całą wysokość od chodnika do okapu (v = 0 przy ziemi, 1 pod okapem). Tło szare, detal biały:
 // kolor tynku z wierzchołków, więc opaski, gzymsy i pilastry wychodzą jaśniejsze od ściany.
-// Warianty: 0 boniowany parter i opaski, 1 pilastry wielkiego porządku i naczółki trójkątne, 2 naczółki odcinkowe i tralki,
-// 3 witryny zamknięte łukiem i płyciny podokienne, 4 gmach Holewińskiego (cztery kondygnacje, parter arkadowy)
-export const RYNEK_H = 140, HOLE_H = 180;                                              // okap kamienic 14 m, gmachu 18 m
+// Jak na zdjęciach Street View: parter ze sklepami (często witryny zamknięte łukiem) i trzy piętra, okap ok. 17,5 m.
+// Warianty: 0 boniowany parter i opaski, 1 pilastry i naczółki trójkątne, 2 witryny łukowe i naczółki odcinkowe,
+// 3 witryny łukowe i płyciny podokienne
+export const RYNEK_H = 175;
+const FL = [[62, 88], [99, 124], [135, 158]], fl = peds => FL.map((f, i) => [...f, peds[i]]);
 const PLAN = [
-  { H: RYNEK_H, shop: [7, 36, false], kordon: 46, floors: [[60, 85, 'hood'], [97, 120, 'key']], frieze: 125, rust: true },
-  { H: RYNEK_H, shop: [7, 36, false], kordon: 46, floors: [[60, 85, 'tri'], [97, 120, 'sill']], frieze: 125, pil: true },
-  { H: RYNEK_H, shop: [7, 36, false], kordon: 46, floors: [[60, 85, 'seg'], [97, 120, 'hood']], frieze: 125, bal: true },
-  { H: RYNEK_H, shop: [7, 38, true], kordon: 46, floors: [[62, 86, 'hood'], [98, 119, 'sill']], frieze: 125, panel: true },
-  { H: HOLE_H, shop: [8, 44, true], kordon: 52, floors: [[64, 95, 'tri'], [108, 134, 'hood'], [142, 162, 'sill']], frieze: 165, rust: true },
+  { H: RYNEK_H, shop: [7, 40, false], kordon: 48, floors: fl(['hood', 'key', 'sill']), frieze: 163, rust: true },
+  { H: RYNEK_H, shop: [7, 40, false], kordon: 48, floors: fl(['tri', 'hood', 'sill']), frieze: 163, pil: true },
+  { H: RYNEK_H, shop: [7, 42, true], kordon: 48, floors: fl(['seg', 'hood', 'key']), frieze: 163, rust: true },
+  { H: RYNEK_H, shop: [7, 42, true], kordon: 48, floors: fl(['hood', 'sill', 'sill']), frieze: 163, panel: true },
 ];
 export const RYNEK_VARIANTS = PLAN.length, RYNEK_PLAN = PLAN;
 
@@ -55,7 +56,6 @@ export function rynekFacade(variant, lit) {
         if (ped === 'seg') { g.beginPath(); g.moveTo(x0 - 12, top); g.quadraticCurveTo(cx, top - 26, x1 + 12, top); g.closePath(); g.fill(); }
         if (ped === 'hood') { g.fillRect(x0 - 12, top - 8, w + 24, 8); rect(x0 - 12, x1 + 12, y1 + 2, y1 + 3, 'rgba(0,0,0,.22)'); }
         if (ped === 'key') { g.beginPath(); g.moveTo(cx - 8, top + 6); g.lineTo(cx + 8, top + 6); g.lineTo(cx + 5, top - 10); g.lineTo(cx - 5, top - 10); g.closePath(); g.fill(); }
-        if (P.bal && y0 === P.floors[0][0]) for (let k = 0; k < 7; k++) rect(x0 - 6 + k * (w + 12) / 6 - 2, x0 - 6 + k * (w + 12) / 6 + 2, y0 - 12, y0 - 5, '#f8f8f8');
         if (P.panel && y0 === P.floors[0][0]) { rect(x0, x1, y0 - 13, y0 - 6, '#f2f2f2'); rect(x0 + 3, x1 - 3, y0 - 11, y0 - 8, 'rgba(0,0,0,.08)'); }
       }
       if (P.pil) { rect(i * bw - 7, i * bw + 7, P.kordon + 5, P.frieze, '#f7f7f7'); rect(i * bw - 10, i * bw + 10, P.frieze - 5, P.frieze, '#ffffff'); rect(i * bw - 9, i * bw + 9, P.kordon + 5, P.kordon + 8, '#ffffff'); }
