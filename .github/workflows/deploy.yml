@@ -1,14 +1,17 @@
-# Wdrożenie na produkcję (Mikrus, https://gta.patrykjagielski.tech).
-#   push do main              ./deploy.sh; z --config, jeśli push zmienił coś w deploy/ (docker-compose, nginx)
-#   Actions → Deploy → Run    ręcznie, z opcją --config
+# Wdrożenie na Mikrusa: staging i produkcja.
+#   push do main              produkcja: ./deploy.sh           → https://gta.patrykjagielski.tech
+#   push do release           staging:   ./deploy.sh --staging → https://gta-staging.patrykjagielski.tech
+#                             w obu przypadkach z --config, jeśli push zmienił coś w deploy/ (docker-compose, nginx)
+#   Actions → Deploy → Run    ręcznie: gałąź main wdraża produkcję, release staging; opcja --config
 #   pull request              tylko lint i build (bez wdrożenia)
+# Sprawdzenie na stagingu przed produkcją: git push --force-with-lease origin <gałąź>:release (opis w README).
 # Sekrety repozytorium: MIKRUS_HOST, MIKRUS_PORT, MIKRUS_SSH_KEY, MIKRUS_KNOWN_HOSTS (opcjonalnie MIKRUS_USER, domyślnie root)
 # — jak je przygotować, opisuje README (sekcja „Wdrożenie”).
 name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, release]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -36,19 +39,20 @@ jobs:
       - run: npm run build
 
   deploy:
-    if: github.event_name != 'pull_request'
+    # ręczne uruchomienie z innej gałęzi niż main/release nic nie wdraża
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
-      name: production
-      url: https://gta.patrykjagielski.tech
+      name: production                           # na razie staging korzysta z tych samych sekretów co produkcja
+      url: ${{ github.ref == 'refs/heads/release' && 'https://gta-staging.patrykjagielski.tech' || 'https://gta.patrykjagielski.tech' }}
     concurrency:
-      group: production                          # wdrożenia po kolei, nigdy dwa naraz
+      group: deploy-${{ github.ref_name }}       # wdrożenia do jednego środowiska po kolei, nigdy dwa naraz
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0                         # historia do porównania z poprzednim stanem main
+          fetch-depth: 0                         # historia do porównania z poprzednim stanem gałęzi
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -101,8 +105,12 @@ jobs:
       - name: Wdrożenie
         env:
           CONFIG: ${{ steps.mode.outputs.config }}
+          REF: ${{ github.ref }}
         run: |
-          if [ "$CONFIG" = true ]; then ./deploy.sh --config; else ./deploy.sh; fi
+          set --
+          if [ "$REF" = refs/heads/release ]; then set -- --staging; fi
+          if [ "$CONFIG" = true ]; then set -- "$@" --config; fi
+          ./deploy.sh "$@"
 
       - name: Sprzątanie klucza
         if: always()

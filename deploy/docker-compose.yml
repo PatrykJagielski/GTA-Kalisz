@@ -4,13 +4,17 @@
 # Nasłuchuje na 127.0.0.1:8083 i 172.17.0.1:8083 (oba nieosiągalne z zewnątrz) — ruch
 # publiczny wchodzi przez istniejący tunel Cloudflare (warta-tunnel, sieć hosta):
 #   gta.patrykjagielski.tech -> http://172.17.0.1:8083
+#
+# Ten sam plik obsługuje staging (/root/gtakalisz-staging). Nazwę kontenera i port bierze z .env,
+# które zapisuje deploy.sh --config; bez .env (stare wdrożenie produkcji) zostają wartości produkcji.
+#   gta-staging.patrykjagielski.tech -> http://172.17.0.1:8084
 services:
   gta:
     image: nginx:1.27-alpine
-    container_name: gtakalisz-web
+    container_name: ${GTA_CONTAINER:-gtakalisz-web}
     ports:
-      - "127.0.0.1:8083:80"
-      - "172.17.0.1:8083:80"
+      - "127.0.0.1:${GTA_PORT:-8083}:80"
+      - "172.17.0.1:${GTA_PORT:-8083}:80"
     volumes:
       - ./site:/usr/share/nginx/html:ro
       - ./nginx/site.conf:/etc/nginx/conf.d/default.conf:ro
