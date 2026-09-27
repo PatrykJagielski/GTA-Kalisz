@@ -5,17 +5,19 @@ import { PAL, facade, oldFacade, tileTex } from './facades.js';
 import { NAR } from './landmarks/narozna.js';
 import { arrGeo, newArr, pushRoof, pushWalls } from './mesh.js';
 import { roofShape } from './roofs.js';
+import { rynekHouse, rynekKit, rynekMeshes, rynekPlan } from './rynek.js';
 import { cellOf, gridPut, indexPolys, polyHas, ringArea2, ringBox } from './spatial.js';
 
 /* ---------- zwykłe budynki: ściany z oknami, dachy spadziste albo płaskie, lukarny i kominy ---------- */
 const OLD_TOWN = 6000;                          // dm od Głównego Rynku: kamienice starówki i śródmieścia
 
-// które krawędzie obrysu są wolne (od ulicy, podwórka), a które przylegają do sąsiedniego budynku (ściana wspólna)
-function freeEdges(ring, self, index) {
+// które krawędzie obrysu są wolne (od ulicy, podwórka), a które przylegają do sąsiedniego budynku (ściana wspólna);
+// off = jak daleko za ścianą szukać sąsiada (dm), przy Rynku dalej, bo obrysy sąsiednich kamienic nie zawsze się stykają
+function freeEdges(ring, self, index, off = 4) {
   const s = ringArea2(ring) > 0 ? 1 : -1, free = [];
   for (let i = 0; i < ring.length; i += 2) {
     const j = (i + 2) % ring.length, dx = ring[j] - ring[i], dz = ring[j + 1] - ring[i + 1], len = Math.hypot(dx, dz) || 1;
-    const ox = s * dz / len * 4, oz = -s * dx / len * 4;                                    // 40 cm na zewnątrz ściany
+    const ox = s * dz / len * off, oz = -s * dx / len * off;
     let hits = 0;
     for (const t of [0.2, 0.5, 0.8]) {
       const x = ring[i] + dx * t + ox, z = ring[i + 1] + dz * t + oz;
@@ -52,6 +54,14 @@ export function buildBuildings(D, R, add) {
   const winUV = (u, v) => [u / 160, v / 132], blankUV = () => [0.01, 0.01];
   const dormers = [], dormerCol = [], dormerRoof = [], chimneys = [], chimneyCol = [];
   const flatCol = new THREE.Color('#5d6266'), brick = [new THREE.Color('#8b4c3b'), new THREE.Color('#9a5a45'), new THREE.Color('#c9c0b0')];
+  const chimneysOn = top => {                                                              // kominy na kalenicy
+    for (let k = top.length ? 1 + Math.floor(RR() * 2) : 0; k > 0; k--) {
+      const p = top[Math.floor(RR() * top.length)];
+      chimneys.push(M4(p[0], p[1] - 6, p[2], RR() * 3)); chimneyCol.push(brick[Math.floor(RR() * brick.length)]);
+    }
+  };
+  const rynek = rynekPlan(rings), kit = rynekKit();
+  const RX = { kit, walls: bArr[3], gable: bArr[2], tiles, roofs, flatCol, pushPoly, inConvex };
   let narRing = null;
   D.buildings.forEach((b, bi) => {
     const h = b[0], minh = b[1], kind = b[2], ring = rings[bi];
@@ -61,6 +71,10 @@ export function buildBuildings(D, R, add) {
     const old = pitched && kind === 0 && Math.hypot((bx0 + bx1) / 2, (bz0 + bz1) / 2) < OLD_TOWN;
     const r1 = R(), r2 = R(), walls = old ? PAL.old : PAL.wall[kind], roofPal = pitched ? PAL.tiles : PAL.roof[kind];
     const col = new THREE.Color(walls[Math.floor(r1 * walls.length)]), roof = new THREE.Color(roofPal[Math.floor(r2 * roofPal.length)]);
+    if (rynek.has(bi)) {                                                                   // pierzeje Głównego Rynku: model osobny
+      gridPut(solid, bx0, bz0, bx1, bz1, { p: [ring], b: [bx0, bz0, bx1, bz1] });
+      chimneysOn(rynekHouse(rynek.get(bi), ring, freeEdges(ring, ring, index, 12), RX)); return;
+    }
     const y0 = minh > 0 ? minh : -2, arr = old ? bArr[3] : kind === 3 ? bArr[1] : kind === 2 ? bArr[2] : bArr[0];
     const H = h - y0, topUV = (u, v) => [u / 160, 1 - (H - v) / 132];                    // kamienica: okna liczone od okapu
     pushWalls(arr, ring, false, y0, h, old ? topUV : kind === 2 ? blankUV : winUV, col);
@@ -85,11 +99,7 @@ export function buildBuildings(D, R, add) {
         dormers.push(M4(px, h + slope * 7, pz, Math.atan2(e.nz, -e.nx))); dormerCol.push(col); dormerRoof.push(roof);
       }
     }
-    // kominy na kalenicy
-    for (let k = top.length ? 1 + Math.floor(RR() * 2) : 0; k > 0; k--) {
-      const p = top[Math.floor(RR() * top.length)];
-      chimneys.push(M4(p[0], p[1] - 6, p[2], RR() * 3)); chimneyCol.push(brick[Math.floor(RR() * brick.length)]);
-    }
+    chimneysOn(top);
   });
   const facM = new THREE.MeshStandardMaterial({ map: facade(false), vertexColors: true, roughness: 0.85, emissive: 0xffffff, emissiveMap: facade(false, true), emissiveIntensity: 0 });
   const glassM = new THREE.MeshStandardMaterial({ map: facade(true), vertexColors: true, roughness: 0.35, metalness: 0.3, emissive: 0xffffff, emissiveMap: facade(true, true), emissiveIntensity: 0 });
@@ -104,6 +114,6 @@ export function buildBuildings(D, R, add) {
     .rotateY(Math.PI / 2).translate(-24, 0, 0);
   const white = () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
   const group = [instanced(body, white(), dormers, dormerCol), instanced(win, new THREE.MeshStandardMaterial({ color: 0x34475a, roughness: 0.3 }), dormers),
-    instanced(cap, white(), dormers, dormerRoof), instanced(new THREE.BoxGeometry(5, 16, 6).translate(0, 8, 0), white(), chimneys, chimneyCol)];
-  return { facM, glassM, oldM, narRing, solid, meshes: group };
+    instanced(cap, white(), dormers, dormerRoof), instanced(new THREE.BoxGeometry(5, 16, 6).translate(0, 8, 0), white(), chimneys, chimneyCol), ...rynekMeshes(kit, add)];
+  return { facM, glassM, oldM, rynekM: kit.mats, narRing, solid, meshes: group };
 }
