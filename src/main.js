@@ -7,7 +7,7 @@ import { updateDrive } from './drive/index.js';
 import { placeCar, resetCar } from './drive/physics.js';
 import { drive, st } from './drive/state.js';
 import { me } from './foot/index.js';
-import { initNet } from './net/index.js';
+import { initNet, updateNet } from './net/index.js';
 import { net } from './net/state.js';
 import { bindButtons } from './game/buttons.js';
 import { initCars, selectCar } from './game/cars.js';
@@ -41,5 +41,5 @@ loadCity();
 
 // build --debug: stan gry w konsoli (usuwane z wersji produkcyjnej)
 if (__DEBUG__) {
-  window.__gta = { S, st, drive, rig, active, selectCar, camera, controls, renderer, scene, resetCar, placeCar, hits, surfaceAt, streetAt, startGame, pauseGame, updateDrive, me, net };
+  window.__gta = { S, st, drive, rig, active, selectCar, camera, controls, renderer, scene, resetCar, placeCar, hits, surfaceAt, streetAt, startGame, pauseGame, updateDrive, me, net, updateNet };
 }

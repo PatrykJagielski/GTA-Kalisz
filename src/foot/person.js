@@ -6,6 +6,7 @@ import { scene } from '../core/renderer.js';
 import { GRID, cellOf, polyHas } from '../city/spatial.js';
 import { heightOf, surfaceAt } from '../drive/collision.js';
 import { drive, st } from '../drive/state.js';
+import { trafficBlocks } from '../drive/traffic.js';
 import { carTopAt } from './car-top.js';
 
 /* ---------- postać pieszego: prosta bryła bez animacji, kolizje z miastem i autem ---------- */
@@ -80,12 +81,13 @@ function solidAt(x, z, y) {
   }
   return false;
 }
-// budynki, woda, granica mapy, słupki, drzewa, latarnie i za wysoki stopień, także auto (y = wysokość stóp)
+// budynki, woda, granica mapy, słupki, drzewa, latarnie i za wysoki stopień, także auto i inni gracze (y = wysokość stóp)
 export function blocked(x, z, y) {
   const C = drive.city, [bx0, bz0, bx1, bz1] = C.bounds;
   if (x < bx0 + 4 || x > bx1 - 4 || z < bz0 + 4 || z > bz1 - 4) return true;
   if (groundAt(x, z, y) > y + (onStairs(x, z, y) ? 6 : STEP)) return true;
   for (const [ox, oz] of RING) if (solidAt(x + ox, z + oz, y)) return true;
+  if (trafficBlocks(x, z, y)) return true;
   for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
     for (const [px, pz, r] of cellOf(C.posts, x + i * GRID, z + j * GRID)) {
       if ((px - x) ** 2 + (pz - z) ** 2 < (r + R) ** 2) return true;

@@ -1,10 +1,12 @@
 import { camera } from '../core/renderer.js';
+import { drive } from '../drive/state.js';
 import { makeAvatar, removeAvatar, setCarModel, setLabel } from './avatar.js';
+import { updateRemoteSound } from './sound.js';
 import { net } from './state.js';
 
-/* ---------- inni gracze: stany z serwera, płynny ruch, położenie dla minimapy i listy graczy ---------- */
-// stan s = [x, z, psi, y, pitch, roll, steer, v] jak st w drive/state.js (x, z = środek tylnej osi),
-// f = [x, z, y, psi] postaci jak me w foot/index.js albo 0, gdy gracz siedzi w aucie.
+/* ---------- inni gracze: stany z serwera, płynny ruch, przeszkody, dźwięk, położenie dla minimapy i listy graczy ---------- */
+// stan s = [x, z, psi, y, pitch, roll, steer, v, rpm, gaz, klakson] jak st w drive/state.js (x, z = środek tylnej osi;
+// gaz i klakson 0 albo 1), f = [x, z, y, psi] postaci jak me w foot/index.js albo 0, gdy gracz siedzi w aucie.
 // Stany przychodzą ok. 15 razy na sekundę, nierówno. Każdy ma czas nadawcy k (ms), więc gracza pokazujemy
 // DELAY za nadawcą i wygładzamy między dwoma stanami, które obejmują ten moment; gdy nowego stanu brak, auto
 // jedzie dalej z ostatnią prędkością (najdłużej MAX_AHEAD), a potem stoi.
@@ -40,7 +42,11 @@ export function applyWorld(list, now) {
   }
   for (const o of others.values()) if (!seen.has(o.id)) remove(o);
 }
-export function clearOthers() { for (const o of [...others.values()]) remove(o); }
+export function clearOthers() {
+  for (const o of [...others.values()]) remove(o);
+  drive.traffic = { cars: [], people: [] };
+  updateRemoteSound([]);
+}
 
 const lerp = (a, b, t) => a + (b - a) * t;
 const mix = (a, b, u) => a.map((v, j) => lerp(v, b[j], u));
@@ -58,10 +64,11 @@ function sample(o, t) {                        // { s, f } w chwili t (czas nada
   return { s, f: A.f };
 }
 export function updateOthers(dt, now) {
+  const cars = [], people = [], sounds = [];
   for (const o of others.values()) {
     if (!o.buf.length) continue;
     const { rig, wheels, model, person, label } = o.a;
-    const { s: [x, z, psi, y, pitch, roll, steer, v], f } = sample(o, now - o.off - DELAY);
+    const { s: [x, z, psi, y, pitch, roll, steer, v, rpm = 0, gas = 0, horn = 0], f } = sample(o, now - o.off - DELAY);
     const rear = -model.dims.axR;
     o.cx = x + Math.cos(psi) * rear; o.cz = z - Math.sin(psi) * rear; o.foot = f;
     rig.position.set(o.cx, y, o.cz);
@@ -75,7 +82,13 @@ export function updateOthers(dt, now) {
     label.sprite.position.set(lx, ly, lz);
     label.sprite.visible = camera.position.distanceToSquared(label.sprite.position) < LABEL_FAR * LABEL_FAR;
     setLabel(o.a, nickOf(o.id));
+    const [hx, hz] = model.hit.box;
+    cars.push({ cx: o.cx, cz: o.cz, psi, hx, hz, v });
+    if (f) people.push([f[0], f[1], f[2]]);
+    sounds.push({ id: o.id, x: o.cx, z: o.cz, model, rpm, load: gas, horn: horn > 0.5, engine: !f && rpm > 0 });
   }
+  drive.traffic = { cars, people };
+  updateRemoteSound(sounds);
 }
 // gdzie są inni: { id, x, z, foot, model } (x, z = postać albo środek auta)
 export function othersWhere() {

@@ -17,7 +17,7 @@ export function startGame() {
   S.started = true; S.paused = false; S.driving = true;
   showHud(true);
   applyCameraMode();
-  if (first) { resetStreetName(); startEngineSound(); }
+  if (first) { resetCar(); resetStreetName(); startEngineSound(); }   // resetCar: gra online zna już auta na starcie
   else if (drive.sound) { try { setupAudio().ctx.resume(); } catch (e) { /* bez dźwięku */ } }
   if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();   // spacja = ręczny, nie klik w przycisk
 }

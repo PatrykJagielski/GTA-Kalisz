@@ -9,7 +9,7 @@ import { drive, st } from './state.js';
 //   fires = zapłony na cykl (2 obroty wału), bank = głośność kolejnych zapłonów (V8: nierówny rytm dwóch rzędów),
 //   tones = [Hz, głośność, faza] jednego zapłonu, decay / tail = wygasanie, knock = stuk wtrysku,
 //   clatter / turbo = głośność klekotu i świstu turbo, lp = filtr dolnoprzepustowy [baza, obciążenie, obroty]
-const BASE_RPM = 1000;
+export const BASE_RPM = 1000;                 // obroty, przy których pętla gra z prędkością 1
 function engineCycleBuffer(ctx, snd) {
   const sr = ctx.sampleRate, cyc = 120 / BASE_RPM, cycles = 8, F = snd.fires;
   const len = Math.round(cyc * cycles * sr), buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0);
@@ -44,13 +44,17 @@ export function setupAudio() {
   setEngineSound();
   return drive.audio;
 }
-// pętla silnika wybranego auta; po zmianie auta nowa pętla zastępuje starą (bufor źródła da się ustawić tylko raz)
+// pętla cyklu pracy danego brzmienia, liczona raz (także dla aut innych graczy, zob. net/sound.js)
 const buffers = new Map();
+export function engineBuffer(ctx, snd) {
+  if (!buffers.has(snd)) buffers.set(snd, engineCycleBuffer(ctx, snd));
+  return buffers.get(snd);
+}
+// pętla silnika wybranego auta; po zmianie auta nowa pętla zastępuje starą (bufor źródła da się ustawić tylko raz)
 export function setEngineSound() {
   const au = drive.audio, snd = active.model.sound;
   if (!au || au.snd === snd) return;
-  if (!buffers.has(snd)) buffers.set(snd, engineCycleBuffer(au.ctx, snd));
-  const src = au.ctx.createBufferSource(); src.buffer = buffers.get(snd); src.loop = true;
+  const src = au.ctx.createBufferSource(); src.buffer = engineBuffer(au.ctx, snd); src.loop = true;
   src.connect(au.lp); src.connect(au.hp); src.start();
   if (au.src) au.src.stop();
   Object.assign(au, { src, snd });

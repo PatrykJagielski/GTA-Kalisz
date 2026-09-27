@@ -4,6 +4,7 @@ import { thump } from './audio.js';
 import { heightOf, hits, surfaceAt } from './collision.js';
 import { KMH } from './gearbox.js';
 import { drive, st } from './state.js';
+import { bumpCars, freeSpot, hitsPeople } from './traffic.js';
 
 /* ---------- fizyka auta: model rowerowy, opory, zawieszenie, zderzenia ---------- */
 // wymiary (rozstaw osi WB, położenie środka auta REAR, koła WHEELS) i osiągi pochodzą z wybranego modelu: active w car/index.js
@@ -42,7 +43,8 @@ function suspension(cx, cz, dt, jump) {
   return grass / 4;
 }
 export function resetCar() {
-  const { REAR } = active.geo, [x, z, psi0] = drive.city.start, psi = psi0 + Math.PI;   // start obrócony o 180°
+  const { REAR } = active.geo, [x0, z0, psi0] = drive.city.start, psi = psi0 + Math.PI;   // start obrócony o 180°
+  const [x, z] = freeSpot(x0, z0, psi);                                          // gra online: obok auta, które stoi na starcie
   Object.assign(st, { x: x - Math.cos(psi) * REAR, z: z + Math.sin(psi) * REAR, psi, v: 0, steer: 0, gear: 1, rpm: active.model.gears.idle });
   suspension(x, z, 0, true); placeCar();
   camera.position.set(x - Math.cos(psi) * 90, 34, z + Math.sin(psi) * 90); drive.last.set(x, 0, z);
@@ -85,10 +87,16 @@ function move(dt, input) {
   st.psi += v / WB * Math.tan(st.steer) * dt;                                     // model rowerowy: obrót wokół tylnej osi
   st.x += Math.cos(st.psi) * v * dt; st.z -= Math.sin(st.psi) * v * dt;
   let cx = st.x + Math.cos(st.psi) * REAR, cz = st.z - Math.sin(st.psi) * REAR;
-  // blokuj tylko wjazd w przeszkodę; jeśli auto już o coś zahacza, zawsze może się wycofać
-  if (hits(cx, cz, st.psi) && !hits(ox + Math.cos(op) * REAR, oz - Math.sin(op) * REAR, op)) {
+  const ocx = ox + Math.cos(op) * REAR, ocz = oz - Math.sin(op) * REAR;
+  // blokuj tylko wjazd w przeszkodę (także w pieszego innego gracza); jeśli auto już o coś zahacza, zawsze może się wycofać
+  if ((hits(cx, cz, st.psi) && !hits(ocx, ocz, op)) || (hitsPeople(cx, cz, st.psi) && !hitsPeople(ocx, ocz, op))) {
     st.x = ox; st.z = oz; st.psi = op; st.v = Math.abs(v) < 8 ? 0 : -v * 0.25;
     cx = st.x + Math.cos(st.psi) * REAR; cz = st.z - Math.sin(st.psi) * REAR;
+  }
+  const bump = bumpCars(cx, cz);                                                // auta innych graczy: odsunięcie i odbicie
+  if (bump) {
+    cx = st.x + Math.cos(st.psi) * REAR; cz = st.z - Math.sin(st.psi) * REAR;
+    if (bump > 20) thump(Math.min(1, bump / 150 + 0.3));
   }
   drive.grass = suspension(cx, cz, dt, false);
   return { cx, cz };

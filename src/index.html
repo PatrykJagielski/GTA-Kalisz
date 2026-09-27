@@ -146,8 +146,19 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
 .dh-rpm{height:6px;margin:10px 0 7px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
 .dh-rpm i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent) 0 70%,#d0141e 90%)}
 #dGear{font:500 12px/1 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
-.dh-help{position:absolute;left:16px;bottom:16px;max-width:400px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+.dh-left{position:absolute;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100% - 32px));display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.dh-help{max-width:400px;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
   background:var(--hud);box-shadow:var(--shadow);font-size:12.5px;line-height:1.7;color:var(--muted)}
+.dh-chat{width:100%;display:flex;flex-direction:column;gap:6px}
+.dh-chat-log{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.dh-chat-log p{margin:0;max-width:100%;box-sizing:border-box;padding:4px 9px;border-radius:6px;background:var(--hud);font-size:13px;line-height:1.35;overflow-wrap:anywhere;transition:opacity .8s}
+.dh-chat-log b{color:var(--accent);font-weight:600}
+.dh-chat-log .sys{color:var(--muted);font-style:italic}
+.dh-chat-log .old{opacity:0}
+.dh-chat-log.open .old{opacity:.85}
+#dChatBox{pointer-events:auto}
+#dChatIn{width:100%;box-sizing:border-box;padding:9px 11px;border-radius:6px;border:1px solid var(--accent);background:var(--hud);color:var(--ink);font:500 14px/1.2 var(--f-body)}
+#dChatIn::placeholder{color:var(--muted)}
 .dh-touch{display:none}
 .touch-only{display:none;margin:0}
 @media (pointer:coarse){
@@ -159,9 +170,18 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
     box-shadow:var(--shadow);font-size:24px;touch-action:none;user-select:none;-webkit-user-select:none}
   .dh-touch button:active{background:var(--accent);color:var(--accent-ink)}
   .dh-gauge{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  .dh-left{bottom:calc(100px + env(safe-area-inset-bottom,0px));width:calc(100% - 240px);min-width:150px}
+  .dh-touch .horn{width:52px;height:52px;align-self:center;font-size:20px}
+}
+/* telefon: pięć przycisków (skręt, klakson, hamulec, gaz) musi się zmieścić w 375 px */
+@media (pointer:coarse) and (max-width:420px){
+  .dh-touch div{gap:8px}
+  .dh-touch button{width:60px;height:60px}
+  .dh-touch .horn{width:48px;height:48px}
+  .dh-left{bottom:calc(90px + env(safe-area-inset-bottom,0px))}
 }
 /* pieszo: bez prędkościomierza, przycisk skoku zamiast niczego */
-.on-foot .dh-gauge,.on-foot .help-car,.drive-hud:not(.on-foot) .help-foot,.drive-hud:not(.on-foot) .dh-touch .jump{display:none}
+.on-foot .dh-gauge,.on-foot .help-car,.on-foot .dh-touch .horn,.drive-hud:not(.on-foot) .help-foot,.drive-hud:not(.on-foot) .dh-touch .jump{display:none}
 @media (max-width:560px){
   .menu{justify-content:flex-end;gap:16px;background:linear-gradient(0deg,rgba(6,9,12,.9) 0,rgba(6,9,12,.6) 55%,rgba(6,9,12,.1) 100%)}
   .m-acts .tbtn{padding:11px 14px;font-size:16px}
@@ -199,7 +219,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
     </div>
     <div class="keys">
       <b>Sterowanie:</b> <kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> <kbd>←</kbd> <kbd>→</kbd> skręt ·
-      <kbd>Spacja</kbd> ręczny · <kbd>F</kbd> wysiądź i wsiądź · pieszo <kbd>Shift</kbd> bieg, <kbd>Spacja</kbd> skok ·
+      <kbd>Spacja</kbd> ręczny · <kbd>H</kbd> klakson · <kbd>F</kbd> wysiądź i wsiądź · pieszo <kbd>Shift</kbd> bieg, <kbd>Spacja</kbd> skok · <kbd>T</kbd> czat ·
       <kbd>C</kbd> kamera · <kbd>R</kbd> powrót na start · <kbd>N</kbd> dzień i noc · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> pauza
     </div>
     <p class="keys touch-only">Na ekranie dotykowym sterujesz przyciskami w rogach ekranu.</p>
@@ -236,13 +256,20 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
         <button class="tbtn" id="dCam">Kamera: za autem</button>
         <button class="tbtn" id="dSound" aria-pressed="false">Dźwięk: wył.</button>
         <button class="tbtn" id="dNight" aria-pressed="false"></button>
+        <button class="tbtn" id="dChat" hidden>Czat</button>
         <button class="tbtn primary" id="dPause">Pauza</button>
       </div>
     </div>
-    <div class="dh-help"><span class="help-car"><kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny</span><span class="help-foot"><kbd>W</kbd> <kbd>S</kbd> naprzód i wstecz · <kbd>A</kbd> <kbd>D</kbd> obrót · <kbd>Shift</kbd> bieg · <kbd>Spacja</kbd> skok</span><br><kbd>F</kbd> wysiądź i wsiądź · <kbd>C</kbd> kamera · <kbd>R</kbd> start · <kbd>N</kbd> noc · <kbd>Esc</kbd> pauza</div>
+    <div class="dh-left">
+      <div class="dh-chat">
+        <div class="dh-chat-log" id="dChatLog" aria-live="polite"></div>
+        <div id="dChatBox" hidden><input id="dChatIn" maxlength="140" autocomplete="off" enterkeyhint="send" aria-label="Wiadomość do pokoju" placeholder="Wiadomość · Enter wysyła · Esc zamyka"></div>
+      </div>
+      <div class="dh-help"><span class="help-car"><kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny · <kbd>H</kbd> klakson</span><span class="help-foot"><kbd>W</kbd> <kbd>S</kbd> naprzód i wstecz · <kbd>A</kbd> <kbd>D</kbd> obrót · <kbd>Shift</kbd> bieg · <kbd>Spacja</kbd> skok</span><br><kbd>F</kbd> wysiądź i wsiądź · <kbd>T</kbd> czat · <kbd>C</kbd> kamera · <kbd>R</kbd> start · <kbd>N</kbd> noc · <kbd>Esc</kbd> pauza</div>
+    </div>
     <div class="dh-gauge"><b id="dSpeed">0</b><span class="u">km/h</span><div class="dh-rpm"><i id="dRpm"></i></div><span id="dGear">1 · 850 obr/min</span></div>
     <div class="dh-touch">
-      <div><button data-k="tleft" aria-label="W lewo">◀</button><button data-k="tright" aria-label="W prawo">▶</button></div>
+      <div><button data-k="tleft" aria-label="W lewo">◀</button><button data-k="tright" aria-label="W prawo">▶</button><button class="horn" data-k="thorn" aria-label="Klakson">📢</button></div>
       <div><button class="jump" data-k="tjump" aria-label="Skok">⤒</button><button data-k="tbrake" aria-label="Hamulec">▼</button><button data-k="tgas" aria-label="Gaz">▲</button></div>
     </div>
   </div>

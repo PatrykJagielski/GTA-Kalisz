@@ -24,6 +24,7 @@ export function paintNet() {
   $('mNet').dataset.status = net.status;
   const hud = $('dNet');
   hud.hidden = net.status !== 'on'; hud.textContent = `Online: ${net.n}`;
+  $('dChat').hidden = net.status !== 'on';
 }
 function say(t) {
   note = t; paintNet();

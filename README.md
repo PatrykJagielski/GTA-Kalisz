@@ -17,10 +17,10 @@ Kod gry to moduły ES w `src/` (jednostka świata = 1 dm; x = wschód, z = połu
 | `src/city/` | Kalisz z danych miasta: `build.js` (`buildCity`), `buildings.js` (budynki: elewacje, lukarny, kominy), `roofs.js` (dachy spadziste z obrysów OSM), `rynek*.js` (pierzeje Głównego Rynku według zdjęć Street View: kamienice o czterech kondygnacjach po ok. 6 osi w różnych kolorach, dachy z dachówki z lukarnami, okna w 3D z opaskami, parapetami i naczółkami, kute balkony, czerwone ławki na płycie, ogródki kawiarniane z parasolami, fortepian plenerowy ze sceną przy ratuszu i namioty restauracji The Jack), indeks przestrzenny, siatki, tekstury elewacji i dachówki, nazwy ulic, niebo dzień/noc |
 | `src/city/kamienice/` | kamienice Rynku odtworzone ze zdjęć 1:1 (dane w `spec.js`): pierzeja między Złotą a Piskorzewską — Salon Firan z kolumnami i attyką z kulami, Pod Filarami z podcieniem i medalionami, Żak, Bank Millennium; każda z własną liczbą osi, balkonami, witrynami i szyldami |
 | `src/city/landmarks/` | zabytki: ratusz (ryzalit wsparty na arkadach, pod którymi da się przejść: `ratusz-arcade.js`; sień i klatka schodowa w wieży: `ratusz-inside.js`, izba i galeria widokowa: `ratusz-tower.js`, piętra dla pieszego: `ratusz-walk.js`), fontanna Noce i Dnie, kolegiata, kościół garnizonowy, mural (sgraffito), Plac św. Józefa z pomnikiem Jana Pawła II, kamienica na rogu |
-| `src/drive/` | jazda: fizyka i zawieszenie, kolizje, skrzynia biegów, kamery, HUD, minimapa, dźwięk silnika; `index.js` = jeden krok jazdy |
+| `src/drive/` | jazda: fizyka i zawieszenie, kolizje, skrzynia biegów, kamery, HUD, minimapa, dźwięk silnika, klakson (`horn.js`), inni gracze jako przeszkody (`traffic.js`); `index.js` = jeden krok jazdy |
 | `src/foot/` | pieszo: postać bez animacji (`person.js`: bryła, kolizje z budynkami, słupkami i drzewami, wysokość podłoża), wierzch auta, na który da się wskoczyć (`car-top.js`), schody i piętra wieży ratusza (posadzka zależna od wysokości stóp, w środku kamera z oczu postaci), wysiadanie i wsiadanie (`F`), chodzenie, bieg (`Shift`), skok (`Spacja`), kamera za postacią (`index.js`) |
 | `src/game/` | wczytywanie mapy, wybór auta (`cars.js`), start i pauza, klawiatura i dotyk, przyciski, dzień/noc, ustawienie dźwięku, utrata kontekstu WebGL, pętla |
-| `src/net/` | gra online: połączenie z serwerem i wysyłanie własnego stanu 15 razy na sekundę (`index.js`), inni gracze z płynnym ruchem między stanami (`remote.js`), ich wygląd: kopia auta, postać, gdy wysiedli, i nick nad głową (`avatar.js`), lista graczy w pauzie (`players.js`), pokój z linku, nick, stan połączenia i „Zaproś znajomych” (`ui.js`) |
+| `src/net/` | gra online: połączenie z serwerem i wysyłanie własnego stanu 15 razy na sekundę (`index.js`), inni gracze z płynnym ruchem między stanami (`remote.js`), ich wygląd: kopia auta, postać, gdy wysiedli, i nick nad głową (`avatar.js`), ich silniki i klaksony (`sound.js`), czat (`chat.js`), lista graczy w pauzie (`players.js`), pokój z linku, nick, stan połączenia i „Zaproś znajomych” (`ui.js`) |
 | `server/` | serwer gry online (Node + `ws`): pokoje i przekazywanie stanów graczy; `static.mjs` tylko do testów lokalnych |
 | `scripts/build.mjs` | build: bundel esbuild, nazwy z hashem, CSP, sprawdzenie `kalisz.json`, pliki `.gz`; serwer online do `dist-server/gta-net.cjs` |
 | `public/kalisz.json` | dane miasta (wynik `dane/build.py`) |
@@ -129,11 +129,15 @@ Zawartość `gta-deploy` wklej do `MIKRUS_SSH_KEY`, a lokalną kopię usuń.
 
 ### Gra online
 
-Każdy gracz liczy fizykę swojego auta u siebie i 15 razy na sekundę wysyła stan (położenie, kurs, przechyły, skręt, prędkość). Serwer (`server/index.mjs`, kontener `gtakalisz-net` / `gtakalisz-staging-net`) nie liczy fizyki: trzyma ostatni stan każdego gracza i 15 razy na sekundę rozsyła stan pokoju. Przeglądarka pokazuje cudze auto ok. 150 ms za nadawcą i wygładza ruch między dwoma stanami, więc nierówne odstępy między pakietami nie szarpią autem. Auta i postacie innych graczy są kopiami tych samych brył (bez dodatkowej pamięci na geometrię) i nie zderzają się z nikim. Gracz, który wysiadł, jest widoczny jako postać obok swojego zaparkowanego auta.
+Każdy gracz liczy fizykę swojego auta u siebie i 15 razy na sekundę wysyła stan (położenie, kurs, przechyły, skręt, prędkość). Serwer (`server/index.mjs`, kontener `gtakalisz-net` / `gtakalisz-staging-net`) nie liczy fizyki: trzyma ostatni stan każdego gracza i 15 razy na sekundę rozsyła stan pokoju. Przeglądarka pokazuje cudze auto ok. 150 ms za nadawcą i wygładza ruch między dwoma stanami, więc nierówne odstępy między pakietami nie szarpią autem. Auta i postacie innych graczy są kopiami tych samych brył (bez dodatkowej pamięci na geometrię). Gracz, który wysiadł, jest widoczny jako postać obok swojego zaparkowanego auta.
 
 Nick wpisuje się w menu (zapamiętany w przeglądarce); serwer usuwa z niego znaki sterujące i niewidoczne i skraca go do 16 znaków, a pusty zastępuje „Gracz <numer>”. Nick wisi nad autem albo postacią, widać go przez budynki do 300 m. Inni gracze są niebieskimi kropkami na minimapie (ci poza jej zasięgiem na brzegu, w swoim kierunku), a pauza ma listę pokoju: nick, auto albo „pieszo” i odległość.
 
-Bez `#pokoj=…` w adresie gracz trafia do pokoju wspólnego; „Zaproś znajomych” zakłada pokój z losową nazwą i kopiuje link do niego. Pokój mieści 16 graczy, serwer do 300 połączeń i do 6 z jednego IP, przyjmuje połączenia tylko ze strony gry (`GTA_ORIGIN`), wiadomości do 512 B i do 40 na sekundę od gracza.
+Zderzenia (`src/drive/traffic.js`): każdy gracz rozwiązuje je tylko dla własnego auta. Auto, które nachodzi na cudze, jest z niego wypychane (jeśli nie wjedzie przez to w budynek) i dostaje odbicie jak przy zderzeniu dwóch aut o tej samej masie; drugi gracz robi to samo u siebie. Cudzy pieszy zatrzymuje auto jak słupek, a własny pieszy nie wejdzie w cudze auto ani postać. Cudze auto widać ok. 150 ms wstecz, więc przy uderzeniu auta mogą na chwilę na siebie wejść. Gdy miejsce startu zajmuje inne auto, gra stawia gracza obok albo za nim.
+
+Dźwięk innych graczy: silnik (ta sama pętla co własny, z ich obrotami i gazem) i klakson, ciszej z odległością (do 90 m) i z lewej albo z prawej względem kamery; głosy tylko dla 4 najbliższych aut. Czat: <kbd>T</kbd> albo przycisk „Czat”, do 140 znaków, najwyżej jedna wiadomość na 0,7 s; w czacie pojawia się też wejście, wyjście i zmiana nicku innych graczy.
+
+Bez `#pokoj=…` w adresie gracz trafia do pokoju wspólnego; „Zaproś znajomych” zakłada pokój z losową nazwą i kopiuje link do niego. Pokój mieści 16 graczy, serwer do 300 połączeń i do 6 z jednego IP, przyjmuje połączenia tylko ze strony gry (`GTA_ORIGIN`), wiadomości do 1 kB i do 40 na sekundę od gracza.
 
 nginx przekazuje `/ws` do kontenera `net` przez sieć Dockera danego środowiska (produkcja i staging mają osobne serwery). `deploy.sh` wysyła `dist-server/gta-net.cjs` do `server/` i restartuje kontener tylko, gdy kod serwera się zmienił (gracze łączą się wtedy ponownie sami); na końcu sprawdza, czy `/ws` odpowiada.
 
@@ -141,7 +145,7 @@ Kontener `gtakalisz-web` (nginx, system plików tylko do odczytu, bez dodatkowyc
 
 ## Sterowanie
 
-<kbd>W</kbd>/<kbd>↑</kbd> gaz · <kbd>S</kbd>/<kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny · <kbd>C</kbd> kamera · <kbd>R</kbd> powrót na start · <kbd>N</kbd> dzień/noc · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> pauza. Na telefonie są przyciski dotykowe.
+<kbd>W</kbd>/<kbd>↑</kbd> gaz · <kbd>S</kbd>/<kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny · <kbd>H</kbd> klakson · <kbd>T</kbd> czat (gra online) · <kbd>C</kbd> kamera · <kbd>R</kbd> powrót na start · <kbd>N</kbd> dzień/noc · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> pauza. Na telefonie są przyciski dotykowe.
 
 Auto wybiera się w menu startowym albo w pauzie (zmiana w pauzie następuje w miejscu, w którym auto stoi); wybór zostaje zapamiętany w przeglądarce.
 

@@ -1,9 +1,12 @@
 import { active } from '../car/index.js';
 import { S } from '../core/state.js';
+import { hornPressed } from '../drive/horn.js';
+import { readInput } from '../drive/physics.js';
 import { drive, st } from '../drive/state.js';
 import { me } from '../foot/index.js';
+import { chatLine, clearChat, initChat } from './chat.js';
 import { paintPlayers } from './players.js';
-import { applyWorld, clearOthers, updateOthers } from './remote.js';
+import { applyWorld, clearOthers, nickOf, updateOthers } from './remote.js';
 import { net } from './state.js';
 import { initNetUi, paintNet, roomFromHash } from './ui.js';
 
@@ -17,7 +20,9 @@ let ws = null, sendT = 0, listT = 0, tries = 0, retryTimer = 0;
 
 const r1 = v => Math.round(v * 10) / 10, r3 = v => Math.round(v * 1000) / 1000;
 function sendState() {
-  const s = [r1(st.x), r1(st.z), r3(st.psi), r1(st.y), r3(st.pitch), r3(st.roll), r3(st.steer), r1(st.v)];
+  const inCar = S.driving && !drive.onFoot, gas = inCar && readInput(drive.keys).gas ? 1 : 0;
+  const s = [r1(st.x), r1(st.z), r3(st.psi), r1(st.y), r3(st.pitch), r3(st.roll), r3(st.steer), r1(st.v),
+    inCar ? Math.round(st.rpm) : 0, gas, hornPressed() ? 1 : 0];
   const f = drive.onFoot ? [r1(me.x), r1(me.z), r1(me.y), r3(me.psi)] : 0;
   ws.send(JSON.stringify({ t: 's', k: Math.round(performance.now()), c: active.model.id, s, f }));
 }
@@ -26,14 +31,24 @@ function onMessage(e) {
   try { m = JSON.parse(e.data); } catch (err) { return; }
   if (m.t === 'hi') {
     net.id = m.id; net.room = m.room; tries = 0; net.status = 'on'; paintNet();
-    if (net.nick) sendNick();
   } else if (m.t === 'w' && Array.isArray(m.p)) {
     applyWorld(m.p, performance.now());
     if (m.n !== net.n) { net.n = m.n; paintNet(); }
   } else if (m.t === 'r' && Array.isArray(m.r)) {
+    const prev = net.roster;
     net.roster = new Map(m.r.map(([id, nick]) => [id, String(nick)]));
+    if (prev.size) announce(prev, net.roster);
     paintPlayers();
+  } else if (m.t === 'c' && typeof m.text === 'string') chatLine(nickOf(m.id), m.text);
+}
+// wejście, wyjście i zmiana nicku innych graczy jako linie czatu (bez pierwszego składu po połączeniu)
+function announce(prev, next) {
+  for (const [id, nick] of next) {
+    if (id === net.id) continue;
+    if (!prev.has(id)) chatLine('', `${nick} dołącza do gry`);
+    else if (prev.get(id) !== nick) chatLine('', `${prev.get(id)} to teraz ${nick}`);
   }
+  for (const [id, nick] of prev) if (!next.has(id)) chatLine('', `${nick} wychodzi z gry`);
 }
 function sendNick() { ws.send(JSON.stringify({ t: 'n', name: net.nick })); }
 export function setNick(nick) {
@@ -44,9 +59,10 @@ export function setNick(nick) {
 export function connect() {
   clearTimeout(retryTimer);
   if (ws) { ws.onclose = null; ws.close(); }
-  clearOthers();
+  clearOthers(); clearChat();
   net.room = roomFromHash(); net.n = 0; net.roster = new Map(); net.status = 'connecting'; paintNet(); paintPlayers();
-  const url = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws?room=${encodeURIComponent(net.room)}`;
+  const q = `room=${encodeURIComponent(net.room)}&nick=${encodeURIComponent(net.nick)}`;   // nick od razu: bez „Gracz 5 to teraz …”
+  const url = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws?${q}`;
   const sock = ws = new WebSocket(url);
   sock.onmessage = onMessage;
   sock.onclose = e => {
@@ -59,6 +75,7 @@ export function connect() {
 }
 export function initNet() {
   initNetUi(connect, setNick);
+  initChat(text => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ t: 'c', text })); });
   addEventListener('hashchange', () => { if (roomFromHash() !== net.room) connect(); });
   connect();
 }

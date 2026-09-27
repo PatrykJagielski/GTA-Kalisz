@@ -4,6 +4,7 @@ import { me, paintDoor, updateFoot } from '../foot/index.js';
 import { updateAudio } from './audio.js';
 import { updateCamera } from './camera.js';
 import { updateGearbox } from './gearbox.js';
+import { updateHorn } from './horn.js';
 import { updateHud, updateStreetName } from './hud.js';
 import { drawMinimap } from './minimap.js';
 import { readInput, stepCar } from './physics.js';
@@ -29,5 +30,6 @@ export function updateDrive(dt) {
     drawMinimap(cx, cz, st.psi, null, othersWhere());
     updateStreetName(dt, cx, cz);
   }
+  updateHorn();
   if (drive.city.fountain) drive.city.fountain.anim(performance.now() / 1000);
 }

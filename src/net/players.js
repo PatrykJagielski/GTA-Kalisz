@@ -6,7 +6,7 @@ import { othersWhere } from './remote.js';
 import { net } from './state.js';
 
 /* ---------- lista graczy w pauzie: nick, auto albo „pieszo”, odległość ---------- */
-const far = d => d < 1000 ? `${Math.round(d / 10) * 10} m` : `${(d / 1000).toFixed(1).replace('.', ',')} km`;
+const far = d => d < 100 ? `${Math.round(d)} m` : d < 1000 ? `${Math.round(d / 10) * 10} m` : `${(d / 1000).toFixed(1).replace('.', ',')} km`;
 function myPlace() {                           // postać albo środek auta (dm)
   if (drive.onFoot) return [me.x, me.z];
   const { REAR } = active.geo;

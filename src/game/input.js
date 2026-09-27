@@ -3,6 +3,7 @@ import { cycleCam } from '../drive/camera.js';
 import { resetCar } from '../drive/physics.js';
 import { drive } from '../drive/state.js';
 import { enterCar, toggleCar } from '../foot/index.js';
+import { openChat } from '../net/chat.js';
 import { pauseGame, restartGame, startGame } from './session.js';
 import { toggleSound } from './sound.js';
 import { toggleNight } from './theme.js';
@@ -27,6 +28,7 @@ function onKeyDown(e) {
   if (e.code === 'KeyR') { enterCar(true); resetCar(); }
   if (e.code === 'KeyM') toggleSound();
   if (e.code === 'Escape' || e.code === 'KeyP') pauseGame();
+  if (e.code === 'KeyT') { e.preventDefault(); openChat(); }       // bez preventDefault litera trafiłaby do pola czatu
 }
 // przycisk dotykowy trzyma klawisz wirtualny (tgas, tbrake, tleft, tright, tjump) do puszczenia palca
 function bindTouchButton(b) {
