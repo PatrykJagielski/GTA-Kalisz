@@ -55,19 +55,24 @@ export function carPoint(lx, lz) {
   return [cx + lx * c + lz * s, cz - lx * s + lz * c];
 }
 
+// wnętrze ratusza (klatka wieży, izba, galeria): posadzka i ściany zależą od wysokości stóp; poza nim null
+export function onStairs(x, z, y) { const f = drive.city.inside?.floorAt(x, z, y); return f !== null && f !== undefined; }
 const RING = [[R, 0], [-R, 0], [0, R], [0, -R], [0.7 * R, 0.7 * R], [0.7 * R, -0.7 * R], [-0.7 * R, 0.7 * R], [-0.7 * R, -0.7 * R]];
-// wysokość, na której stoi postać: jezdnia, chodnik, trawnik, murki i niecki fontanny albo wierzch auta
+// wysokość, na której stoi postać (stopy na wysokości y): jezdnia, chodnik, trawnik, murki i niecki fontanny,
+// schody i piętra wieży ratusza albo wierzch auta
 // (auto: najwyższy punkt pod obrysem postaci, żeby nie wchodziła w karoserię i mogła stać na krawędzi dachu)
-export function groundAt(x, z) {
-  const f = drive.city.fountain, h = f && f.floorAt(x, z);
-  const g = h === null || h === undefined ? heightOf(surfaceAt(x, z), x, z) : h;
+export function groundAt(x, z, y = 0) {
+  const f = drive.city.fountain, h = f && f.floorAt(x, z), i = drive.city.inside?.floorAt(x, z, y);
+  const g = i !== null && i !== undefined ? i : h === null || h === undefined ? heightOf(surfaceAt(x, z), x, z) : h;
   if (carGap(x, z) > R) return g;
   let top = carTopAt(x, z);
   for (const [ox, oz] of RING) top = Math.max(top, carTopAt(x + ox, z + oz));
   return Math.max(g, top);
 }
-// bryły miasta bez fontanny: na nią da się wskoczyć (wysokość z groundAt)
-function solidAt(x, z) {
+// bryły miasta bez fontanny: na nią da się wskoczyć (wysokość z groundAt); w wieży ratusza ściany z ratusz-walk.js
+function solidAt(x, z, y) {
+  const w = drive.city.inside?.blockedAt(x, z, y);
+  if (w !== null && w !== undefined) return w;
   const hull = drive.city.fountain?.hull;
   for (const it of cellOf(drive.city.solid, x, z)) {
     const b = it.b;
@@ -79,8 +84,8 @@ function solidAt(x, z) {
 export function blocked(x, z, y) {
   const C = drive.city, [bx0, bz0, bx1, bz1] = C.bounds;
   if (x < bx0 + 4 || x > bx1 - 4 || z < bz0 + 4 || z > bz1 - 4) return true;
-  if (groundAt(x, z) > y + STEP) return true;
-  for (const [ox, oz] of RING) if (solidAt(x + ox, z + oz)) return true;
+  if (groundAt(x, z, y) > y + (onStairs(x, z, y) ? 6 : STEP)) return true;
+  for (const [ox, oz] of RING) if (solidAt(x + ox, z + oz, y)) return true;
   for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
     for (const [px, pz, r] of cellOf(C.posts, x + i * GRID, z + j * GRID)) {
       if ((px - x) ** 2 + (pz - z) ** 2 < (r + R) ** 2) return true;

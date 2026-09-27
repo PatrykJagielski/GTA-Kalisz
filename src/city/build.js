@@ -62,7 +62,8 @@ export function buildCity(D) {
   // budynki: ściany z oknami, dachy (spadziste nad kamienicami i domami), lukarny, kominy; kolizja dla wszystkiego, co stoi na ziemi
   const { facM, glassM, oldM, rynekM, narRing, solid, meshes } = buildBuildings(D, R, add);
   group.add(...meshes);
-  const ratM = (D.ratusz ? buildRatusz(D.ratusz, group, solid) : []).concat(D.kolegiata ? buildKolegiata(D.kolegiata, group, solid) : [], D.garnizon ? buildGarnizon(D.garnizon, group, solid) : [], buildMural(group));
+  const rat = D.ratusz ? buildRatusz(D.ratusz, group, solid) : null;           // inside: piętra wieży ratusza dla pieszego
+  const ratM = (rat ? rat.mats : []).concat(D.kolegiata ? buildKolegiata(D.kolegiata, group, solid) : [], D.garnizon ? buildGarnizon(D.garnizon, group, solid) : [], buildMural(group));
   const posts = new Map();
   const fountain = D.fountain ? buildFountain(D.fountain, group, solid, posts) : null;
   buildJozef(D, group, solid, posts);
@@ -144,6 +145,6 @@ export function buildCity(D) {
 
   scene.add(group);
   const start = D.start;
-  return { group, solid, posts, segs, names: D.names, lampHeadM, facM, glassM, oldM, rynekM, ratM, fountain, map, MS, bounds: D.bounds,
+  return { group, solid, posts, segs, names: D.names, lampHeadM, facM, glassM, oldM, rynekM, ratM, inside: rat?.inside, fountain, map, MS, bounds: D.bounds,
     blockG: indexPolys(D.blocks), greenG: indexPolys(D.green), start };
 }

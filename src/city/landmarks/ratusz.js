@@ -2,8 +2,10 @@ import * as THREE from 'three';
 import { canvasTex } from '../../core/textures.js';
 import { arrGeo, flatGeo, newArr, pushWalls } from '../mesh.js';
 import { gridPut, ringBox } from '../spatial.js';
-import { ARC, arcadeHole, archX, buildArcade } from './ratusz-arcade.js';
-import { archTex, clockTex } from './tower-textures.js';
+import { ARC, DOOR, arcadeHole, archX, buildArcade } from './ratusz-arcade.js';
+import { buildInside, hallWallTex } from './ratusz-inside.js';
+import { buildTower } from './ratusz-tower.js';
+import { TW, towerWalk } from './ratusz-walk.js';
 
 /* ---------- Ratusz w Kaliszu (Główny Rynek 20, 1920–1925): neoklasycystyczny gmach z wieżą ---------- */
 const RAT = { H: 158, bay: 38 };                                               // wysokość do gzymsu 15,8 m, oś okienna 3,8 m
@@ -71,15 +73,6 @@ function ratShaftTex() {                                                        
     g.fillStyle = '#e4e1d9'; g.fillRect(0, 118, n, 7);
   });
 }
-function railTex() {
-  const t = canvasTex(128, (g, n) => {
-    g.clearRect(0, 0, n, n); g.fillStyle = '#1d2226';
-    g.fillRect(0, 0, n, 12); g.fillRect(0, n - 10, n, 10);
-    for (let x = 4; x < n; x += 16) g.fillRect(x, 0, 5, n);
-  });
-  return t;
-}
-
 export function buildRatusz(R0, group, solid) {
   const plaster = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.88, emissive: 0xfff0d2, emissiveIntensity: 0 });
   const facadeM = plaster.clone(); facadeM.map = ratFacadeTex();
@@ -110,10 +103,15 @@ export function buildRatusz(R0, group, solid) {
   pushWalls(cor, R0.cornice[0], false, RAT.H - 9, RAT.H, () => [0.5, 0.97]);
   R0.body.slice(1).forEach(r => pushWalls(cor, r, true, RAT.H - 9, RAT.H, () => [0.5, 0.97]));
   add(arrGeo(cor), facadeM);
-  add(flatGeo([[R0.cornice[0], ...R0.body.slice(1)]], RAT.H, 1 / 40), roofM);
-  const bb = ringBox(outer);                                                     // kolizja korpusu bez przestrzeni pod ryzalitem
-  gridPut(solid, bb[0], bb[1], bb[2], bb[3], { p: [outer, arcadeHole(L).flatMap(([x, z]) => toWorld(x, z))], b: bb });
-  const arcM = buildArcade(F, L, toWorld, solid, plaster);
+  const ring = pts => pts.flatMap(([x, z]) => toWorld(x, z)), rect = (x0, x1, z0, z1) => ring([[x0, z0], [x1, z0], [x1, z1], [x0, z1]]);
+  const tw = TS / 2;
+  add(flatGeo([[R0.cornice[0], ...R0.body.slice(1), rect(tx - tw, tx + tw, tz - tw, tz + tw)]], RAT.H, 1 / 40), roofM);   // dach bez trzonu wieży
+  // kolizja korpusu bez przestrzeni pod ryzalitem, drzwi do sieni, sieni i drzwi do klatki (klatkę i wieżę obsługuje ratusz-walk.js)
+  const [hx0, hx1, hz0, hz1] = TW.hall, [dx0, dx1] = TW.towerDoor.map(v => v + tx), bb = ringBox(outer);
+  const holes = [ring(arcadeHole(L)), rect(-DOOR.w / 2, DOOR.w / 2, hz1 - 1, -ARC.depth + 1), rect(hx0, hx1, hz0, hz1), rect(dx0, dx1, tz + TW.wall - 2, hz0 + 1)];
+  gridPut(solid, bb[0], bb[1], bb[2], bb[3], { p: [outer, ...holes], b: bb });
+  const hallM = plaster.clone(); hallM.map = hallWallTex(); hallM.emissiveMap = hallM.map; hallM.emissive.set(0xffd9a8);
+  const arcM = buildArcade(F, L, toWorld, solid, plaster, hallM);
 
   // ryzalit: lico nad podcieniami, pary pilastrów wielkiego porządku nad filarami, belkowanie i tympanon z herbem
   const frontM = plaster.clone(); frontM.map = ratFrontTex(L);
@@ -137,40 +135,11 @@ export function buildRatusz(R0, group, solid) {
   add(new THREE.ExtrudeGeometry(shield, { depth: 1.2, bevelEnabled: false }).translate(0, RAT.H + 17, 3.3), goldM, F); // herb Kalisza w tympanonie
   add(new THREE.TorusGeometry(10, 0.9, 6, 24, Math.PI).rotateZ(Math.PI).translate(0, RAT.H + 17, 3.8), goldM, F);                    // wieniec
 
-  // wieża: biały trzon z zegarami, galeria, ciemna ośmioboczna izba, hełm, latarnia i iglica z wiatrowskazem
+  // wieża z klatką schodową, sień za podcieniami; chodzenie po piętrach wieży (ratusz-walk.js)
   const W = new THREE.Group(); W.position.set(tx, 0, tz); F.add(W);
-  const s = TS, top = 348;
-  add(new THREE.BoxGeometry(s, top - RAT.H + 20, s).translate(0, (top + RAT.H - 20) / 2, 0), shaftM, W);
-  add(new THREE.BoxGeometry(s + 3, 3, s + 3).translate(0, top - 78, 0), plaster, W);
-  add(new THREE.BoxGeometry(s + 8, 7, s + 8).translate(0, top - 3.5, 0), plaster, W);                                // gzyms pod galerią
-  const cm = new THREE.MeshStandardMaterial({ map: clockTex(), roughness: 0.4, metalness: 0.3 });
-  for (let k = 0; k < 4; k++) {
-    const c = add(new THREE.CircleGeometry(17, 40).translate(0, 0, 0), cm, W);
-    const a = k * Math.PI / 2; c.position.set(Math.sin(a) * (s / 2 + 0.3), top - 40, Math.cos(a) * (s / 2 + 0.3)); c.rotation.y = a;
-  }
-  const Cr = new THREE.Group(); Cr.position.y = top - 330; W.add(Cr);
-  const T0 = 330;
-  add(new THREE.BoxGeometry(s + 14, 3, s + 14).translate(0, T0 + 1.5, 0), roofM, Cr);                               // posadzka galerii
-  const railM = new THREE.MeshStandardMaterial({ map: railTex(), transparent: true, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.5, metalness: 0.5 });
-  railM.map.repeat.set(6, 1);
-  for (let k = 0; k < 4; k++) {
-    const r = add(new THREE.PlaneGeometry(s + 14, 10).translate(0, T0 + 8, (s + 14) / 2), railM, Cr); r.rotation.y = k * Math.PI / 2;
-  }
-  const belfryT = archTex('#2b3133', '#101416', '#3a4245'); belfryT.repeat.set(8, 1);
-  const belfryM = new THREE.MeshStandardMaterial({ map: belfryT, roughness: 0.55, metalness: 0.3 });
-  const oct = (r0, r1, y0, y1, mat, open = false) => add(new THREE.CylinderGeometry(r1, r0, y1 - y0, 8, 1, open).rotateY(Math.PI / 8).translate(0, (y0 + y1) / 2, 0), mat, Cr);
-  oct(s * 0.42, s * 0.42, T0 + 3, 405, belfryM);                                                                      // izba z otworami
-  oct(s * 0.47, s * 0.47, 403, 409, darkM);                                                                            // gzyms
-  const bell = [[s * 0.47, 409], [s * 0.45, 414], [s * 0.36, 424], [s * 0.22, 434], [s * 0.14, 441], [s * 0.13, 447]].map(([r, y]) => new THREE.Vector2(r, y));
-  add(new THREE.LatheGeometry(bell, 8).rotateY(Math.PI / 8), darkM, Cr);                                              // hełm
-  const lanT = archTex('#2b3133', '#0e1113', '#394144'); lanT.repeat.set(8, 1);
-  oct(s * 0.13, s * 0.13, 447, 474, new THREE.MeshStandardMaterial({ map: lanT, roughness: 0.55, metalness: 0.3 }));  // latarnia
-  oct(s * 0.17, s * 0.17, 474, 478, darkM);
-  add(new THREE.SphereGeometry(s * 0.1, 12, 8).scale(1, 1.3, 1).translate(0, 485, 0), darkM, Cr);                     // cebulka
-  add(new THREE.ConeGeometry(2.4, 62, 8).translate(0, 522, 0), darkM, Cr);                                            // iglica
-  add(new THREE.SphereGeometry(2.8, 12, 8).translate(0, 540, 0), goldM, Cr);
-  add(new THREE.BoxGeometry(14, 5, 0.5).translate(4, 560, 0), goldM, Cr);                                             // wiatrowskaz
-  add(new THREE.CylinderGeometry(0.4, 0.4, 16, 6).translate(0, 558, 0), goldM, Cr);
+  buildTower(W, TS, RAT.H - 20, { plaster, shaftM, roofM, darkM, goldM });
+  const inM = buildInside(F, tx, tz, hallM);
+  const toLocal = (x, z) => { const px = x - F.position.x, pz = z - F.position.z; return [px * ux + pz * uz, -px * uz + pz * ux]; };
 
-  return [plaster, facadeM, frontM, shaftM, ...arcM];
+  return { mats: [plaster, facadeM, frontM, shaftM, hallM, ...arcM, ...inM], inside: towerWalk(toLocal, tx, tz) };
 }

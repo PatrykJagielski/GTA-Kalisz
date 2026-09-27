@@ -4,7 +4,7 @@ import { V } from '../core/geometry.js';
 import { camera, controls } from '../core/renderer.js';
 import { startEngineSound, stopEngineSound } from '../drive/audio.js';
 import { drive, st } from '../drive/state.js';
-import { HEAD, R, blocked, carGap, carPoint, groundAt, placePerson, showPerson } from './person.js';
+import { HEAD, R, blocked, carGap, carPoint, groundAt, onStairs, placePerson, showPerson } from './person.js';
 
 /* ================= pieszo: wysiadanie i wsiadanie, chodzenie, bieg, skok ================= */
 // me: x, z = stopy postaci (dm), y = wysokość stóp, vy = prędkość w pionie, psi = kurs, air = w powietrzu
@@ -58,9 +58,9 @@ function walk(dt, k) {
     else if (!b(x, me.z)) me.x = x;
     else if (!b(me.x, z)) me.z = z;
   }
-  const g = groundAt(me.x, me.z);
+  const g = groundAt(me.x, me.z, me.y);
   if (!me.air && (k.Space || k.tjump)) { me.air = true; me.vy = JUMP; }
-  if (me.air || me.y > g + 0.6) {                                                // skok albo zejście z krawężnika
+  if (me.air || me.y > g + (onStairs(me.x, me.z, me.y) ? 6 : 0.6)) {             // skok albo zejście z krawężnika (ze schodów krokiem)
     me.air = true; me.vy -= GRAVITY * dt; me.y += me.vy * dt;
     if (me.y <= g) { me.y = g; me.vy = 0; me.air = false; }
   } else me.y = g;                                                               // wejście na krawężnik: krok w górę
@@ -69,10 +69,11 @@ function walk(dt, k) {
 
 function followCamera(dt) {
   const fx = Math.cos(me.psi), fz = -Math.sin(me.psi);
-  if (drive.cam === 'chase') {
+  const indoor = drive.city.inside?.indoor(me.x, me.z, me.y);                    // w sieni i klatce za plecami byłyby ściany
+  if (drive.cam === 'chase' && !indoor) {
     camera.position.lerp(tmp.set(me.x - fx * 42, me.y + 19, me.z - fz * 42), 1 - Math.exp(-dt * 4));
     camera.lookAt(me.x + fx * 12, me.y + 12, me.z + fz * 12);
-  } else if (drive.cam === 'driver') {                                           // oczami postaci
+  } else if (drive.cam !== 'orbit') {                                            // oczami postaci
     camera.position.set(me.x + fx * 1.8, me.y + HEAD, me.z + fz * 1.8);
     camera.lookAt(me.x + fx * 40, me.y + HEAD - 1.5, me.z + fz * 40);
   } else {

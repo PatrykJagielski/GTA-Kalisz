@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { canvasTex } from '../../core/textures.js';
+import { CURB } from '../config.js';
 import { gridPut, ringBox } from '../spatial.js';
+import { archWall } from './arch-wall.js';
 
 /* ---------- podcienia ratusza: parter ryzalitu wsparty na arkadach, pod którymi da się przejść ---------- */
 // według zdjęć: od rynku 3 łuki na szerokich, boniowanych filarach, z boków ryzalitu po jednym łuku;
@@ -8,6 +10,7 @@ import { gridPut, ringBox } from '../spatial.js';
 // układ lokalny frontu jak w ratusz.js: x wzdłuż ryzalitu, +z w stronę rynku, 0 = lico ryzalitu
 export const ARC = { top: 57, crown: 48, open: 27, pier: 24, wall: 10, depth: 44, side: 22, vault: 51 };
 const FACE = 0.6;                                                                // lico ściany parteru (tu stoi płaszczyzna frontu)
+export const DOOR = { w: 17, h: 40 };                                           // drzwi z podcieni do sieni (x = 0)
 export const archX = () => [-(ARC.open + ARC.pier), 0, ARC.open + ARC.pier];   // środki łuków od rynku = osie okien wyżej
 const sideZ = -(ARC.wall + ARC.depth) / 2;                                       // środek łuku bocznego (między ścianą frontu a tylną)
 
@@ -47,19 +50,6 @@ function rusticTex(len, top, arches, size) {
     }
   });
 }
-// ściana z łukowymi otworami: lico w płaszczyźnie XY (x od 0 do len), grubość w -z; lico dostaje całą teksturę;
-// materiały: 0 = lico, 1 = ościeża łuków i krawędzie, 2 = lico od strony podcieni (ciemniejsze, bo w cieniu)
-function arcadeWall(len, arches, thick) {
-  const s = new THREE.Shape(); s.moveTo(0, 0);
-  for (const [c, w, cr] of arches) { const r = w / 2; s.lineTo(c - r, 0); s.lineTo(c - r, cr - r); s.absarc(c, cr - r, r, Math.PI, 0, true); s.lineTo(c + r, 0); }
-  s.lineTo(len, 0); s.lineTo(len, ARC.top); s.lineTo(0, ARC.top); s.closePath();
-  const geo = new THREE.ExtrudeGeometry(s, { depth: thick, bevelEnabled: false, curveSegments: 24 }).translate(0, 0, -thick);
-  const p = geo.attributes.position, uv = geo.attributes.uv;
-  for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / len, p.getY(i) / ARC.top);
-  const [lids] = geo.groups.splice(0, 1), half = lids.count / 2;                 // ExtrudeGeometry: najpierw spód (tył), potem wierzch (lico)
-  geo.addGroup(lids.start, half, 2); geo.addGroup(lids.start + half, half, 0);
-  return geo;
-}
 // sklepienie krzyżowe nad prostokątnym przęsłem: sufit = wyższa z dwóch kolebek; szwy wypadają na przekątnych siatki
 function groinVault(x0, x1, z0, z1, y0, rise, N = 20) {
   const pos = [], idx = [];
@@ -74,7 +64,7 @@ function groinVault(x0, x1, z0, z1, y0, rise, N = 20) {
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
   const f = g.toNonIndexed(); f.computeVertexNormals(); return f;
 }
-// ściana w głębi podcieni: boniowanie, drzwi w środkowym przęśle, okna w bocznych, tablice
+// ściana w głębi podcieni: boniowanie, opaska drzwi do sieni w środkowym przęśle, okna w bocznych, tablice
 function backTex(W, H, X) {
   return canvasTex(1024, (g, n) => {
     g.fillStyle = '#ece8df'; g.fillRect(0, 0, n, n);
@@ -86,11 +76,7 @@ function backTex(W, H, X) {
     for (const c of X) {
       const door = c === 0, w = door ? 17 : 13, y0 = door ? 0 : 11, y1 = door ? 40 : 34;
       arched(c, w + 4, y0, y1 + 2, '#e3dfd5');                                   // opaska
-      if (door) {
-        arched(c, w, 0, y1, '#3b3129');
-        g.fillStyle = '#5a4838'; g.fillRect(c - w / 2 + 1, 1, w / 2 - 1.5, 28); g.fillRect(c + 0.5, 1, w / 2 - 1.5, 28);   // dwuskrzydłowe drzwi
-        g.fillStyle = '#2d3a44'; g.beginPath(); g.arc(c, y1 - w / 2, w / 2 - 1, 0, Math.PI); g.fill();                         // naświetle
-      } else {
+      if (!door) {                                                               // w miejscu drzwi otwór do sieni
         const gr = g.createLinearGradient(0, y1, 0, y0); gr.addColorStop(0, '#6f8598'); gr.addColorStop(1, '#2f3f4e');
         arched(c, w, y0, y1, gr);
         g.fillStyle = '#f4f2ec'; g.fillRect(c - 0.4, y0, 0.8, y1 - y0 - w / 2); g.fillRect(c - w / 2, y0 + 12, w, 0.8);      // szczebliny
@@ -111,7 +97,7 @@ function lantern(parent, mats, x, y, z) {
 }
 
 // buduje podcienia w grupie frontu F; toWorld(x, z) -> [x, z] na mapie; zwraca materiały do nocnej iluminacji
-export function buildArcade(F, L, toWorld, solid, plaster) {
+export function buildArcade(F, L, toWorld, solid, plaster, hallM) {
   const add = (geo, mat, parent = F) => { const m = new THREE.Mesh(geo, mat); parent.add(m); return m; };
   const sideM = plaster.clone(); sideM.color.set(0xe2ddd3);
   // nocna iluminacja (emissive z sky.js) mnożona przez teksturę, żeby nie zmywała fug, okien i drzwi; w podcieniach ciepłe światło latarń
@@ -121,13 +107,13 @@ export function buildArcade(F, L, toWorld, solid, plaster) {
   // front: 3 łuki
   const fa = X.map(c => [c + len / 2, ARC.open, ARC.crown]);
   const frontM = plaster.clone(); frontM.map = rusticTex(len, ARC.top, fa, 1024); lit(frontM); const frontIn = shade(frontM);
-  add(arcadeWall(len, fa, ARC.wall).translate(-len / 2, 0, FACE), [frontM, sideM, frontIn]);
+  add(archWall(len, fa, ARC.top, ARC.wall).translate(-len / 2, 0, FACE), [frontM, sideM, frontIn]);
   // boki ryzalitu: po jednym łuku; ściana od lica frontu do ściany w głębi
   const slen = ARC.depth + FACE, sc = FACE - sideZ;                              // środek łuku liczony od przedniej krawędzi
   const sideTexM = plaster.clone(); sideTexM.map = rusticTex(slen, ARC.top, [[sc, ARC.side, ARC.crown - 4]], 512); lit(sideTexM); const sideIn = shade(sideTexM);
   for (const s of [1, -1]) {
     const a = [[s > 0 ? sc : slen - sc, ARC.side, ARC.crown - 4]];
-    add(arcadeWall(slen, a, ARC.wall).rotateY(s * Math.PI / 2).translate(s * (L / 2 + FACE), 0, s > 0 ? FACE : -ARC.depth), [sideTexM, sideM, sideIn]);
+    add(archWall(slen, a, ARC.top, ARC.wall).rotateY(s * Math.PI / 2).translate(s * (L / 2 + FACE), 0, s > 0 ? FACE : -ARC.depth), [sideTexM, sideM, sideIn]);
   }
   // gzyms nad arkadami (front i boki)
   add(new THREE.BoxGeometry(len + 1, 4, 1.4).translate(0, ARC.top - 3.6, FACE + 0.6), plaster);
@@ -147,7 +133,9 @@ export function buildArcade(F, L, toWorld, solid, plaster) {
   const edges = [-inner - 1, (X[0] + X[1]) / 2, (X[1] + X[2]) / 2, inner + 1], spring = ARC.crown - ARC.open / 2;
   for (let k = 0; k < 3; k++) add(groinVault(edges[k], edges[k + 1], back, FACE - ARC.wall + 0.3, spring, ARC.vault - spring), vaultM);
   const bw = 2 * (inner + 1), backM = plaster.clone(); backM.color.set(0xd2cdc3); backM.map = backTex(bw, ARC.vault + 1, X); lit(backM, true);
-  add(new THREE.PlaneGeometry(bw, ARC.vault + 1).translate(0, (ARC.vault + 1) / 2, back + 0.05), backM);
+  add(archWall(bw, [[bw / 2, DOOR.w, DOOR.h]], ARC.vault + 1, 2).translate(-bw / 2, 0, back), [backM, sideM, hallM]);   // od tyłu: ściana sieni
+  const woodM = new THREE.MeshStandardMaterial({ color: 0x5a4838, roughness: 0.7 });
+  for (const s of [1, -1]) add(new THREE.BoxGeometry(0.8, 30, DOOR.w / 2 - 0.5).translate(s * (DOOR.w / 2 - 0.4), CURB + 15, back - 2 - DOOR.w / 4), woodM);   // skrzydła otwarte do sieni
 
   // latarnie zawieszone w łukach
   const ironM = new THREE.MeshStandardMaterial({ color: 0x1b1d1f, roughness: 0.5, metalness: 0.6 });
