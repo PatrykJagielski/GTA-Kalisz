@@ -36,12 +36,13 @@ export function rynekBenches(R, solid) {
   return [instanced(wood, std({ color: 0xb4382c }), mats), instanced(iron, std({ color: 0x26282b, roughness: 0.5, metalness: 0.5 }), mats)];
 }
 
-// ogródki przed co trzecią kamienicą: białe parasole nad stolikami, po cztery krzesła; cały ogródek jest przeszkodą
+// ogródki (fronty: co trzecia kamienica i odcinki z kamienice/spec.js): białe parasole nad stolikami, po cztery krzesła;
+// cały ogródek jest przeszkodą
 const DEPTH = 28, STEP = 45;                                                             // środek ogródka 2,8 m od lica, parasole co 4,5 m
 export function rynekCafes(fronts, solid) {
   const umb = [], seats = [];
   for (const F of fronts) {
-    if (F.k % 3 !== 0 || F.len < 60) continue;
+    if (F.len < 60) continue;
     const tx = (F.x1 - F.x0) / F.len, tz = (F.z1 - F.z0) / F.len, ang = Math.atan2(-tz, tx), cnt = Math.max(1, Math.floor((F.len - 20) / STEP));
     const at = (t, o) => [F.x0 + tx * t + F.nx * o, F.z0 + tz * t + F.nz * o], t0 = (F.len - (cnt - 1) * STEP) / 2;
     for (let i = 0; i < cnt; i++) {

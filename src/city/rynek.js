@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { M4, instanced } from '../core/geometry.js';
 import { arrGeo, newArr, pushWalls } from './mesh.js';
+import { kamieniceMeshes } from './kamienice/index.js';
+import { kamienica } from './kamienice/spec.js';
 import { roofShape } from './roofs.js';
 import { rynekFacadeDetails, rynekGlowM } from './rynek-details.js';
 import { RYNEK_H, RYNEK_VARIANTS, rynekFacade } from './rynek-facades.js';
@@ -58,19 +60,26 @@ export function rynekKit() {
     for (const t of [map, lit]) t.wrapT = THREE.ClampToEdgeWrapping;
     mats.push(new THREE.MeshStandardMaterial({ map, vertexColors: true, roughness: 0.88, emissive: 0xffffff, emissiveMap: lit, emissiveIntensity: 0 }));
   }
-  return { mats, glowM: rynekGlowM(), fronts: mats.map(() => newArr()), faces: [], houses: 0, dormers: [], dormerCol: [], dormerRoof: [] };
+  return { mats, glowM: rynekGlowM(), fronts: mats.map(() => newArr()), faces: [], real: [], lit: [], houses: 0, dormers: [], dormerCol: [], dormerRoof: [] };
 }
 
-// kamienica przy Rynku: front z elewacją rynkową (odcinki po ok. 6 osi), reszta ścian jak w starówce, dach mansardowy
+// kamienica przy Rynku: front z elewacją rynkową (odcinki po ok. 6 osi), reszta ścian jak w starówce, dach mansardowy;
+// kamienice odtworzone ze zdjęć (kamienice/spec.js) dostają własny front, wysokość okapu i kolor
 // x = { kit, walls, gable, tiles, roofs, flatCol, pushPoly, inConvex }; zwraca punkty kalenicy (kominy)
 const color = k => new THREE.Color(PALETTE[(k * 5) % PALETTE.length]).multiplyScalar(1.12);
+const frontSpec = (ring, i) => { const j = (i + 2) % ring.length; return kamienica((ring[i] + ring[j]) / 2, (ring[i + 1] + ring[j + 1]) / 2); };
 export function rynekHouse(f, ring, free, x) {
-  const h = RYNEK_H, y0 = -2, H = h - y0, sg = ringArea2(ring) > 0 ? 1 : -1, kit = x.kit, col = color(kit.houses);
+  let own = null;
+  for (let i = 0; i < ring.length && !own; i += 2) if (f.front[i / 2]) own = frontSpec(ring, i);
+  const h = own ? own.eave : RYNEK_H, y0 = -2, H = h - y0, sg = ringArea2(ring) > 0 ? 1 : -1, kit = x.kit, col = own ? new THREE.Color(own.wall) : color(kit.houses);
   for (let i = 0; i < ring.length; i += 2) {
     if (!f.front[i / 2]) continue;
     const j = (i + 2) % ring.length, x0 = ring[i], z0 = ring[i + 1], len = Math.hypot(ring[j] - x0, ring[j + 1] - z0);
     const tx = (ring[j] - x0) / len, tz = (ring[j + 1] - z0) / len, nx = sg * tz, nz = -sg * tx;
-    const axes = Math.max(1, Math.round(len / AXIS)), m = Math.max(1, Math.round(axes / HOUSE)), aw = len / axes;
+    const axes = Math.max(1, Math.round(len / AXIS)), m = Math.max(1, Math.round(axes / HOUSE)), aw = len / axes, spec = frontSpec(ring, i);
+    if (spec) {                                                                          // numeracja kamienic jak bez niej: reszta Rynku bez zmian
+      kit.houses += m; kit.real.push({ x0, z0, x1: ring[j], z1: ring[j + 1], nx, nz, len, spec }); continue;
+    }
     for (let s = 0, done = 0; s < m; s++) {
       const n = Math.floor(axes * (s + 1) / m) - done, k = kit.houses++, variant = (k * 3) % RYNEK_VARIANTS, c = color(k), A = kit.fronts[variant];
       const sx = x0 + tx * done * aw, sz = z0 + tz * done * aw, ex = sx + tx * n * aw, ez = sz + tz * n * aw, u1 = n / 4;
@@ -88,6 +97,7 @@ export function rynekHouse(f, ring, free, x) {
     for (const s of [1, -1]) x.pushPoly(x.gable, q, [s * nx / l, 0, s * nz / l], q.map(() => [0.01, 0.01]), FIREWALL);
   }
   // lukarny w dolnej, stromej połaci mansardy: po jednej na oś, w osi okien
+  if (own && own.dormers === false) return top;
   for (const fc of faces) {
     const e = fc.edge; if (!fc.low || !e || e.len < 30) continue;
     const cnt = Math.max(1, Math.round(e.len / AXIS));
@@ -108,7 +118,8 @@ export function rynekMeshes(kit, add, solid) {
   const win = new THREE.PlaneGeometry(8, 10).rotateY(Math.PI / 2).translate(-2.45, 12, 0);
   const cap = new THREE.ExtrudeGeometry(new THREE.Shape([new THREE.Vector2(-8, 20), new THREE.Vector2(8, 20), new THREE.Vector2(0, 26)]), { depth: 18.5, bevelEnabled: false })
     .rotateY(Math.PI / 2).translate(-20, 0, 0);
+  const real = kamieniceMeshes(kit.real, kit.glowM, solid); kit.lit = real.lit;
   return [instanced(body, std(), kit.dormers, kit.dormerCol), instanced(win, std({ color: 0x34475a, roughness: 0.3 }), kit.dormers),
-    instanced(cap, std({ roughness: 0.9 }), kit.dormers, kit.dormerRoof), ...rynekFacadeDetails(kit.faces, kit.glowM),
-    ...rynekBenches(RYNEK, solid), ...rynekCafes(kit.faces, solid)];
+    instanced(cap, std({ roughness: 0.9 }), kit.dormers, kit.dormerRoof), ...rynekFacadeDetails(kit.faces, kit.glowM), ...real.meshes,
+    ...rynekBenches(RYNEK, solid), ...rynekCafes(kit.faces.filter(F => F.k % 3 === 0).concat(real.cafes), solid)];
 }

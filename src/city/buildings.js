@@ -115,5 +115,5 @@ export function buildBuildings(D, R, add) {
   const white = () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
   const group = [instanced(body, white(), dormers, dormerCol), instanced(win, new THREE.MeshStandardMaterial({ color: 0x34475a, roughness: 0.3 }), dormers),
     instanced(cap, white(), dormers, dormerRoof), instanced(new THREE.BoxGeometry(5, 16, 6).translate(0, 8, 0), white(), chimneys, chimneyCol), ...rynekMeshes(kit, add, solid)];
-  return { facM, glassM, oldM, rynekM: [...kit.mats, kit.glowM], narRing, solid, meshes: group };
+  return { facM, glassM, oldM, rynekM: [...kit.mats, kit.glowM, ...kit.lit], narRing, solid, meshes: group };
 }
