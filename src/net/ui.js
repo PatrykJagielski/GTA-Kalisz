@@ -1,7 +1,7 @@
 import { $ } from '../core/dom.js';
 import { net } from './state.js';
 
-/* ---------- gra online w interfejsie: pokój z linku, stan połączenia, zapraszanie znajomych ---------- */
+/* ---------- gra online w interfejsie: pokój z linku, stan połączenia, nick, zapraszanie znajomych ---------- */
 // Pokój bierze się z adresu (#pokoj=abc123); bez niego gracz trafia do pokoju wspólnego.
 const DEFAULT_ROOM = 'kalisz';
 const ROOM_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789';   // bez 0/o i 1/l/i: link da się przepisać
@@ -43,6 +43,21 @@ async function invite(connect) {
   try { await navigator.clipboard.writeText(url); say(`Link skopiowany, wyślij go znajomym: ${url}`); }
   catch (e) { say(`Wyślij znajomym ten link: ${url}`); }
 }
-export function initNetUi(connect) {
+// nick z menu: zapamiętany w przeglądarce, wysyłany po zatwierdzeniu (Enter albo wyjście z pola)
+function initNick(setNick) {
+  const input = $('mNick');
+  try { input.value = localStorage.getItem('gta-nick') || ''; } catch (e) { /* bez zapisu */ }
+  const apply = () => {
+    const nick = input.value.replace(/\s+/g, ' ').trim();
+    input.value = nick;
+    try { localStorage.setItem('gta-nick', nick); } catch (e) { /* nick działa do przeładowania */ }
+    setNick(nick);
+  };
+  input.addEventListener('change', apply);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+  apply();
+}
+export function initNetUi(connect, setNick) {
   for (const id of ['mInvite', 'pInvite']) $(id).onclick = () => invite(connect);
+  initNick(setNick);
 }

@@ -15,7 +15,7 @@ export const HEAD = 16.5;                      // wysokość oczu (kamera z pier
 const STEP = 2;                                // bez skoku postać wchodzi na stopień do 20 cm (krawężnik ma 14)
 let body = null, shadow = null;
 
-function buildPerson() {
+export function buildPerson() {
   const mat = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8 });
   const jeans = mat(0x2f4a6e), jacket = mat(0xe0a02a), skin = mat(0xd9a782);
   const g = new THREE.Group();

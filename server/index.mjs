@@ -9,8 +9,10 @@
 // Protokół (JSON):
 //   serwer → gracz   {t:'hi', id, room}                         po połączeniu
 //                    {t:'w', n, p:[[id, auto, k, s, f], …]}     stan pokoju: n = liczba połączonych, p = gracze w grze
+//                    {t:'r', r:[[id, nick], …]}                 skład pokoju: po wejściu, wyjściu i zmianie nicku
 //   gracz → serwer   {t:'s', k, c, s:[x, z, psi, y, pitch, roll, steer, v], f:[x, z, y, psi] | 0}
 //                    k = czas nadawcy (ms), c = id auta, f = postać, jeśli gracz wysiadł
+//                    {t:'n', name}                              nick (do 16 znaków; pusty = „Gracz <id>”)
 import { createServer } from 'node:http';
 import { WebSocketServer } from 'ws';
 import { serveStatic } from './static.mjs';
@@ -23,6 +25,7 @@ const ROOM_MAX = 16, CONN_MAX = 300, PER_IP = 6;
 const MSG_PER_S = 40;                          // gracz wysyła 15/s; więcej to błąd albo nadużycie
 const DEFAULT_ROOM = 'kalisz';
 const ROOM_RE = /^[a-z0-9-]{1,24}$/, CAR_RE = /^[a-z0-9-]{1,16}$/;
+const NICK_MAX = 16;
 
 const rooms = new Map();                       // nazwa → Set graczy
 const players = new Map();                     // WebSocket → gracz
@@ -30,12 +33,19 @@ const perIp = new Map();
 let nextId = 1;
 
 const finite = (a, n) => Array.isArray(a) && a.length === n && a.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1e7);
-function parseState(raw) {
-  let m;
-  try { m = JSON.parse(raw); } catch { return null; }
-  if (!m || m.t !== 's' || !Number.isFinite(m.k) || typeof m.c !== 'string' || !CAR_RE.test(m.c) || !finite(m.s, 8)) return null;
+function parseState(m) {
+  if (!Number.isFinite(m.k) || typeof m.c !== 'string' || !CAR_RE.test(m.c) || !finite(m.s, 8)) return null;
   if (m.f !== 0 && !finite(m.f, 4)) return null;
   return { car: m.c, state: [m.k, m.s, m.f] };
+}
+// nick: bez znaków sterujących i niewidocznych, pojedyncze spacje, najwyżej NICK_MAX znaków (nie bajtów)
+function cleanNick(name) {
+  if (typeof name !== 'string') return '';
+  return [...name.normalize('NFC').replace(/[\p{C}\p{Zl}\p{Zp}]/gu, '').replace(/\s+/gu, ' ').trim()].slice(0, NICK_MAX).join('').trim();
+}
+function sendRoster(members) {
+  const msg = JSON.stringify({ t: 'r', r: [...members].map(m => [m.id, m.nick || `Gracz ${m.id}`]) });
+  for (const m of members) if (m.ws.readyState === 1) m.ws.send(msg);
 }
 
 const http = createServer((req, res) => {
@@ -64,21 +74,27 @@ http.on('upgrade', (req, socket, head) => {
 function join(ws, ip, room) {
   const members = rooms.get(room) || new Set();
   if (members.size >= ROOM_MAX) { ws.close(4001, 'room full'); return; }
-  const p = { ws, id: nextId++, ip, room, car: '', state: null, alive: true, count: 0, second: 0 };
+  const p = { ws, id: nextId++, ip, room, nick: '', car: '', state: null, alive: true, count: 0, second: 0 };
   members.add(p); rooms.set(room, members); players.set(ws, p);
   perIp.set(ip, (perIp.get(ip) || 0) + 1);
   ws.send(JSON.stringify({ t: 'hi', id: p.id, room }));
+  sendRoster(members);
   ws.on('pong', () => { p.alive = true; });
   ws.on('message', (data, binary) => {
     const now = Math.floor(Date.now() / 1000);
     if (now !== p.second) { p.second = now; p.count = 0; }
     if (binary || ++p.count > MSG_PER_S) return;
-    const m = parseState(data.toString());
-    if (m) Object.assign(p, m);
+    let m;
+    try { m = JSON.parse(data.toString()); } catch { return; }
+    if (m && m.t === 's') { const s = parseState(m); if (s) Object.assign(p, s); }
+    else if (m && m.t === 'n') {
+      const nick = cleanNick(m.name);
+      if (nick !== p.nick) { p.nick = nick; sendRoster(members); }
+    }
   });
   ws.on('close', () => {
     members.delete(p); players.delete(ws);
-    if (!members.size) rooms.delete(room);
+    if (!members.size) rooms.delete(room); else sendRoster(members);
     const n = perIp.get(ip) - 1;
     if (n > 0) perIp.set(ip, n); else perIp.delete(ip);
   });

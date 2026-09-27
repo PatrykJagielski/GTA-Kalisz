@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "gta-dist", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "8766", "--bind", "127.0.0.1", "--directory", "dist"], "port": 8766 }
+    { "name": "gta-dist", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "8766", "--bind", "127.0.0.1", "--directory", "dist"], "port": 8766 },
+    { "name": "gta-online", "runtimeExecutable": "sh", "runtimeArgs": ["-c", "PORT=8767 STATIC_DIR=dist node server/index.mjs"], "port": 8767 }
   ]
 }

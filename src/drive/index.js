@@ -1,4 +1,5 @@
 import { S } from '../core/state.js';
+import { othersWhere } from '../net/remote.js';
 import { me, paintDoor, updateFoot } from '../foot/index.js';
 import { updateAudio } from './audio.js';
 import { updateCamera } from './camera.js';
@@ -16,7 +17,7 @@ export function updateDrive(dt) {
   if (drive.onFoot) {
     const car = stepCar(dt, PARKED);
     updateFoot(dt);
-    drawMinimap(me.x, me.z, me.psi, car);
+    drawMinimap(me.x, me.z, me.psi, car, othersWhere());
     updateStreetName(dt, me.x, me.z);
   } else {
     const input = readInput(drive.keys);
@@ -25,7 +26,7 @@ export function updateDrive(dt) {
     updateHud(input.gas);
     updateCamera(dt, cx, cz);
     updateAudio(input.gas, dt);
-    drawMinimap(cx, cz, st.psi);
+    drawMinimap(cx, cz, st.psi, null, othersWhere());
     updateStreetName(dt, cx, cz);
   }
   if (drive.city.fountain) drive.city.fountain.anim(performance.now() / 1000);

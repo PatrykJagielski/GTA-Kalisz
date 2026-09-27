@@ -1,10 +1,11 @@
 import { $ } from '../core/dom.js';
 import { drive } from './state.js';
 
-/* ---------- minimapa: gotowy plan miasta obracany za graczem, strzałka gracza, auto (gdy idzie pieszo) i północ ---------- */
+/* ---------- minimapa: gotowy plan miasta obracany za graczem, strzałka gracza, auto (gdy idzie pieszo), inni gracze i północ ---------- */
 const mapCanvas = $('minimap'), mapG = mapCanvas.getContext('2d');
-// car = środek zaparkowanego auta { cx, cz }, jeśli gracz wysiadł
-export function drawMinimap(cx, cz, psi, car) {
+// car = środek zaparkowanego auta { cx, cz }, jeśli gracz wysiadł; others = inni gracze online [{ x, z }]
+// (gracz poza zasięgiem mapy jest na jej brzegu, w swoim kierunku)
+export function drawMinimap(cx, cz, psi, car, others) {
   const g = mapG, C = drive.city, n = mapCanvas.width, rot = psi - Math.PI / 2;
   g.fillStyle = '#7b8a63'; g.fillRect(0, 0, n, n);
   g.save(); g.translate(n / 2, n / 2); g.rotate(rot);
@@ -12,6 +13,14 @@ export function drawMinimap(cx, cz, psi, car) {
   if (car) {
     g.fillStyle = '#e8eef3'; g.strokeStyle = '#1b1300'; g.lineWidth = 2;
     g.beginPath(); g.arc((car.cx - cx) * C.MS, (car.cz - cz) * C.MS, 7, 0, 7); g.fill(); g.stroke();
+  }
+  const edge = n / 2 - 12;
+  g.fillStyle = '#3fa7ff'; g.strokeStyle = '#08121c'; g.lineWidth = 2.5;
+  for (const o of others) {
+    let x = (o.x - cx) * C.MS, z = (o.z - cz) * C.MS;
+    const d = Math.hypot(x, z);
+    if (d > edge) { x *= edge / d; z *= edge / d; }
+    g.beginPath(); g.arc(x, z, 8, 0, 7); g.fill(); g.stroke();
   }
   g.restore();
   g.save(); g.translate(n / 2, n / 2);

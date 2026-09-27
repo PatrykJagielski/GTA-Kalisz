@@ -1,82 +1,88 @@
-import * as THREE from 'three';
-import { carParts, modelById } from '../car/index.js';
-import { createShadow } from '../car/shadow.js';
-import { scene } from '../core/renderer.js';
+import { camera } from '../core/renderer.js';
+import { makeAvatar, removeAvatar, setCarModel, setLabel } from './avatar.js';
+import { net } from './state.js';
 
-/* ---------- auta innych graczy: kopie brył, płynny ruch między stanami z serwera ---------- */
-// stan s = [x, z, psi, y, pitch, roll, steer, v] jak st w drive/state.js (x, z = środek tylnej osi)
-// Stany przychodzą ok. 15 razy na sekundę, nierówno. Każdy ma czas nadawcy k (ms), więc auto pokazujemy
+/* ---------- inni gracze: stany z serwera, płynny ruch, położenie dla minimapy i listy graczy ---------- */
+// stan s = [x, z, psi, y, pitch, roll, steer, v] jak st w drive/state.js (x, z = środek tylnej osi),
+// f = [x, z, y, psi] postaci jak me w foot/index.js albo 0, gdy gracz siedzi w aucie.
+// Stany przychodzą ok. 15 razy na sekundę, nierówno. Każdy ma czas nadawcy k (ms), więc gracza pokazujemy
 // DELAY za nadawcą i wygładzamy między dwoma stanami, które obejmują ten moment; gdy nowego stanu brak, auto
 // jedzie dalej z ostatnią prędkością (najdłużej MAX_AHEAD), a potem stoi.
 const DELAY = 150, MAX_AHEAD = 250;            // ms
 const KEEP = 30;                               // stanów w buforze (ok. 2 s)
+const LABEL_FAR = 3000;                        // dm: dalej nick nie jest pokazywany
+const CAR_LABEL = 17, PERSON_LABEL = 21;       // dm nad podłożem
 const others = new Map();                      // id → gracz
-let shadowTemplate = null;
 
-// kopia zbudowanego auta: bryły i materiały wspólne, własne położenie kół
-function cloneCar(model) {
-  const { car, wheels } = carParts(model), copy = car.clone();
-  const path = o => { const p = []; for (; o !== car; o = o.parent) p.unshift(o.parent.children.indexOf(o)); return p; };
-  const at = p => p.reduce((o, i) => o.children[i], copy);
-  return { car: copy, wheels: wheels.map(({ w, spin, front }) => ({ w: at(path(w)), spin: at(path(spin)), front })) };
-}
-function setModel(o, id) {
-  const model = modelById(id);
-  if (o.model === model) return;
-  o.model = model;
-  const { car, wheels } = cloneCar(model);
-  shadowTemplate = shadowTemplate || createShadow();
-  const shadow = shadowTemplate.clone(); shadow.scale.set(model.shadow[0], model.shadow[1], 1);
-  o.rig.clear(); o.rig.add(car, shadow); o.wheels = wheels;
-}
 function add(id) {
-  const o = { id, rig: new THREE.Group(), model: null, wheels: [], buf: [], off: null, spin: 0 };
-  o.rig.rotation.order = 'YZX';                // jak placeCar: kurs, potem pochylenie, potem przechył
-  scene.add(o.rig); others.set(id, o);
+  const o = { id, a: makeAvatar(), buf: [], off: null, spin: 0, cx: 0, cz: 0, foot: null };
+  others.set(id, o);
   return o;
 }
-function remove(o) { scene.remove(o.rig); others.delete(o.id); }
+function remove(o) { removeAvatar(o.a); others.delete(o.id); }
+export const nickOf = id => net.roster.get(id) || `Gracz ${id}`;
 
-// stan pokoju z serwera; me = własne id (siebie nie pokazujemy)
-export function applyWorld(list, me, now) {
+// stan pokoju z serwera (siebie nie pokazujemy)
+export function applyWorld(list, now) {
   const seen = new Set();
-  for (const [id, car, k, s] of list) {
-    if (id === me) continue;
+  for (const [id, car, k, s, f] of list) {
+    if (id === net.id) continue;
     seen.add(id);
     const o = others.get(id) || add(id);
-    setModel(o, car);
+    setCarModel(o.a, car);
     const last = o.buf[o.buf.length - 1];
     if (last && k <= last.k) continue;         // serwer rozsyła ostatni stan, dopóki gracz nie przyśle nowego
     // przesunięcie zegara nadawcy względem naszego: najmniejsze opóźnienie, powoli doganiane w górę
     const off = now - k;
     o.off = o.off === null || off < o.off ? off : o.off + (off - o.off) * 0.02;
-    o.buf.push({ k, s });
+    o.buf.push({ k, s, f });
     if (o.buf.length > KEEP) o.buf.shift();
   }
   for (const o of others.values()) if (!seen.has(o.id)) remove(o);
 }
 export function clearOthers() { for (const o of [...others.values()]) remove(o); }
-export const othersCount = () => others.size;
 
 const lerp = (a, b, t) => a + (b - a) * t;
-function sample(o, t) {                        // stan w chwili t (czas nadawcy)
+const mix = (a, b, u) => a.map((v, j) => lerp(v, b[j], u));
+function sample(o, t) {                        // { s, f } w chwili t (czas nadawcy)
   const b = o.buf;
   let i = b.length - 1;
   while (i > 0 && b[i].k > t) i--;
   const A = b[i], B = b[i + 1];
-  if (B) { const u = (t - A.k) / (B.k - A.k); return A.s.map((v, j) => lerp(v, B.s[j], u)); }
+  if (B) {
+    const u = (t - A.k) / (B.k - A.k);
+    return { s: mix(A.s, B.s, u), f: A.f && B.f ? mix(A.f, B.f, u) : (u < 0.5 ? A.f : B.f) };
+  }
   const s = [...A.s], dt = Math.min(Math.max(t - A.k, 0), MAX_AHEAD) / 1000;
   s[0] += Math.cos(s[2]) * s[7] * dt; s[1] -= Math.sin(s[2]) * s[7] * dt;
-  return s;
+  return { s, f: A.f };
 }
 export function updateOthers(dt, now) {
   for (const o of others.values()) {
     if (!o.buf.length) continue;
-    const [x, z, psi, y, pitch, roll, steer, v] = sample(o, now - o.off - DELAY);
-    const rear = -o.model.dims.axR;
-    o.rig.position.set(x + Math.cos(psi) * rear, y, z - Math.sin(psi) * rear);
-    o.rig.rotation.set(roll, psi, pitch);
-    o.spin -= v * dt / o.model.dims.wr;
-    for (const { w, spin, front } of o.wheels) { spin.rotation.z = o.spin; if (front) w.rotation.y = steer; }
+    const { rig, wheels, model, person, label } = o.a;
+    const { s: [x, z, psi, y, pitch, roll, steer, v], f } = sample(o, now - o.off - DELAY);
+    const rear = -model.dims.axR;
+    o.cx = x + Math.cos(psi) * rear; o.cz = z - Math.sin(psi) * rear; o.foot = f;
+    rig.position.set(o.cx, y, o.cz);
+    rig.rotation.set(roll, psi, pitch);
+    o.spin -= v * dt / model.dims.wr;
+    for (const { w, spin, front } of wheels) { spin.rotation.z = o.spin; if (front) w.rotation.y = steer; }
+    person.g.visible = !!f;
+    if (f) { person.g.position.set(f[0], f[2], f[1]); person.g.rotation.y = f[3]; }
+    // nick nad postacią albo nad autem, w którym gracz siedzi
+    const [lx, ly, lz] = f ? [f[0], f[2] + PERSON_LABEL, f[1]] : [o.cx, y + CAR_LABEL, o.cz];
+    label.sprite.position.set(lx, ly, lz);
+    label.sprite.visible = camera.position.distanceToSquared(label.sprite.position) < LABEL_FAR * LABEL_FAR;
+    setLabel(o.a, nickOf(o.id));
   }
+}
+// gdzie są inni: { id, x, z, foot, model } (x, z = postać albo środek auta)
+export function othersWhere() {
+  const out = [];
+  for (const o of others.values()) {
+    if (!o.buf.length) continue;
+    out.push({ id: o.id, x: o.foot ? o.foot[0] : o.cx, z: o.foot ? o.foot[1] : o.cz, foot: !!o.foot, model: o.a.model });
+  }
+  return out;
 }
