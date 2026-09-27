@@ -1,0 +1,41 @@
+# GTA Kalisz — gta.patrykjagielski.tech
+#
+# Statyczny nginx, tak jak audia4 i warta. Nie zajmuje portu 80 hosta (trzyma go powiadom-web-1).
+# Nasłuchuje na 127.0.0.1:8083 i 172.17.0.1:8083 (oba nieosiągalne z zewnątrz) — ruch
+# publiczny wchodzi przez istniejący tunel Cloudflare (warta-tunnel, sieć hosta):
+#   gta.patrykjagielski.tech -> http://172.17.0.1:8083
+services:
+  gta:
+    image: nginx:1.27-alpine
+    container_name: gtakalisz-web
+    ports:
+      - "127.0.0.1:8083:80"
+      - "172.17.0.1:8083:80"
+    volumes:
+      - ./site:/usr/share/nginx/html:ro
+      - ./nginx/site.conf:/etc/nginx/conf.d/default.conf:ro
+    # kontener tylko czyta pliki: zapis wyłącznie do tmpfs (pid, bufory nginx)
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=16m
+      - /var/run:size=1m
+      - /tmp:size=8m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, NET_BIND_SERVICE]
+    mem_limit: 64m
+    pids_limit: 64
+    environment:
+      TZ: Europe/Warsaw
+      NGINX_ENTRYPOINT_QUIET_LOGS: "1"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}

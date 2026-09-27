@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="GTA Kalisz: jazda Audi A4 B7 1.9 TDI po Kaliszu odtworzonym z danych OpenStreetMap.">
+<meta name="theme-color" content="#0d1115">
+<title>GTA Kalisz</title>
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var t = localStorage.getItem('gta-theme'); if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t); } catch (e) {}
+  // Awaria przed startem (skrypt się nie pobrał, brak WebGL, stara przeglądarka): komunikat zamiast wiecznego „Wczytywanie…”.
+  // Po starcie gra ustawia data-ready i sama obsługuje błędy.
+  var failed = false;
+  function fail(msg) {
+    if (failed || root.hasAttribute('data-ready')) return;
+    var status = document.getElementById('mStatus'), reload = document.getElementById('mReload');
+    if (!status) return;
+    failed = true;
+    status.textContent = typeof msg === 'string' ? msg : 'Nie udało się uruchomić gry. Odśwież stronę albo spróbuj w innej przeglądarce.';
+    document.getElementById('mMenu').classList.remove('busy');
+    reload.hidden = false;
+    reload.onclick = function () { location.reload(); };
+  }
+  window.gtaFail = fail;
+  addEventListener('error', function (e) { var t = e.target; if (!t || !t.tagName || t.tagName === 'SCRIPT') fail(); }, true);
+  addEventListener('unhandledrejection', function () { fail(); });
+  addEventListener('DOMContentLoaded', function () {
+    if (!('noModule' in HTMLScriptElement.prototype)) fail('Ta przeglądarka jest za stara, żeby uruchomić grę. Zaktualizuj ją albo użyj innej.');
+  });
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#C9D6E1; --ink:#F3F5F7; --muted:#AEB8C2; --line:rgba(255,255,255,.16);
+  --hud:rgba(14,18,23,.72); --hud-2:rgba(255,255,255,.08); --accent:#F2B33A; --accent-ink:#1B1300;
+  --scene-top:#DDE6EE; --scene-bot:#AFBDCA; --shadow:0 8px 28px rgba(0,0,0,.28);
+  --f-logo:Anton,Impact,"Arial Narrow Bold",sans-serif;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10171F; --hud:rgba(8,11,15,.78); --scene-top:#1A222A; --scene-bot:#090C10; --shadow:0 8px 28px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10171F; --hud:rgba(8,11,15,.78); --scene-top:#1A222A; --scene-bot:#090C10; --shadow:0 8px 28px rgba(0,0,0,.5);
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--f-body);overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.view{position:fixed;inset:0;overflow:hidden;background:linear-gradient(var(--scene-top),var(--scene-bot))}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+.tbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--hud);color:var(--ink);border-radius:6px;
+  padding:7px 11px;font:600 14px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;box-shadow:var(--shadow);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.tbtn:hover{border-color:rgba(255,255,255,.4)}
+.tbtn svg{width:16px;height:16px}
+.tbtn[aria-pressed="true"]{border-color:var(--accent)}
+.tbtn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tbtn.primary:hover{filter:brightness(1.07)}
+kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;background:var(--hud-2);color:var(--ink)}
+
+/* ---------- menu startowe ---------- */
+.menu{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:safe center;gap:22px;box-sizing:border-box;overflow-y:auto;
+  padding:32px max(16px,6vw) calc(32px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(90deg,rgba(6,9,12,.86) 0,rgba(6,9,12,.62) 38%,rgba(6,9,12,0) 72%)}
+.logo{margin:12px 0 0;display:flex;flex-direction:column;line-height:.84;transform:rotate(-4deg);transform-origin:left bottom;user-select:none}
+.logo b{font:400 clamp(72px,min(17vw,21vh),190px)/.84 var(--f-logo);color:#fff;letter-spacing:.01em;
+  -webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:0 6px 0 #000,0 10px 30px rgba(0,0,0,.5)}
+.logo span{font:400 clamp(38px,min(8.4vw,10.4vh),94px)/.9 var(--f-logo);color:var(--accent);letter-spacing:.06em;margin-left:.08em;
+  -webkit-text-stroke:2px #000;paint-order:stroke fill;text-shadow:0 4px 0 #000}
+.car-line{font:600 clamp(15px,2vw,19px)/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.car-line b{color:var(--ink);font-weight:600}
+.m-load{display:flex;flex-direction:column;gap:8px;max-width:360px}
+.m-bar{height:5px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+.m-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s ease}
+.menu:not(.busy) .m-bar{display:none}
+#mStatus{font-size:13px;color:var(--muted)}
+.m-acts{display:flex;gap:10px;flex-wrap:wrap}
+.m-acts .tbtn{padding:12px 18px;font-size:18px}
+#mPlay{min-width:170px;justify-content:center;font-size:22px;letter-spacing:.12em}
+#mPlay:disabled{opacity:.45;filter:grayscale(.6)}
+.keys{max-width:430px;font-size:13px;line-height:1.95;color:var(--muted)}
+.keys b{color:var(--ink);font-weight:500}
+.credit{position:absolute;right:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));font-size:11px;color:rgba(255,255,255,.7);text-shadow:0 1px 2px #000}
+.credit a{color:inherit}
+
+/* ---------- pauza ---------- */
+.pause{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(6,9,12,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.p-box{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:420px;width:100%}
+.p-box h2{margin:0;font:400 64px/1 var(--f-logo);letter-spacing:.06em;color:#fff;-webkit-text-stroke:2px #000;paint-order:stroke fill;text-shadow:0 4px 0 #000}
+.p-acts{display:flex;flex-direction:column;gap:8px;width:100%;max-width:280px}
+.p-acts .tbtn{justify-content:center;padding:11px 14px;font-size:17px}
+.p-acts .row{display:flex;gap:8px}
+.p-acts .row .tbtn{flex:1}
+.p-box .keys{text-align:center}
+.p-note{margin:0;text-align:center;font-size:13px;color:var(--ink)}
+
+/* ---------- HUD jazdy ---------- */
+.drive-hud{position:absolute;inset:0;pointer-events:none}
+.dh-top{position:absolute;left:16px;right:16px;top:calc(16px + env(safe-area-inset-top,0px));display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dh-map{display:flex;flex-direction:column;gap:6px;align-items:flex-start;pointer-events:auto}
+#minimap{width:190px;height:190px;border-radius:50%;border:3px solid rgba(10,12,15,.85);box-shadow:var(--shadow);background:#222}
+.dh-street{max-width:230px;padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--hud);box-shadow:var(--shadow);
+  font:700 17px/1.1 var(--f-display);letter-spacing:.02em}
+.dh-osm{font-size:10.5px;color:rgba(255,255,255,.75);text-shadow:0 1px 2px #000;padding-left:2px}
+.dh-osm a{color:inherit}
+.dh-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;pointer-events:auto}
+.dh-gauge{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));min-width:180px;padding:12px 16px;border-radius:10px;border:1px solid var(--line);
+  background:var(--hud);box-shadow:var(--shadow)}
+.dh-gauge b{display:block;font:700 56px/.9 var(--f-display);font-variant-numeric:tabular-nums}
+.dh-gauge .u{font:600 13px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.dh-rpm{height:6px;margin:10px 0 7px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+.dh-rpm i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent) 0 70%,#d0141e 90%)}
+#dGear{font:500 12px/1 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.dh-help{position:absolute;left:16px;bottom:16px;max-width:400px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+  background:var(--hud);box-shadow:var(--shadow);font-size:12.5px;line-height:1.7;color:var(--muted)}
+.dh-touch{display:none}
+.touch-only{display:none;margin:0}
+@media (pointer:coarse){
+  .dh-help,.keys{display:none}
+  .touch-only{display:block}
+  .dh-touch{position:absolute;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;pointer-events:none}
+  .dh-touch div{display:flex;gap:12px;pointer-events:auto}
+  .dh-touch button{width:70px;height:70px;border-radius:50%;border:1px solid var(--line);background:var(--hud);
+    box-shadow:var(--shadow);font-size:24px;touch-action:none;user-select:none;-webkit-user-select:none}
+  .dh-touch button:active{background:var(--accent);color:var(--accent-ink)}
+  .dh-gauge{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:560px){
+  .menu{justify-content:flex-end;gap:16px;background:linear-gradient(0deg,rgba(6,9,12,.9) 0,rgba(6,9,12,.6) 55%,rgba(6,9,12,.1) 100%)}
+  .m-acts .tbtn{padding:11px 14px;font-size:16px}
+  #mPlay{flex:1;font-size:20px}
+  .credit{position:static;align-self:flex-start}
+  #minimap{width:118px;height:118px}
+  .dh-street{font-size:14px;max-width:150px;padding:5px 8px}
+  .dh-btns .tbtn span{display:none}
+  .dh-btns .tbtn{padding:7px 9px;font-size:12.5px}
+  .dh-gauge{min-width:0;padding:10px 12px}
+  .dh-gauge b{font-size:40px}
+}
+@media (prefers-reduced-motion:reduce){.m-bar i{transition:none}}
+</style>
+</head>
+<body>
+<main class="view" id="view">
+  <canvas id="c" aria-label="Kalisz w 3D"></canvas>
+
+  <section class="menu busy" id="mMenu" aria-labelledby="logo">
+    <h1 class="logo" id="logo"><b>GTA</b><span>KALISZ</span></h1>
+    <div class="car-line"><b>Audi A4 B7</b> · 1.9 TDI · PKA 02209</div>
+    <div class="m-load" aria-live="polite">
+      <div class="m-bar"><i id="mBar"></i></div>
+      <span id="mStatus">Wczytywanie Kalisza…</span>
+    </div>
+    <div class="m-acts">
+      <button class="tbtn primary" id="mPlay" disabled>Graj</button>
+      <button class="tbtn" id="mRetry" hidden>Spróbuj ponownie</button>
+      <button class="tbtn" id="mReload" hidden>Odśwież stronę</button>
+      <button class="tbtn" id="mNight" aria-pressed="false" hidden></button>
+    </div>
+    <div class="keys">
+      <b>Sterowanie:</b> <kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> <kbd>←</kbd> <kbd>→</kbd> skręt ·
+      <kbd>Spacja</kbd> ręczny · <kbd>C</kbd> kamera · <kbd>R</kbd> powrót na start · <kbd>N</kbd> dzień i noc · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> pauza
+    </div>
+    <p class="keys touch-only">Na ekranie dotykowym sterujesz przyciskami w rogach ekranu.</p>
+    <small class="credit">Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">współtwórcy OpenStreetMap</a> · budynki i zabytki odtworzone w przybliżeniu</small>
+  </section>
+
+  <section class="pause" id="pMenu" hidden aria-labelledby="pTitle">
+    <div class="p-box">
+      <h2 id="pTitle">PAUZA</h2>
+      <p class="p-note" id="pNote" role="status" hidden></p>
+      <div class="p-acts">
+        <button class="tbtn primary" id="pResume">Wznów</button>
+        <button class="tbtn" id="pRestart">Wróć na start</button>
+        <div class="row"><button class="tbtn" id="pSound" aria-pressed="false">Dźwięk</button><button class="tbtn" id="pNight" aria-pressed="false"></button></div>
+      </div>
+      <div class="keys"><kbd>Esc</kbd> wznów · <kbd>R</kbd> start · <kbd>N</kbd> dzień i noc</div>
+    </div>
+  </section>
+
+  <div class="drive-hud" id="driveHud" hidden>
+    <div class="dh-top">
+      <div class="dh-map">
+        <canvas id="minimap" width="340" height="340" aria-label="Mapa Kalisza"></canvas>
+        <div class="dh-street" id="dStreet" aria-live="polite">Kalisz</div>
+        <small class="dh-osm">Mapa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></small>
+      </div>
+      <div class="dh-btns">
+        <button class="tbtn" id="dCam">Kamera: za autem</button>
+        <button class="tbtn" id="dSound" aria-pressed="false">Dźwięk: wył.</button>
+        <button class="tbtn" id="dNight" aria-pressed="false"></button>
+        <button class="tbtn primary" id="dPause">Pauza</button>
+      </div>
+    </div>
+    <div class="dh-help"><kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt<br><kbd>Spacja</kbd> ręczny · <kbd>C</kbd> kamera · <kbd>R</kbd> start · <kbd>N</kbd> noc · <kbd>Esc</kbd> pauza</div>
+    <div class="dh-gauge"><b id="dSpeed">0</b><span class="u">km/h</span><div class="dh-rpm"><i id="dRpm"></i></div><span id="dGear">1 · 850 obr/min</span></div>
+    <div class="dh-touch">
+      <div><button data-k="tleft" aria-label="W lewo">◀</button><button data-k="tright" aria-label="W prawo">▶</button></div>
+      <div><button data-k="tbrake" aria-label="Hamulec">▼</button><button data-k="tgas" aria-label="Gaz">▲</button></div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

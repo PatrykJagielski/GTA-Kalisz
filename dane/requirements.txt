@@ -1,0 +1,2 @@
+# dane/build.py (set_precision wymaga Shapely 2)
+shapely>=2.0,<3

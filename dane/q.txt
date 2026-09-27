@@ -1,0 +1,21 @@
+[out:json][timeout:120];
+(
+  way["highway"](51.7480,18.0660,51.7750,18.1120);
+  way["building"](51.7480,18.0660,51.7750,18.1120);
+  relation["building"](51.7480,18.0660,51.7750,18.1120);
+  way["building:part"](51.7480,18.0660,51.7750,18.1120);
+  way["natural"="water"](51.7480,18.0660,51.7750,18.1120);
+  relation["natural"="water"](51.7480,18.0660,51.7750,18.1120);
+  way["waterway"](51.7480,18.0660,51.7750,18.1120);
+  way["leisure"~"park|garden|pitch|playground"](51.7480,18.0660,51.7750,18.1120);
+  relation["leisure"="park"](51.7480,18.0660,51.7750,18.1120);
+  way["landuse"~"grass|forest|meadow|cemetery|recreation_ground|village_green|allotments"](51.7480,18.0660,51.7750,18.1120);
+  relation["landuse"~"grass|forest|cemetery"](51.7480,18.0660,51.7750,18.1120);
+  way["natural"~"wood|scrub|grassland"](51.7480,18.0660,51.7750,18.1120);
+  way["amenity"="parking"](51.7480,18.0660,51.7750,18.1120);
+  way["railway"="rail"](51.7480,18.0660,51.7750,18.1120);
+  node["natural"="tree"](51.7480,18.0660,51.7750,18.1120);
+);
+out body;
+>;
+out skel qt;

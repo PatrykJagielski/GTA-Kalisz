@@ -1,0 +1,2609 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-07-28T02:16:18Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 1778197390,
+  "lat": 51.7648468,
+  "lon": 18.0927093,
+  "tags": {
+    "artist_name": "Jerzy Jarnuszkiewicz",
+    "historic": "memorial",
+    "material": "sandstone",
+    "memorial": "statue",
+    "name": "Adam Asnyk",
+    "start_date": "1960-07-24"
+  }
+},
+{
+  "type": "node",
+  "id": 1791374542,
+  "lat": 51.7547256,
+  "lon": 18.0884472,
+  "tags": {
+    "artist_name": "Stanisław Horno-Popławski",
+    "historic": "memorial",
+    "material": "bronze",
+    "memorial": "statue",
+    "name": "Pomnik Marii Konopnickiej",
+    "start_date": "1969-10",
+    "subject:wikidata": "Q257852"
+  }
+},
+{
+  "type": "node",
+  "id": 1792091459,
+  "lat": 51.7587234,
+  "lon": 18.0942631,
+  "tags": {
+    "amenity": "fountain",
+    "name": "Fontanna na Prośnie"
+  }
+},
+{
+  "type": "node",
+  "id": 1792502470,
+  "lat": 51.7563520,
+  "lon": 18.0962973,
+  "tags": {
+    "historic": "memorial",
+    "name": "Kotwica",
+    "tourism": "attraction"
+  }
+},
+{
+  "type": "node",
+  "id": 1794677992,
+  "lat": 51.7568364,
+  "lon": 18.0954877,
+  "tags": {
+    "historic": "memorial"
+  }
+},
+{
+  "type": "node",
+  "id": 1794678009,
+  "lat": 51.7575079,
+  "lon": 18.0947720,
+  "tags": {
+    "historic": "memorial"
+  }
+},
+{
+  "type": "node",
+  "id": 1794678019,
+  "lat": 51.7570789,
+  "lon": 18.0949343,
+  "tags": {
+    "historic": "memorial",
+    "name": "Obelisk"
+  }
+},
+{
+  "type": "node",
+  "id": 1798205262,
+  "lat": 51.7648414,
+  "lon": 18.0883172,
+  "tags": {
+    "artist_name": "Jerzy Sobociński",
+    "historic": "memorial",
+    "inscription": "Tu, w zasypanym korycie rzeki Prosny hitlerowcy zniszczyli dziesiątki tysięcy książek ze zbiorów kaliskich bibliotek publicznych.",
+    "name": "Pomnik Książki",
+    "start_date": "1978-05-11",
+    "wikidata": "Q11823309",
+    "wikipedia": "pl:Pomnik Książki w Kaliszu"
+  }
+},
+{
+  "type": "node",
+  "id": 1798662106,
+  "lat": 51.7626831,
+  "lon": 18.0935452,
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "5",
+    "addr:postcode": "62-800",
+    "addr:street": "Plac Świętego Józefa",
+    "amenity": "bank",
+    "name": "Bank Spółdzielczy Ziemi Kaliskiej",
+    "opening_hours": "Mo-Fr 08:45-16:00"
+  }
+},
+{
+  "type": "node",
+  "id": 1803258327,
+  "lat": 51.7656551,
+  "lon": 18.0872854,
+  "tags": {
+    "amenity": "parking",
+    "capacity": "240",
+    "name": "Podziemny",
+    "parking": "underground"
+  }
+},
+{
+  "type": "node",
+  "id": 2036710941,
+  "lat": 51.7501420,
+  "lon": 18.0761845,
+  "tags": {
+    "access": "customers",
+    "amenity": "parking",
+    "name": "Podziemny",
+    "parking": "underground"
+  }
+},
+{
+  "type": "node",
+  "id": 2036710968,
+  "lat": 51.7504476,
+  "lon": 18.0768712,
+  "tags": {
+    "amenity": "parking",
+    "name": "Podziemny",
+    "parking": "underground"
+  }
+},
+{
+  "type": "node",
+  "id": 2273023079,
+  "lat": 51.7495431,
+  "lon": 18.0661941,
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "53a",
+    "addr:postcode": "62-800",
+    "addr:street": "Aleja Wojska Polskiego",
+    "name": "Centrum Odzieży Używanej \"Reforma\"",
+    "note": "Previous business moved to Polna 14.",
+    "shop": "clothes"
+  }
+},
+{
+  "type": "node",
+  "id": 2466745275,
+  "lat": 51.7565484,
+  "lon": 18.0983236,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "statue",
+    "name": "Posąg Flory"
+  }
+},
+{
+  "type": "node",
+  "id": 2689902966,
+  "lat": 51.7538430,
+  "lon": 18.0898561,
+  "tags": {
+    "artist_name": "Robert Sobociński",
+    "artwork_type": "sculpture",
+    "name": "Turbulencja",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 2689902979,
+  "lat": 51.7515359,
+  "lon": 18.0946062,
+  "tags": {
+    "artist_name": "Robert Sobociński",
+    "artwork_type": "sculpture",
+    "name": "Kosmogonia Ptolemeusza",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 2709436178,
+  "lat": 51.7661923,
+  "lon": 18.0938551,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "obelisk",
+    "name": "Obelisk-kolumna",
+    "start_date": "1813"
+  }
+},
+{
+  "type": "node",
+  "id": 2709436185,
+  "lat": 51.7662422,
+  "lon": 18.0938970,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "Ofiarom terroru na nieludzkiej ziemi Sybiracy",
+    "memorial": "stone",
+    "name": "Pomnik Sybiraków",
+    "start_date": "1993-09-17"
+  }
+},
+{
+  "type": "node",
+  "id": 2709436192,
+  "lat": 51.7663529,
+  "lon": 18.0938245,
+  "tags": {
+    "artist_name": "Wiesław Andrzej Oźmina",
+    "historic": "memorial",
+    "name": "Pomnik ofiar Katynia",
+    "start_date": "1993",
+    "subject:wikidata": "Q134301"
+  }
+},
+{
+  "type": "node",
+  "id": 2709436197,
+  "lat": 51.7663213,
+  "lon": 18.0939561,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "W hołdzie żołnierzom Armii Krajowej",
+    "name": "Pomnik żołnierzy Armii Krajowej"
+  }
+},
+{
+  "type": "node",
+  "id": 2761969137,
+  "lat": 51.7604634,
+  "lon": 18.0828423,
+  "tags": {
+    "artist_name": "Wiesław Andrzej Oźmina",
+    "historic": "memorial",
+    "memorial": "bust",
+    "name": "Popiersie Mikołaja Kopernika",
+    "start_date": "1973-02-19",
+    "subject:wikidata": "Q619"
+  }
+},
+{
+  "type": "node",
+  "id": 2761969147,
+  "lat": 51.7582613,
+  "lon": 18.0837889,
+  "tags": {
+    "artist_name": "Wiesław Andrzej Oźmina",
+    "historic": "memorial",
+    "inscription": "Pamięci dzieci poddawanych przymusowej germanizacji w hitlerowskim obozie, który mieścił się w obiektach klasztoru w latach 1941-45",
+    "name": "Pomnik dzieci wynaradawianych",
+    "start_date": "1979"
+  }
+},
+{
+  "type": "node",
+  "id": 2761969153,
+  "lat": 51.7583738,
+  "lon": 18.0838896,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "W hołdzie Polakom pomordowanym, więzionym, wysiedlonym, zmuszonym do niewolniczej pracy",
+    "start_date": "1995-09"
+  }
+},
+{
+  "type": "node",
+  "id": 2761969640,
+  "lat": 51.7609552,
+  "lon": 18.0818788,
+  "tags": {
+    "historic": "memorial"
+  }
+},
+{
+  "type": "node",
+  "id": 2793147911,
+  "lat": 51.7575020,
+  "lon": 18.0977979,
+  "tags": {
+    "amenity": "fountain"
+  }
+},
+{
+  "type": "node",
+  "id": 3409165909,
+  "lat": 51.7604113,
+  "lon": 18.0829523,
+  "tags": {
+    "artist_name": "Wiesław Andrzej Oźmina",
+    "historic": "memorial",
+    "memorial": "bust",
+    "name": "Popiersie Anny Jagiellonki",
+    "start_date": "2014-06-21"
+  }
+},
+{
+  "type": "node",
+  "id": 3409165910,
+  "lat": 51.7584174,
+  "lon": 18.0839373,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "Bohaterom Powstania Wielkopolskiego 1918-1919 poległym za wolność i niepodległość Rzeczypospolitej Polskiej ku wiecznej pamięci i chwale",
+    "memorial": "plaque",
+    "start_date": "1958-12-27"
+  }
+},
+{
+  "type": "node",
+  "id": 3430696769,
+  "lat": 51.7632275,
+  "lon": 18.0944450,
+  "tags": {
+    "artist_name": "Marian Banasiewicz",
+    "artwork_type": "sculpture",
+    "name": "Muzykanci",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 3430696771,
+  "lat": 51.7593818,
+  "lon": 18.0960834,
+  "tags": {
+    "artist_name": "Benedykt Kasznia",
+    "artwork_type": "sculpture",
+    "name": "Spoczywająca",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 3430696772,
+  "lat": 51.7608476,
+  "lon": 18.0922393,
+  "tags": {
+    "artist_name": "August Dyrda",
+    "artwork_type": "sculpture",
+    "name": "Tańczące Eurydyki greckie",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 3431898595,
+  "lat": 51.7642328,
+  "lon": 18.0897850,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "stone"
+  }
+},
+{
+  "type": "node",
+  "id": 3545436731,
+  "lat": 51.7722231,
+  "lon": 18.0858301,
+  "tags": {
+    "historic": "memorial",
+    "name": "Pomnik Pro Partia",
+    "start_date": "1918-08"
+  }
+},
+{
+  "type": "node",
+  "id": 3545436732,
+  "lat": 51.7723716,
+  "lon": 18.0850516,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "Pamięci 327 ofiar hitlerowskich okupantów z lat 1939-1945; Zwłoki pomordowanych zostały ekshumowane z miejsca straceń na teren mauzoleum przy ul. Widok a następnie w roku 1970 przeniesione na Cmentarz Żołnierski Majków.",
+    "name": "Pomnik ofiar hitlerowców",
+    "start_date": "1962-09-01"
+  }
+},
+{
+  "type": "node",
+  "id": 3545436733,
+  "lat": 51.7719123,
+  "lon": 18.0857973,
+  "tags": {
+    "historic": "memorial",
+    "name": "Pomnik tysiąclecia chrztu Rusi",
+    "start_date": "1988"
+  }
+},
+{
+  "type": "node",
+  "id": 3625717170,
+  "lat": 51.7502195,
+  "lon": 18.0939533,
+  "tags": {
+    "historic": "memorial"
+  }
+},
+{
+  "type": "node",
+  "id": 3812937175,
+  "lat": 51.7563954,
+  "lon": 18.0903296,
+  "tags": {
+    "artist_name": "Marian Banasiewicz",
+    "artwork_type": "sculpture",
+    "name": "Kształt",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 3812937177,
+  "lat": 51.7555577,
+  "lon": 18.0808474,
+  "tags": {
+    "artist_name": "Monika Żółtek",
+    "artwork_type": "sculpture",
+    "name": "Monitor",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 3812937201,
+  "lat": 51.7509411,
+  "lon": 18.0796582,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "Bóg, Honor, Ojczyzna. Skwer Inwalidów Wojennych",
+    "memorial": "plaque",
+    "start_date": "2008-09"
+  }
+},
+{
+  "type": "node",
+  "id": 4363571573,
+  "lat": 51.7624243,
+  "lon": 18.0809656,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "bust",
+    "name": "Popiersie Tadeusza Kościuszki",
+    "start_date": "2008-03",
+    "subject:wikidata": "Q191479"
+  }
+},
+{
+  "type": "node",
+  "id": 4935867391,
+  "lat": 51.7570981,
+  "lon": 18.0857440,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "bust",
+    "name": "Popiersie Stanisława Wojciechowskiego",
+    "start_date": "2009-10"
+  }
+},
+{
+  "type": "node",
+  "id": 4935867392,
+  "lat": 51.7522528,
+  "lon": 18.0930230,
+  "tags": {
+    "artist_name": "Wiesław Andrzej Oźmina",
+    "historic": "memorial",
+    "inscription": "Pamięci poległym w walce z żywiołem",
+    "name": "Pomnik strażaka",
+    "start_date": "1985-05-19"
+  }
+},
+{
+  "type": "node",
+  "id": 8827210431,
+  "lat": 51.7602301,
+  "lon": 18.0893343,
+  "tags": {
+    "artist_name": "Michał Pronobis",
+    "historic": "memorial",
+    "material": "bronze",
+    "memorial": "statue",
+    "name": "Pomnik Józefa Piłsudskiego",
+    "start_date": "2018-12-05"
+  }
+},
+{
+  "type": "node",
+  "id": 10966312032,
+  "lat": 51.7553058,
+  "lon": 18.0767455,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "Sybirakom kaliszanie",
+    "memorial": "stone",
+    "start_date": "2006-06"
+  }
+},
+{
+  "type": "node",
+  "id": 10966320093,
+  "lat": 51.7609045,
+  "lon": 18.0870795,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "bench",
+    "name": "Ławka Stefana Szolca-Rogozińskiego",
+    "start_date": "2017-10-30"
+  }
+},
+{
+  "type": "node",
+  "id": 12112541092,
+  "lat": 51.7661084,
+  "lon": 18.0945441,
+  "tags": {
+    "artwork_type": "mural",
+    "name": "Kalisz - miasto ze wszystkich w Polsce najstarsze",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12239493578,
+  "lat": 51.7632343,
+  "lon": 18.0936342,
+  "tags": {
+    "artwork_type": "statue",
+    "name": "Św. Józef",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12292251173,
+  "lat": 51.7592673,
+  "lon": 18.0939037,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "3",
+    "start_date": "2024-07",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12292251174,
+  "lat": 51.7627543,
+  "lon": 18.0895182,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "8",
+    "start_date": "2024-07",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12292251175,
+  "lat": 51.7631538,
+  "lon": 18.0916871,
+  "tags": {
+    "artist_name": "Damian Kwiatkowski",
+    "artwork_type": "mural",
+    "description": "Mural powstał na potrzeby filmu dokumentalnego \"Matka 24h\"",
+    "name": "Matka 24h",
+    "start_date": "2012",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12292251180,
+  "lat": 51.7649293,
+  "lon": 18.0928572,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "2",
+    "start_date": "2024-07",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12292351816,
+  "lat": 51.7626628,
+  "lon": 18.0888956,
+  "tags": {
+    "artist_name": "Wiesław Andrzej Ozimina",
+    "artwork_type": "relief",
+    "description": "Adam Asnyk, Maria Konopnicka, Stefan Szolc-Rogoziński, Maria Dąbrowska",
+    "inscription": "Sławią nasz gród",
+    "name": "Medaliony",
+    "start_date": "1978",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12292352122,
+  "lat": 51.7624256,
+  "lon": 18.0894589,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "1",
+    "start_date": "2024-07",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12292399525,
+  "lat": 51.7626958,
+  "lon": 18.0895377,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "plaque",
+    "name": "Tablica ofiar I i II wojny światowej"
+  }
+},
+{
+  "type": "node",
+  "id": 12292399526,
+  "lat": 51.7631553,
+  "lon": 18.0917771,
+  "tags": {
+    "description": "Miejsce rozstrzelania ks. Romana Pawłowskiego przez hitlerowców 18.10.1939",
+    "historic": "memorial",
+    "memorial": "plaque",
+    "name": "Ks. Roman Pawłowski",
+    "start_date": "1959"
+  }
+},
+{
+  "type": "node",
+  "id": 12305500462,
+  "lat": 51.7622220,
+  "lon": 18.0960495,
+  "tags": {
+    "artwork_type": "sculpture",
+    "name": "Żaba",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12305500464,
+  "lat": 51.7637361,
+  "lon": 18.0937322,
+  "tags": {
+    "artist_name": "Jolanta Wdowczyk",
+    "artwork_type": "sculpture",
+    "name": "Milcząca żaba",
+    "start_date": "2018-10",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12305500465,
+  "lat": 51.7638794,
+  "lon": 18.0936578,
+  "tags": {
+    "artist_name": "Jolanta Wdowczyk",
+    "artwork_type": "sculpture",
+    "name": "Marcinek",
+    "start_date": "2018-10",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12305500466,
+  "lat": 51.7636873,
+  "lon": 18.0935804,
+  "tags": {
+    "artist_name": "Damian Kwiatkowski",
+    "artwork_type": "mural",
+    "name": "Kalisz Piastowski",
+    "start_date": "2018-10",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12307264369,
+  "lat": 51.7630992,
+  "lon": 18.0881852,
+  "tags": {
+    "artist_name": "Michał Mąka",
+    "artwork_type": "mural",
+    "name": "Geometria dźwięku",
+    "start_date": "2017-09",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12307835692,
+  "lat": 51.7626574,
+  "lon": 18.0908098,
+  "tags": {
+    "artwork_type": "mosaic",
+    "name": "Herb Kalisza",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12307857042,
+  "lat": 51.7631249,
+  "lon": 18.0900278,
+  "tags": {
+    "historic": "memorial",
+    "material": "stone",
+    "memorial": "plaque",
+    "name": "Fryderyk Chopin",
+    "start_date": "2010-09-05"
+  }
+},
+{
+  "type": "node",
+  "id": 12307857052,
+  "lat": 51.7631158,
+  "lon": 18.0878805,
+  "tags": {
+    "artwork_type": "sculpture",
+    "name": "Aniołek",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12307857053,
+  "lat": 51.7634880,
+  "lon": 18.0887322,
+  "tags": {
+    "artist_name": "Jarosław Romaniuk",
+    "artwork_type": "statue",
+    "name": "Shirley Temple",
+    "start_date": "2018-11",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12327578131,
+  "lat": 51.7611425,
+  "lon": 18.0895569,
+  "tags": {
+    "amenity": "fountain"
+  }
+},
+{
+  "type": "node",
+  "id": 12327578137,
+  "lat": 51.7611757,
+  "lon": 18.0895040,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "statue",
+    "name": "Matka Boża"
+  }
+},
+{
+  "type": "node",
+  "id": 12327578203,
+  "lat": 51.7610266,
+  "lon": 18.0888107,
+  "tags": {
+    "historic": "memorial",
+    "memorial": "plaque",
+    "name": "Tablica ofiar zbrodni w Katyniu i katastrofy w Smoleńsku",
+    "start_date": "2014-04-10"
+  }
+},
+{
+  "type": "node",
+  "id": 12329287249,
+  "lat": 51.7628016,
+  "lon": 18.0867729,
+  "tags": {
+    "historic": "memorial",
+    "name": "Miejsce Wielkiej Synagogi"
+  }
+},
+{
+  "type": "node",
+  "id": 12329502524,
+  "lat": 51.7659923,
+  "lon": 18.0933364,
+  "tags": {
+    "artist_name": "Niki Szpera",
+    "artwork_type": "mural",
+    "start_date": "2023-09",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12329502527,
+  "lat": 51.7641026,
+  "lon": 18.0876304,
+  "tags": {
+    "artist_name": "Niki Szpera",
+    "artwork_type": "mural",
+    "description": "Projekt \"Street art - mural - miejski ogród\"",
+    "start_date": "2022-06-10",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12377175750,
+  "lat": 51.7654697,
+  "lon": 18.0917320,
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "1a",
+    "addr:postcode": "62-800",
+    "addr:street": "Babina",
+    "email": "biuro@fundacjadziewieciubraci.pl",
+    "image": "https://www.fundacjadziewieciubraci.pl/wp-content/uploads/2020/11/cropped-Bez_nazwy.png.240x240_q80.jpg",
+    "internet_access": "wlan",
+    "internet_access:ssid": "Fundacja Dziewieciu Braci",
+    "name": "Fundacja Dziewięciu Braci",
+    "office": "foundation",
+    "opening_hours": "Mo-Fr 08:00-17:00",
+    "phone": "+48511116299",
+    "start_date": "2020-12-12",
+    "website": "https://fundacjadziewieciubraci.pl/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 12377175772,
+  "lat": 51.7637401,
+  "lon": 18.0909325,
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "14",
+    "addr:postcode": "62-800",
+    "addr:street": "Zamkowa",
+    "name": "Ukrainoczka",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "node",
+  "id": 12392528695,
+  "lat": 51.7613530,
+  "lon": 18.0875181,
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "16",
+    "addr:postcode": "62-800",
+    "addr:street": "Śródmiejska",
+    "name": "Fundacja \"Ocalmy dziedzictwo narodowe\"",
+    "office": "foundation"
+  }
+},
+{
+  "type": "node",
+  "id": 12394742772,
+  "lat": 51.7600110,
+  "lon": 18.0894136,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "Przywrócić godność prawu!"
+  }
+},
+{
+  "type": "node",
+  "id": 12405386793,
+  "lat": 51.7612294,
+  "lon": 18.0943701,
+  "tags": {
+    "artist_name": "Paweł Althamer, Artur Żmijewski",
+    "artwork_type": "sculpture",
+    "name": "Gaja",
+    "start_date": "2023-09-16",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12441312984,
+  "lat": 51.7607012,
+  "lon": 18.0816423,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "7",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 12461589036,
+  "lat": 51.7630319,
+  "lon": 18.0938936,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "Dąb piramidalny\nquercus robur -fastigiata-\n*\nPosadzony\ndla upamiętnienia\npobytu w tym miejscu\nojca świętego\nJana Pawła II\npapieża Polaka\n\nw dniu 4 czerwca\n1997 roku",
+    "memorial": "plaque"
+  }
+},
+{
+  "type": "node",
+  "id": 12461589037,
+  "lat": 51.7630473,
+  "lon": 18.0938140,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "\"Człowieka bowiem nie można\ndo końca zrozumieć bez Chrystusa\n\n\"Ten stary dąb tak urósł\na wiatr go żaden nie obalił\nbo korzeń jego jest Chrystus\n\nJoannes Paulus II\n\nWarszawa 2 06 1979",
+    "memorial": "plaque"
+  }
+},
+{
+  "type": "node",
+  "id": 12731921317,
+  "lat": 51.7612754,
+  "lon": 18.0932997,
+  "tags": {
+    "artist_name": "Krzysztof Bednarski",
+    "artwork_type": "sculpture",
+    "name": "Piano-Forte",
+    "start_date": "2023-11-23",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13197012852,
+  "lat": 51.7567639,
+  "lon": 18.1023656,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "4",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13197453995,
+  "lat": 51.7542607,
+  "lon": 18.0799464,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "6",
+    "start_date": "2025-06",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13197453996,
+  "lat": 51.7492739,
+  "lon": 18.0862471,
+  "tags": {
+    "artist_name": "Gabriela Michalak",
+    "artwork_type": "sculpture",
+    "material": "bronze",
+    "name": "Wiewiórka",
+    "ref": "5",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13275202903,
+  "lat": 51.7663133,
+  "lon": 18.0870264,
+  "tags": {
+    "historic": "memorial",
+    "inscription": "W tym miejscu w latach 1939 - 1942 niemiecki okupant urządził obóz przejściowy dla żołnierzy polskich a następnie ludności cywilnej\n\nWywieziono stąd ponad 20.000 ludzi do obozów śmierci",
+    "memorial": "plaque"
+  }
+},
+{
+  "type": "node",
+  "id": 13414326401,
+  "lat": 51.7636447,
+  "lon": 18.0941431,
+  "tags": {
+    "artwork_subject": "7 smutków i radości św. Józefa",
+    "artwork_type": "stained_glass",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13414326402,
+  "lat": 51.7635504,
+  "lon": 18.0938482,
+  "tags": {
+    "artwork_subject": "7 smutków i radości św. Józefa",
+    "artwork_type": "stained_glass",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13414326403,
+  "lat": 51.7636435,
+  "lon": 18.0943979,
+  "tags": {
+    "artwork_subject": "7 smutków i radości św. Józefa",
+    "artwork_type": "stained_glass",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13414326404,
+  "lat": 51.7634589,
+  "lon": 18.0945472,
+  "tags": {
+    "artwork_subject": "7 smutków i radości św. Józefa",
+    "artwork_type": "stained_glass",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13414326405,
+  "lat": 51.7632953,
+  "lon": 18.0943343,
+  "tags": {
+    "artwork_subject": "7 smutków i radości św. Józefa",
+    "artwork_type": "stained_glass",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13414326406,
+  "lat": 51.7631970,
+  "lon": 18.0940387,
+  "tags": {
+    "artwork_subject": "7 smutków i radości św. Józefa",
+    "artwork_type": "stained_glass",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13414326407,
+  "lat": 51.7631915,
+  "lon": 18.0937016,
+  "tags": {
+    "artwork_subject": "7 smutków i radości św. Józefa",
+    "artwork_type": "stained_glass",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "node",
+  "id": 13670179511,
+  "lat": 51.7657356,
+  "lon": 18.0864454,
+  "tags": {
+    "amenity": "fountain"
+  }
+},
+{
+  "type": "way",
+  "id": 167622024,
+  "bounds": {
+    "minlat": 51.7512399,
+    "minlon": 18.0849090,
+    "maxlat": 51.7518290,
+    "maxlon": 18.0862634
+  },
+  "nodes": [
+    1790032427,
+    3976732977,
+    3976732976,
+    3976732969,
+    3976732970,
+    3976732963,
+    3976732960,
+    3976732954,
+    3976732955,
+    3976732948,
+    3976732944,
+    3976732930,
+    3976732934,
+    3976732926,
+    3976732923,
+    1790032389,
+    1790032384,
+    3976732900,
+    3976732896,
+    3976732889,
+    3976732891,
+    3976732884,
+    3976732882,
+    3976732873,
+    3976732875,
+    3976732871,
+    3976732867,
+    3976732862,
+    3976732864,
+    3976732860,
+    3976732858,
+    3976732849,
+    3976732851,
+    3976732844,
+    3976732842,
+    3976732838,
+    3976732839,
+    3976732835,
+    3976732833,
+    1790032342,
+    3976732848,
+    3976732847,
+    1790032378,
+    1790032341,
+    3976732841,
+    3976732837,
+    1790032359,
+    3976732856,
+    3976732859,
+    3976732865,
+    3976732863,
+    3976732866,
+    3976732869,
+    3976732878,
+    3976732876,
+    3976732881,
+    3976732883,
+    3976732893,
+    3976732890,
+    3976732897,
+    3976732901,
+    3976732906,
+    3976732905,
+    3976732909,
+    3976732910,
+    3976732917,
+    3976732912,
+    3976732921,
+    3976732922,
+    1790032390,
+    1790032386,
+    3976732920,
+    3976732918,
+    3976732924,
+    3976732927,
+    3976732937,
+    3976732935,
+    3976732945,
+    3976732950,
+    3976732957,
+    3976732956,
+    3976732961,
+    3976732964,
+    3976732973,
+    3976732971,
+    1790032421,
+    1790032414,
+    1790032382,
+    1790032370,
+    1790032388,
+    1790032408,
+    1790032429,
+    1790032427
+  ],
+  "geometry": [
+    { "lat": 51.7517495, "lon": 18.0849090 },
+    { "lat": 51.7517267, "lon": 18.0849337 },
+    { "lat": 51.7517208, "lon": 18.0849193 },
+    { "lat": 51.7516944, "lon": 18.0849479 },
+    { "lat": 51.7517004, "lon": 18.0849621 },
+    { "lat": 51.7516819, "lon": 18.0849821 },
+    { "lat": 51.7516757, "lon": 18.0849673 },
+    { "lat": 51.7516496, "lon": 18.0849956 },
+    { "lat": 51.7516556, "lon": 18.0850101 },
+    { "lat": 51.7516370, "lon": 18.0850303 },
+    { "lat": 51.7516307, "lon": 18.0850151 },
+    { "lat": 51.7516040, "lon": 18.0850441 },
+    { "lat": 51.7516099, "lon": 18.0850581 },
+    { "lat": 51.7515911, "lon": 18.0850785 },
+    { "lat": 51.7515850, "lon": 18.0850638 },
+    { "lat": 51.7515636, "lon": 18.0850870 },
+    { "lat": 51.7515179, "lon": 18.0849771 },
+    { "lat": 51.7514892, "lon": 18.0850083 },
+    { "lat": 51.7514832, "lon": 18.0849939 },
+    { "lat": 51.7514638, "lon": 18.0850150 },
+    { "lat": 51.7514697, "lon": 18.0850293 },
+    { "lat": 51.7514494, "lon": 18.0850513 },
+    { "lat": 51.7514434, "lon": 18.0850369 },
+    { "lat": 51.7514104, "lon": 18.0850728 },
+    { "lat": 51.7514163, "lon": 18.0850870 },
+    { "lat": 51.7514046, "lon": 18.0850998 },
+    { "lat": 51.7513986, "lon": 18.0850855 },
+    { "lat": 51.7513730, "lon": 18.0851133 },
+    { "lat": 51.7513790, "lon": 18.0851277 },
+    { "lat": 51.7513606, "lon": 18.0851476 },
+    { "lat": 51.7513545, "lon": 18.0851332 },
+    { "lat": 51.7513288, "lon": 18.0851612 },
+    { "lat": 51.7513346, "lon": 18.0851752 },
+    { "lat": 51.7513157, "lon": 18.0851957 },
+    { "lat": 51.7513099, "lon": 18.0851816 },
+    { "lat": 51.7512849, "lon": 18.0852087 },
+    { "lat": 51.7512907, "lon": 18.0852227 },
+    { "lat": 51.7512714, "lon": 18.0852436 },
+    { "lat": 51.7512656, "lon": 18.0852296 },
+    { "lat": 51.7512399, "lon": 18.0852575 },
+    { "lat": 51.7513244, "lon": 18.0854608 },
+    { "lat": 51.7513194, "lon": 18.0854662 },
+    { "lat": 51.7514642, "lon": 18.0858143 },
+    { "lat": 51.7512635, "lon": 18.0860321 },
+    { "lat": 51.7513053, "lon": 18.0861325 },
+    { "lat": 51.7512835, "lon": 18.0861562 },
+    { "lat": 51.7513280, "lon": 18.0862634 },
+    { "lat": 51.7513505, "lon": 18.0862391 },
+    { "lat": 51.7513565, "lon": 18.0862535 },
+    { "lat": 51.7513817, "lon": 18.0862261 },
+    { "lat": 51.7513754, "lon": 18.0862110 },
+    { "lat": 51.7513946, "lon": 18.0861902 },
+    { "lat": 51.7514008, "lon": 18.0862051 },
+    { "lat": 51.7514265, "lon": 18.0861771 },
+    { "lat": 51.7514203, "lon": 18.0861622 },
+    { "lat": 51.7514390, "lon": 18.0861419 },
+    { "lat": 51.7514451, "lon": 18.0861567 },
+    { "lat": 51.7514712, "lon": 18.0861283 },
+    { "lat": 51.7514651, "lon": 18.0861137 },
+    { "lat": 51.7514835, "lon": 18.0860938 },
+    { "lat": 51.7514895, "lon": 18.0861081 },
+    { "lat": 51.7515160, "lon": 18.0860794 },
+    { "lat": 51.7515099, "lon": 18.0860648 },
+    { "lat": 51.7515284, "lon": 18.0860446 },
+    { "lat": 51.7515345, "lon": 18.0860591 },
+    { "lat": 51.7515606, "lon": 18.0860306 },
+    { "lat": 51.7515545, "lon": 18.0860159 },
+    { "lat": 51.7515756, "lon": 18.0859929 },
+    { "lat": 51.7515817, "lon": 18.0860075 },
+    { "lat": 51.7516075, "lon": 18.0859794 },
+    { "lat": 51.7515511, "lon": 18.0858438 },
+    { "lat": 51.7515745, "lon": 18.0858184 },
+    { "lat": 51.7515682, "lon": 18.0858033 },
+    { "lat": 51.7515851, "lon": 18.0857849 },
+    { "lat": 51.7515914, "lon": 18.0857998 },
+    { "lat": 51.7516191, "lon": 18.0857697 },
+    { "lat": 51.7516128, "lon": 18.0857545 },
+    { "lat": 51.7516312, "lon": 18.0857345 },
+    { "lat": 51.7516375, "lon": 18.0857495 },
+    { "lat": 51.7516641, "lon": 18.0857207 },
+    { "lat": 51.7516580, "lon": 18.0857061 },
+    { "lat": 51.7516765, "lon": 18.0856861 },
+    { "lat": 51.7516825, "lon": 18.0857004 },
+    { "lat": 51.7517085, "lon": 18.0856722 },
+    { "lat": 51.7517024, "lon": 18.0856576 },
+    { "lat": 51.7517248, "lon": 18.0856334 },
+    { "lat": 51.7516444, "lon": 18.0854402 },
+    { "lat": 51.7515087, "lon": 18.0855875 },
+    { "lat": 51.7514159, "lon": 18.0853645 },
+    { "lat": 51.7515484, "lon": 18.0852207 },
+    { "lat": 51.7516011, "lon": 18.0853476 },
+    { "lat": 51.7518290, "lon": 18.0851003 },
+    { "lat": 51.7517495, "lon": 18.0849090 }
+  ],
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "6",
+    "addr:postcode": "62-800",
+    "addr:street": "Cegielniana",
+    "amenity": "nursing_home",
+    "building": "residential",
+    "building:levels": "4",
+    "capacity": "110",
+    "name": "Dzienny Dom Pomocy Społecznej",
+    "source:addr": "EMUiA (emuia.gugik.gov.pl)"
+  }
+},
+{
+  "type": "way",
+  "id": 167913482,
+  "bounds": {
+    "minlat": 51.7580221,
+    "minlon": 18.0923308,
+    "maxlat": 51.7583396,
+    "maxlon": 18.0926219
+  },
+  "nodes": [
+    1792502637,
+    1792502639,
+    4363571901,
+    1792502629,
+    4363571882,
+    1792502627,
+    4363571884,
+    4363571888,
+    1792502637
+  ],
+  "geometry": [
+    { "lat": 51.7583204, "lon": 18.0923308 },
+    { "lat": 51.7583396, "lon": 18.0925657 },
+    { "lat": 51.7583247, "lon": 18.0925686 },
+    { "lat": 51.7580386, "lon": 18.0926219 },
+    { "lat": 51.7580360, "lon": 18.0925844 },
+    { "lat": 51.7580221, "lon": 18.0923868 },
+    { "lat": 51.7580457, "lon": 18.0923823 },
+    { "lat": 51.7580740, "lon": 18.0923771 },
+    { "lat": 51.7583204, "lon": 18.0923308 }
+  ],
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "3",
+    "addr:postcode": "62-800",
+    "addr:street": "Teatralna",
+    "building": "arts_centre",
+    "building:levels": "4",
+    "name": "Młodzieżowy Dom Kultury im. Władysława Broniewskiego",
+    "ref:rspo": "13032",
+    "website": "http://mdk.kalisz.pl/"
+  }
+},
+{
+  "type": "way",
+  "id": 167913510,
+  "bounds": {
+    "minlat": 51.7558706,
+    "minlon": 18.0933318,
+    "maxlat": 51.7561096,
+    "maxlon": 18.0936318
+  },
+  "nodes": [
+    1792502518,
+    4360614410,
+    13829158539,
+    13829158540,
+    4360614411,
+    1792502509,
+    1792502512,
+    1792502516,
+    1792502518
+  ],
+  "geometry": [
+    { "lat": 51.7560866, "lon": 18.0933318 },
+    { "lat": 51.7559871, "lon": 18.0933560 },
+    { "lat": 51.7559884, "lon": 18.0933680 },
+    { "lat": 51.7559790, "lon": 18.0933708 },
+    { "lat": 51.7559794, "lon": 18.0933776 },
+    { "lat": 51.7558706, "lon": 18.0934012 },
+    { "lat": 51.7558919, "lon": 18.0936318 },
+    { "lat": 51.7561096, "lon": 18.0935788 },
+    { "lat": 51.7560866, "lon": 18.0933318 }
+  ],
+  "tags": {
+    "addr:city": "Kalisz",
+    "addr:housenumber": "17",
+    "addr:postcode": "62-800",
+    "addr:street": "Częstochowska",
+    "building": "commercial",
+    "building:levels": "2",
+    "leisure": "playground",
+    "name": "Centrum Zabaw i Edukacji Dzieci \"Hali Gali\"",
+    "opening_hours": "Mo-Fr 14:00-20:00; Sa-Su 12:00-20:00",
+    "source:addr": "EMUiA (emuia.gugik.gov.pl)",
+    "website": "http://www.haligali.pl/"
+  }
+},
+{
+  "type": "way",
+  "id": 168174700,
+  "bounds": {
+    "minlat": 51.7563291,
+    "minlon": 18.0937184,
+    "maxlat": 51.7580655,
+    "maxlon": 18.0956670
+  },
+  "nodes": [
+    12405624331,
+    12405624333,
+    12405624354,
+    12405624336,
+    12405624335,
+    12405624355,
+    12405624334,
+    12405624357,
+    12405624364,
+    12405624381,
+    12405624365,
+    12405624380,
+    12405624366,
+    12405624367,
+    12405624379,
+    12405624356,
+    12405624337,
+    12405624340,
+    12405624339,
+    12405624338,
+    12405624348,
+    12405624349,
+    12405624346,
+    12405624347,
+    1794678008,
+    1794678005,
+    12405624345,
+    12405624344,
+    12405624343,
+    12405624351,
+    12405624350,
+    5926754611,
+    5926754612,
+    5926754613,
+    1794678018,
+    12405624359,
+    12405624375,
+    12405624360,
+    12405624361,
+    12405624376,
+    12405624363,
+    12405624377,
+    12405624362,
+    12405624378,
+    12405624358,
+    5926754608,
+    5926754610,
+    12405624352,
+    5926754609,
+    12405624353,
+    1794678006,
+    12405624332,
+    12405624331
+  ],
+  "geometry": [
+    { "lat": 51.7563291, "lon": 18.0955690 },
+    { "lat": 51.7566004, "lon": 18.0953238 },
+    { "lat": 51.7565507, "lon": 18.0951744 },
+    { "lat": 51.7565682, "lon": 18.0951129 },
+    { "lat": 51.7567794, "lon": 18.0949253 },
+    { "lat": 51.7568083, "lon": 18.0949426 },
+    { "lat": 51.7568573, "lon": 18.0950846 },
+    { "lat": 51.7569826, "lon": 18.0949682 },
+    { "lat": 51.7569821, "lon": 18.0949279 },
+    { "lat": 51.7569898, "lon": 18.0948824 },
+    { "lat": 51.7570076, "lon": 18.0948432 },
+    { "lat": 51.7570368, "lon": 18.0948094 },
+    { "lat": 51.7570695, "lon": 18.0947970 },
+    { "lat": 51.7570953, "lon": 18.0947984 },
+    { "lat": 51.7571232, "lon": 18.0948124 },
+    { "lat": 51.7571410, "lon": 18.0948376 },
+    { "lat": 51.7573200, "lon": 18.0946600 },
+    { "lat": 51.7572587, "lon": 18.0944971 },
+    { "lat": 51.7574085, "lon": 18.0943618 },
+    { "lat": 51.7574676, "lon": 18.0945213 },
+    { "lat": 51.7577161, "lon": 18.0942926 },
+    { "lat": 51.7576916, "lon": 18.0942157 },
+    { "lat": 51.7579092, "lon": 18.0940305 },
+    { "lat": 51.7578334, "lon": 18.0937493 },
+    { "lat": 51.7578717, "lon": 18.0937184 },
+    { "lat": 51.7580053, "lon": 18.0942254 },
+    { "lat": 51.7580655, "lon": 18.0944425 },
+    { "lat": 51.7580291, "lon": 18.0944738 },
+    { "lat": 51.7579704, "lon": 18.0942677 },
+    { "lat": 51.7577655, "lon": 18.0944502 },
+    { "lat": 51.7577400, "lon": 18.0943620 },
+    { "lat": 51.7575185, "lon": 18.0945720 },
+    { "lat": 51.7575826, "lon": 18.0947444 },
+    { "lat": 51.7574441, "lon": 18.0948796 },
+    { "lat": 51.7573778, "lon": 18.0947054 },
+    { "lat": 51.7571677, "lon": 18.0949009 },
+    { "lat": 51.7571761, "lon": 18.0949455 },
+    { "lat": 51.7571735, "lon": 18.0949885 },
+    { "lat": 51.7571617, "lon": 18.0950424 },
+    { "lat": 51.7571378, "lon": 18.0950825 },
+    { "lat": 51.7570983, "lon": 18.0951118 },
+    { "lat": 51.7570668, "lon": 18.0951099 },
+    { "lat": 51.7570463, "lon": 18.0951037 },
+    { "lat": 51.7570226, "lon": 18.0950854 },
+    { "lat": 51.7570075, "lon": 18.0950598 },
+    { "lat": 51.7568867, "lon": 18.0951711 },
+    { "lat": 51.7569377, "lon": 18.0953284 },
+    { "lat": 51.7569195, "lon": 18.0954287 },
+    { "lat": 51.7567482, "lon": 18.0955867 },
+    { "lat": 51.7566808, "lon": 18.0955614 },
+    { "lat": 51.7566315, "lon": 18.0954164 },
+    { "lat": 51.7563637, "lon": 18.0956670 },
+    { "lat": 51.7563291, "lon": 18.0955690 }
+  ],
+  "tags": {
+    "landuse": "cemetery",
+    "name": "Cmentarz Żołnierzy Radzieckich"
+  }
+},
+{
+  "type": "way",
+  "id": 171754322,
+  "bounds": {
+    "minlat": 51.7545654,
+    "minlon": 18.0712936,
+    "maxlat": 51.7910655,
+    "maxlon": 18.1363356
+  },
+  "nodes": [
+    1827397740,
+    1827397732,
+    1827397736,
+    1827402123,
+    1827402118,
+    1827402122,
+    1827402119,
+    1827402120,
+    1827402110,
+    1827402109,
+    2454678853,
+    1827402112,
+    1827402116,
+    1827402106,
+    1827402111,
+    1827402105,
+    1827402108,
+    1827402107,
+    1827402113,
+    1827402114,
+    1827402117,
+    1827402115,
+    1827406559,
+    1827406581,
+    1827406571,
+    1827406574,
+    1827406579,
+    1827406557,
+    1827406582,
+    1827406576,
+    4145107577,
+    1827349330,
+    2841611356,
+    1827349325
+  ],
+  "geometry": [
+    { "lat": 51.7733388, "lon": 18.0712936 },
+    { "lat": 51.7735376, "lon": 18.0714879 },
+    { "lat": 51.7754268, "lon": 18.0738235 },
+    { "lat": 51.7769817, "lon": 18.0751041 },
+    { "lat": 51.7794593, "lon": 18.0771468 },
+    { "lat": 51.7819410, "lon": 18.0791954 },
+    { "lat": 51.7837507, "lon": 18.0814370 },
+    { "lat": 51.7852486, "lon": 18.0832904 },
+    { "lat": 51.7872749, "lon": 18.0857960 },
+    { "lat": 51.7882673, "lon": 18.0887578 },
+    { "lat": 51.7890843, "lon": 18.0911823 },
+    { "lat": 51.7900694, "lon": 18.0941123 },
+    { "lat": 51.7910655, "lon": 18.0970675 },
+    { "lat": 51.7909275, "lon": 18.1011824 },
+    { "lat": 51.7908003, "lon": 18.1051240 },
+    { "lat": 51.7906686, "lon": 18.1092490 },
+    { "lat": 51.7905415, "lon": 18.1132997 },
+    { "lat": 51.7884305, "lon": 18.1162393 },
+    { "lat": 51.7862157, "lon": 18.1193290 },
+    { "lat": 51.7840678, "lon": 18.1223182 },
+    { "lat": 51.7818984, "lon": 18.1253523 },
+    { "lat": 51.7797842, "lon": 18.1282877 },
+    { "lat": 51.7777681, "lon": 18.1309395 },
+    { "lat": 51.7757471, "lon": 18.1335997 },
+    { "lat": 51.7736653, "lon": 18.1363356 },
+    { "lat": 51.7707231, "lon": 18.1357082 },
+    { "lat": 51.7680898, "lon": 18.1351419 },
+    { "lat": 51.7652455, "lon": 18.1345318 },
+    { "lat": 51.7625306, "lon": 18.1339519 },
+    { "lat": 51.7596932, "lon": 18.1333208 },
+    { "lat": 51.7581788, "lon": 18.1330097 },
+    { "lat": 51.7563501, "lon": 18.1326205 },
+    { "lat": 51.7547448, "lon": 18.1322762 },
+    { "lat": 51.7545654, "lon": 18.1322362 }
+  ],
+  "tags": {
+    "cables": "3",
+    "name": "110kV Kalisz Północ - Kalisz Centrum",
+    "power": "line",
+    "voltage": "110000"
+  }
+},
+{
+  "type": "way",
+  "id": 171759848,
+  "bounds": {
+    "minlat": 51.7562953,
+    "minlon": 18.0580425,
+    "maxlat": 51.7731554,
+    "maxlon": 18.0711114
+  },
+  "nodes": [
+    1792392503,
+    1792392382,
+    1792392514,
+    1792392509,
+    1792392387,
+    1792392392,
+    1787187153,
+    1792392372,
+    1792392510,
+    1792392350,
+    1792392504,
+    1827395456
+  ],
+  "geometry": [
+    { "lat": 51.7731554, "lon": 18.0711114 },
+    { "lat": 51.7728495, "lon": 18.0706032 },
+    { "lat": 51.7707235, "lon": 18.0686769 },
+    { "lat": 51.7688526, "lon": 18.0669755 },
+    { "lat": 51.7672440, "lon": 18.0650971 },
+    { "lat": 51.7657092, "lon": 18.0633028 },
+    { "lat": 51.7653653, "lon": 18.0628999 },
+    { "lat": 51.7633589, "lon": 18.0605490 },
+    { "lat": 51.7612158, "lon": 18.0580425 },
+    { "lat": 51.7588952, "lon": 18.0582783 },
+    { "lat": 51.7565989, "lon": 18.0585049 },
+    { "lat": 51.7562953, "lon": 18.0585076 }
+  ],
+  "tags": {
+    "cables": "3",
+    "name": "110kV Kalisz Północ - Dobrzec",
+    "power": "line",
+    "voltage": "110000"
+  }
+},
+{
+  "type": "way",
+  "id": 171760081,
+  "bounds": {
+    "minlat": 51.7725345,
+    "minlon": 18.0707149,
+    "maxlat": 51.7737018,
+    "maxlon": 18.0727632
+  },
+  "nodes": [
+    1827397741,
+    3273869379,
+    2429329494,
+    1827397739,
+    1827397738,
+    2429329798,
+    1827397742,
+    1827397735,
+    1827397741
+  ],
+  "geometry": [
+    { "lat": 51.7730282, "lon": 18.0707416 },
+    { "lat": 51.7729021, "lon": 18.0710919 },
+    { "lat": 51.7726352, "lon": 18.0718336 },
+    { "lat": 51.7725345, "lon": 18.0721132 },
+    { "lat": 51.7731677, "lon": 18.0727632 },
+    { "lat": 51.7735083, "lon": 18.0718540 },
+    { "lat": 51.7737018, "lon": 18.0713377 },
+    { "lat": 51.7731011, "lon": 18.0707149 },
+    { "lat": 51.7730282, "lon": 18.0707416 }
+  ],
+  "tags": {
+    "barrier": "fence",
+    "name": "Stacja elektroenergetyczna 110/15kV Kalisz Północ",
+    "operator": "Energa",
+    "power": "substation",
+    "substation": "distribution",
+    "voltage": "110000;15000"
+  }
+},
+{
+  "type": "way",
+  "id": 172520312,
+  "bounds": {
+    "minlat": 51.7475954,
+    "minlon": 18.1036751,
+    "maxlat": 51.7490040,
+    "maxlon": 18.1066722
+  },
+  "nodes": [
+    1834167058,
+    1834167122,
+    1834167038,
+    1834167241,
+    1834167243,
+    1834167155,
+    1834167226,
+    1834167286,
+    1834167293,
+    1834167047,
+    1834167130,
+    1834167234,
+    1834167205,
+    6325968488,
+    1834167300
+  ],
+  "geometry": [
+    { "lat": 51.7476403, "lon": 18.1036751 },
+    { "lat": 51.7476313, "lon": 18.1037440 },
+    { "lat": 51.7476014, "lon": 18.1038728 },
+    { "lat": 51.7475954, "lon": 18.1039272 },
+    { "lat": 51.7475997, "lon": 18.1039801 },
+    { "lat": 51.7476164, "lon": 18.1040284 },
+    { "lat": 51.7476612, "lon": 18.1041035 },
+    { "lat": 51.7477260, "lon": 18.1041947 },
+    { "lat": 51.7483676, "lon": 18.1049867 },
+    { "lat": 51.7484433, "lon": 18.1051120 },
+    { "lat": 51.7485280, "lon": 18.1052810 },
+    { "lat": 51.7485961, "lon": 18.1054526 },
+    { "lat": 51.7488053, "lon": 18.1060079 },
+    { "lat": 51.7488626, "lon": 18.1062041 },
+    { "lat": 51.7490040, "lon": 18.1066722 }
+  ],
+  "tags": {
+    "highway": "track",
+    "name": "Zawodzie",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 216889976,
+  "bounds": {
+    "minlat": 51.7733800,
+    "minlon": 18.0606278,
+    "maxlat": 52.1943607,
+    "maxlon": 18.2314462
+  },
+  "nodes": [
+    2839463413,
+    2262115095,
+    2450610616,
+    2450610461,
+    2262113936,
+    2262112888,
+    2262112890,
+    2262112889,
+    2262113934,
+    2262112887,
+    2450610877,
+    2262111713,
+    2262111715,
+    2262111709,
+    2262111714,
+    2262111711,
+    2262111712,
+    2262111710,
+    2262113937,
+    2262113935,
+    2262113930,
+    2262113928,
+    2262113929,
+    2262113931,
+    2450610679,
+    2262113932,
+    2437213664,
+    2437213597,
+    2437213755,
+    2437213648,
+    2437213651,
+    2437213788,
+    2437213735,
+    2437213606,
+    2437213777,
+    2437213705,
+    2437213769,
+    2437213744,
+    2437213724,
+    2437213586,
+    2437213657,
+    2437213748,
+    2437213752,
+    2437213784,
+    2437213731,
+    2437213756,
+    2437213750,
+    2437213738,
+    2437213677,
+    2437213672,
+    2437213674,
+    2437213741,
+    2437213659,
+    2437213632,
+    3800379001,
+    2437213615,
+    2437213718,
+    2437213641,
+    2437213636,
+    2437213579,
+    2437213643,
+    2437213667,
+    2437213780,
+    2437213601,
+    13938579103,
+    13901529928,
+    2437213773,
+    2437213746,
+    2437213728,
+    2437213569,
+    2437213624,
+    2437213702,
+    2437213583,
+    2437213765,
+    2437213629,
+    2437213712,
+    2437213574,
+    2437213759,
+    2437213609,
+    2437213721,
+    2437213620,
+    2437213761,
+    2437213710,
+    1827463488,
+    1827463534,
+    1827463485,
+    1827463540,
+    1827463515,
+    1827463478,
+    1827463505,
+    1827463544,
+    1827463536,
+    1827463529,
+    1827463547,
+    1827463538,
+    1827463498,
+    1827463548,
+    1827463537,
+    1827463464,
+    1827463466,
+    1827463470,
+    1827463545,
+    1827463474,
+    1827463467,
+    1827463533,
+    1827463491,
+    1827463483,
+    1827463472,
+    1827463468,
+    1827463549,
+    1827463532,
+    1827463543,
+    1827463476,
+    1827463530,
+    1827463531,
+    1827463518,
+    1827463494,
+    1827463501,
+    1827463542,
+    1827463546,
+    1827463535,
+    1827463469,
+    1827463471,
+    1827463528,
+    1827463508,
+    1827463527,
+    1827463510,
+    1827463526,
+    1827463513,
+    1827463541,
+    1827463465,
+    1827447629,
+    1827447650,
+    3800378976,
+    1827447647,
+    1827447679,
+    1827447661,
+    1827447697,
+    1827447634,
+    1827447667,
+    1827447653,
+    1827447694,
+    1827447691,
+    1827447649,
+    1827447696,
+    1827447666,
+    1827447663,
+    1827447672,
+    1827447658,
+    1827447686,
+    1827447641,
+    1827447657,
+    1827447690,
+    1827447656,
+    1827447635,
+    1827447636,
+    1827447678,
+    1827447676,
+    1827447655,
+    1827447645,
+    1827447677,
+    1827447675,
+    1827447693,
+    1827447630,
+    1827447671,
+    1827447662,
+    1827447659,
+    1827447684,
+    1827447640,
+    1827447654,
+    1827447670,
+    1827447648,
+    1827447660,
+    1827447674,
+    1827447688,
+    1827447643,
+    1827447633,
+    1827447646,
+    1827447664,
+    1827447644,
+    1827447683,
+    1827447668,
+    1827447695,
+    1827447652,
+    1827447689,
+    1827447669,
+    1827447681,
+    1827447631,
+    1827447692,
+    1827447637,
+    1827447673,
+    1827447642,
+    1827447680,
+    1827402121,
+    1827397737,
+    1827397734,
+    1827397733
+  ],
+  "geometry": [
+    { "lat": 52.1928094, "lon": 18.2314462 },
+    { "lat": 52.1928214, "lon": 18.2308196 },
+    { "lat": 52.1933226, "lon": 18.2270351 },
+    { "lat": 52.1938990, "lon": 18.2225910 },
+    { "lat": 52.1943607, "lon": 18.2190175 },
+    { "lat": 52.1922816, "lon": 18.2159914 },
+    { "lat": 52.1907788, "lon": 18.2137277 },
+    { "lat": 52.1885918, "lon": 18.2104285 },
+    { "lat": 52.1868499, "lon": 18.2077701 },
+    { "lat": 52.1851532, "lon": 18.2052220 },
+    { "lat": 52.1832989, "lon": 18.2049318 },
+    { "lat": 52.1804158, "lon": 18.2044365 },
+    { "lat": 52.1778104, "lon": 18.2039751 },
+    { "lat": 52.1750010, "lon": 18.2035084 },
+    { "lat": 52.1725897, "lon": 18.2030632 },
+    { "lat": 52.1699049, "lon": 18.2025858 },
+    { "lat": 52.1674836, "lon": 18.2021447 },
+    { "lat": 52.1644920, "lon": 18.2016107 },
+    { "lat": 52.1623496, "lon": 18.2012242 },
+    { "lat": 52.1598036, "lon": 18.1990450 },
+    { "lat": 52.1574695, "lon": 18.1970123 },
+    { "lat": 52.1552222, "lon": 18.1950670 },
+    { "lat": 52.1530141, "lon": 18.1931657 },
+    { "lat": 52.1505934, "lon": 18.1910879 },
+    { "lat": 52.1483897, "lon": 18.1891978 },
+    { "lat": 52.1461283, "lon": 18.1872589 },
+    { "lat": 52.1441252, "lon": 18.1855382 },
+    { "lat": 52.1414181, "lon": 18.1832191 },
+    { "lat": 52.1392710, "lon": 18.1813859 },
+    { "lat": 52.1368247, "lon": 18.1792803 },
+    { "lat": 52.1345604, "lon": 18.1773404 },
+    { "lat": 52.1320729, "lon": 18.1752012 },
+    { "lat": 52.1298347, "lon": 18.1732818 },
+    { "lat": 52.1275194, "lon": 18.1712931 },
+    { "lat": 52.1251945, "lon": 18.1692967 },
+    { "lat": 52.1226890, "lon": 18.1671493 },
+    { "lat": 52.1205104, "lon": 18.1652867 },
+    { "lat": 52.1183799, "lon": 18.1634547 },
+    { "lat": 52.1160137, "lon": 18.1614344 },
+    { "lat": 52.1141826, "lon": 18.1598749 },
+    { "lat": 52.1117223, "lon": 18.1578014 },
+    { "lat": 52.1091344, "lon": 18.1577531 },
+    { "lat": 52.1062516, "lon": 18.1576539 },
+    { "lat": 52.1035481, "lon": 18.1575949 },
+    { "lat": 52.1009499, "lon": 18.1575439 },
+    { "lat": 52.0981802, "lon": 18.1574447 },
+    { "lat": 52.0955059, "lon": 18.1573910 },
+    { "lat": 52.0927836, "lon": 18.1573481 },
+    { "lat": 52.0900958, "lon": 18.1573293 },
+    { "lat": 52.0873551, "lon": 18.1572945 },
+    { "lat": 52.0848532, "lon": 18.1572784 },
+    { "lat": 52.0834950, "lon": 18.1587458 },
+    { "lat": 52.0819621, "lon": 18.1603873 },
+    { "lat": 52.0805528, "lon": 18.1619159 },
+    { "lat": 52.0802869, "lon": 18.1621975 },
+    { "lat": 52.0787610, "lon": 18.1638136 },
+    { "lat": 52.0778164, "lon": 18.1668136 },
+    { "lat": 52.0768158, "lon": 18.1699223 },
+    { "lat": 52.0752349, "lon": 18.1727038 },
+    { "lat": 52.0736638, "lon": 18.1754584 },
+    { "lat": 52.0710061, "lon": 18.1768266 },
+    { "lat": 52.0681389, "lon": 18.1783069 },
+    { "lat": 52.0659196, "lon": 18.1794498 },
+    { "lat": 52.0633357, "lon": 18.1807853 },
+    { "lat": 52.0615274, "lon": 18.1817267 },
+    { "lat": 52.0612403, "lon": 18.1818762 },
+    { "lat": 52.0606098, "lon": 18.1822044 },
+    { "lat": 52.0581608, "lon": 18.1834597 },
+    { "lat": 52.0555385, "lon": 18.1847978 },
+    { "lat": 52.0528485, "lon": 18.1861794 },
+    { "lat": 52.0511380, "lon": 18.1870722 },
+    { "lat": 52.0487199, "lon": 18.1883038 },
+    { "lat": 52.0471198, "lon": 18.1891272 },
+    { "lat": 52.0447311, "lon": 18.1886762 },
+    { "lat": 52.0422153, "lon": 18.1882018 },
+    { "lat": 52.0396845, "lon": 18.1876999 },
+    { "lat": 52.0371172, "lon": 18.1872041 },
+    { "lat": 52.0344607, "lon": 18.1867159 },
+    { "lat": 52.0318518, "lon": 18.1861738 },
+    { "lat": 52.0289904, "lon": 18.1855947 },
+    { "lat": 52.0262855, "lon": 18.1850154 },
+    { "lat": 52.0235343, "lon": 18.1844277 },
+    { "lat": 52.0211608, "lon": 18.1839744 },
+    { "lat": 52.0186419, "lon": 18.1834459 },
+    { "lat": 52.0160475, "lon": 18.1829387 },
+    { "lat": 52.0133491, "lon": 18.1824355 },
+    { "lat": 52.0113751, "lon": 18.1824964 },
+    { "lat": 52.0088095, "lon": 18.1825608 },
+    { "lat": 52.0060990, "lon": 18.1826544 },
+    { "lat": 52.0034302, "lon": 18.1827110 },
+    { "lat": 52.0009005, "lon": 18.1827807 },
+    { "lat": 51.9985556, "lon": 18.1837087 },
+    { "lat": 51.9960459, "lon": 18.1847089 },
+    { "lat": 51.9933044, "lon": 18.1857979 },
+    { "lat": 51.9903744, "lon": 18.1869566 },
+    { "lat": 51.9882531, "lon": 18.1878125 },
+    { "lat": 51.9855111, "lon": 18.1888961 },
+    { "lat": 51.9830238, "lon": 18.1898910 },
+    { "lat": 51.9804528, "lon": 18.1909024 },
+    { "lat": 51.9778259, "lon": 18.1919538 },
+    { "lat": 51.9754831, "lon": 18.1928819 },
+    { "lat": 51.9733417, "lon": 18.1937295 },
+    { "lat": 51.9712041, "lon": 18.1932330 },
+    { "lat": 51.9687613, "lon": 18.1926512 },
+    { "lat": 51.9656942, "lon": 18.1919538 },
+    { "lat": 51.9632218, "lon": 18.1913906 },
+    { "lat": 51.9602866, "lon": 18.1906986 },
+    { "lat": 51.9579065, "lon": 18.1901568 },
+    { "lat": 51.9572160, "lon": 18.1861305 },
+    { "lat": 51.9565180, "lon": 18.1820511 },
+    { "lat": 51.9557714, "lon": 18.1777781 },
+    { "lat": 51.9550436, "lon": 18.1734895 },
+    { "lat": 51.9544617, "lon": 18.1701207 },
+    { "lat": 51.9537580, "lon": 18.1660300 },
+    { "lat": 51.9529679, "lon": 18.1614971 },
+    { "lat": 51.9523326, "lon": 18.1577664 },
+    { "lat": 51.9501075, "lon": 18.1557494 },
+    { "lat": 51.9480646, "lon": 18.1538957 },
+    { "lat": 51.9456834, "lon": 18.1517261 },
+    { "lat": 51.9434447, "lon": 18.1497037 },
+    { "lat": 51.9411894, "lon": 18.1476438 },
+    { "lat": 51.9392023, "lon": 18.1458491 },
+    { "lat": 51.9367842, "lon": 18.1436473 },
+    { "lat": 51.9343009, "lon": 18.1414127 },
+    { "lat": 51.9321609, "lon": 18.1394762 },
+    { "lat": 51.9298388, "lon": 18.1373626 },
+    { "lat": 51.9274897, "lon": 18.1352305 },
+    { "lat": 51.9251078, "lon": 18.1330794 },
+    { "lat": 51.9227330, "lon": 18.1309253 },
+    { "lat": 51.9206383, "lon": 18.1290239 },
+    { "lat": 51.9189547, "lon": 18.1274974 },
+    { "lat": 51.9170517, "lon": 18.1246572 },
+    { "lat": 51.9150901, "lon": 18.1217163 },
+    { "lat": 51.9133907, "lon": 18.1191461 },
+    { "lat": 51.9130737, "lon": 18.1186726 },
+    { "lat": 51.9112221, "lon": 18.1159594 },
+    { "lat": 51.9097891, "lon": 18.1120912 },
+    { "lat": 51.9082943, "lon": 18.1080183 },
+    { "lat": 51.9069380, "lon": 18.1043575 },
+    { "lat": 51.9058118, "lon": 18.1012846 },
+    { "lat": 51.9043915, "lon": 18.0974512 },
+    { "lat": 51.9030661, "lon": 18.0938824 },
+    { "lat": 51.9004463, "lon": 18.0935413 },
+    { "lat": 51.8978660, "lon": 18.0931904 },
+    { "lat": 51.8948578, "lon": 18.0927897 },
+    { "lat": 51.8929477, "lon": 18.0925370 },
+    { "lat": 51.8903604, "lon": 18.0921943 },
+    { "lat": 51.8878610, "lon": 18.0918568 },
+    { "lat": 51.8854086, "lon": 18.0915284 },
+    { "lat": 51.8829278, "lon": 18.0911996 },
+    { "lat": 51.8806506, "lon": 18.0908928 },
+    { "lat": 51.8783865, "lon": 18.0905850 },
+    { "lat": 51.8758971, "lon": 18.0902582 },
+    { "lat": 51.8733886, "lon": 18.0899198 },
+    { "lat": 51.8709758, "lon": 18.0896033 },
+    { "lat": 51.8684545, "lon": 18.0892616 },
+    { "lat": 51.8664783, "lon": 18.0890214 },
+    { "lat": 51.8642555, "lon": 18.0887210 },
+    { "lat": 51.8619730, "lon": 18.0884099 },
+    { "lat": 51.8597042, "lon": 18.0881172 },
+    { "lat": 51.8574442, "lon": 18.0878090 },
+    { "lat": 51.8553402, "lon": 18.0875354 },
+    { "lat": 51.8534781, "lon": 18.0873048 },
+    { "lat": 51.8513840, "lon": 18.0863767 },
+    { "lat": 51.8487628, "lon": 18.0852341 },
+    { "lat": 51.8463370, "lon": 18.0841827 },
+    { "lat": 51.8436427, "lon": 18.0830079 },
+    { "lat": 51.8412034, "lon": 18.0819511 },
+    { "lat": 51.8388738, "lon": 18.0809343 },
+    { "lat": 51.8370370, "lon": 18.0801326 },
+    { "lat": 51.8346603, "lon": 18.0791026 },
+    { "lat": 51.8319222, "lon": 18.0779117 },
+    { "lat": 51.8298336, "lon": 18.0770105 },
+    { "lat": 51.8271914, "lon": 18.0758571 },
+    { "lat": 51.8246484, "lon": 18.0747413 },
+    { "lat": 51.8218201, "lon": 18.0735290 },
+    { "lat": 51.8196586, "lon": 18.0725872 },
+    { "lat": 51.8175525, "lon": 18.0716729 },
+    { "lat": 51.8150023, "lon": 18.0705785 },
+    { "lat": 51.8122828, "lon": 18.0693986 },
+    { "lat": 51.8101370, "lon": 18.0684706 },
+    { "lat": 51.8074239, "lon": 18.0672797 },
+    { "lat": 51.8048898, "lon": 18.0661907 },
+    { "lat": 51.8022526, "lon": 18.0650642 },
+    { "lat": 51.7997846, "lon": 18.0639859 },
+    { "lat": 51.7973462, "lon": 18.0629399 },
+    { "lat": 51.7944598, "lon": 18.0616900 },
+    { "lat": 51.7920178, "lon": 18.0606278 },
+    { "lat": 51.7896824, "lon": 18.0627006 },
+    { "lat": 51.7873895, "lon": 18.0646908 },
+    { "lat": 51.7850245, "lon": 18.0667288 },
+    { "lat": 51.7824932, "lon": 18.0689385 },
+    { "lat": 51.7805409, "lon": 18.0706401 },
+    { "lat": 51.7781115, "lon": 18.0719435 },
+    { "lat": 51.7756893, "lon": 18.0732428 },
+    { "lat": 51.7735836, "lon": 18.0713629 },
+    { "lat": 51.7733800, "lon": 18.0711881 }
+  ],
+  "tags": {
+    "cables": "3",
+    "circuits": "1",
+    "frequency": "50",
+    "name": "110kV Konin Południe - Kalisz Północ / Rychwał / Stawiszyn",
+    "operator": "Energa",
+    "operator:wikidata": "Q9253957",
+    "power": "line",
+    "voltage": "110000",
+    "wires": "single"
+  }
+},
+{
+  "type": "way",
+  "id": 241614301,
+  "bounds": {
+    "minlat": 51.7645712,
+    "minlon": 18.0933792,
+    "maxlat": 51.7646904,
+    "maxlon": 18.0935810
+  },
+  "nodes": [
+    2492159554,
+    3407611352,
+    2492159556,
+    2492565722,
+    2492159558,
+    3407611353,
+    2492565656,
+    2492159560,
+    2492159561,
+    2492159563,
+    2492565693,
+    3407611350,
+    2492159565,
+    9866393732,
+    9866393730,
+    9866393731,
+    9866393729,
+    9866393728,
+    9866393720,
+    9866393721,
+    10964042870,
+    9866393722,
+    9866393723,
+    9866393724,
+    9866393725,
+    9866393726,
+    9866393727,
+    2492159567,
+    9866392511,
+    9866392512,
+    9866392513,
+    9866392514,
+    9866392515,
+    9866392516,
+    9866393717,
+    9866393718,
+    9866393719,
+    2492159569,
+    2492159554
+  ],
+  "geometry": [
+    { "lat": 51.7646673, "lon": 18.0935689 },
+    { "lat": 51.7646570, "lon": 18.0935586 },
+    { "lat": 51.7646461, "lon": 18.0935610 },
+    { "lat": 51.7646371, "lon": 18.0935615 },
+    { "lat": 51.7646291, "lon": 18.0935594 },
+    { "lat": 51.7646204, "lon": 18.0935544 },
+    { "lat": 51.7646133, "lon": 18.0935479 },
+    { "lat": 51.7646056, "lon": 18.0935373 },
+    { "lat": 51.7645997, "lon": 18.0935241 },
+    { "lat": 51.7645956, "lon": 18.0935079 },
+    { "lat": 51.7645821, "lon": 18.0934992 },
+    { "lat": 51.7645713, "lon": 18.0934925 },
+    { "lat": 51.7645712, "lon": 18.0934834 },
+    { "lat": 51.7645821, "lon": 18.0934751 },
+    { "lat": 51.7645937, "lon": 18.0934663 },
+    { "lat": 51.7645964, "lon": 18.0934508 },
+    { "lat": 51.7646007, "lon": 18.0934388 },
+    { "lat": 51.7646068, "lon": 18.0934277 },
+    { "lat": 51.7646149, "lon": 18.0934174 },
+    { "lat": 51.7646246, "lon": 18.0934097 },
+    { "lat": 51.7646340, "lon": 18.0934057 },
+    { "lat": 51.7646435, "lon": 18.0934052 },
+    { "lat": 51.7646528, "lon": 18.0934067 },
+    { "lat": 51.7646624, "lon": 18.0933937 },
+    { "lat": 51.7646719, "lon": 18.0933792 },
+    { "lat": 51.7646771, "lon": 18.0933838 },
+    { "lat": 51.7646755, "lon": 18.0934026 },
+    { "lat": 51.7646741, "lon": 18.0934238 },
+    { "lat": 51.7646813, "lon": 18.0934380 },
+    { "lat": 51.7646864, "lon": 18.0934533 },
+    { "lat": 51.7646895, "lon": 18.0934699 },
+    { "lat": 51.7646904, "lon": 18.0934874 },
+    { "lat": 51.7646885, "lon": 18.0935050 },
+    { "lat": 51.7646839, "lon": 18.0935220 },
+    { "lat": 51.7646780, "lon": 18.0935356 },
+    { "lat": 51.7646809, "lon": 18.0935569 },
+    { "lat": 51.7646839, "lon": 18.0935766 },
+    { "lat": 51.7646789, "lon": 18.0935810 },
+    { "lat": 51.7646673, "lon": 18.0935689 }
+  ],
+  "tags": {
+    "amenity": "fountain",
+    "name": "Fontanna „Noce i Dnie”"
+  }
+},
+{
+  "type": "way",
+  "id": 377886357,
+  "bounds": {
+    "minlat": 51.7511302,
+    "minlon": 18.0799028,
+    "maxlat": 51.7512750,
+    "maxlon": 18.0800491
+  },
+  "nodes": [
+    1790051102,
+    3812937207
+  ],
+  "geometry": [
+    { "lat": 51.7512750, "lon": 18.0799028 },
+    { "lat": 51.7511302, "lon": 18.0800491 }
+  ],
+  "tags": {
+    "artwork_type": "mural",
+    "barrier": "fence",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "way",
+  "id": 539656604,
+  "bounds": {
+    "minlat": 51.7538194,
+    "minlon": 18.0983937,
+    "maxlat": 51.7543962,
+    "maxlon": 18.0994745
+  },
+  "nodes": [
+    1827413223,
+    1827413222
+  ],
+  "geometry": [
+    { "lat": 51.7538194, "lon": 18.0994745 },
+    { "lat": 51.7543962, "lon": 18.0983937 }
+  ],
+  "tags": {
+    "cables": "3",
+    "name": "110kV Kalisz Północ - Kalisz Centrum",
+    "power": "line",
+    "voltage": "110000"
+  }
+},
+{
+  "type": "way",
+  "id": 539656606,
+  "bounds": {
+    "minlat": 51.7417648,
+    "minlon": 18.0994745,
+    "maxlat": 51.7538194,
+    "maxlon": 18.1203083
+  },
+  "nodes": [
+    1827349323,
+    1827349321,
+    1827350879,
+    1827350878,
+    1827350877,
+    1827413228,
+    1827413227,
+    1827413225,
+    1827413224,
+    1827413223
+  ],
+  "geometry": [
+    { "lat": 51.7417648, "lon": 18.1203083 },
+    { "lat": 51.7428642, "lon": 18.1169146 },
+    { "lat": 51.7439615, "lon": 18.1135127 },
+    { "lat": 51.7451086, "lon": 18.1099600 },
+    { "lat": 51.7461406, "lon": 18.1067613 },
+    { "lat": 51.7483301, "lon": 18.1051251 },
+    { "lat": 51.7504834, "lon": 18.1035139 },
+    { "lat": 51.7522474, "lon": 18.1022060 },
+    { "lat": 51.7532839, "lon": 18.1004039 },
+    { "lat": 51.7538194, "lon": 18.0994745 }
+  ],
+  "tags": {
+    "cables": "6",
+    "circuits": "2",
+    "name": "2 x 110kV Kalisz Północ - Kalisz Centrum + Kalisz Piwonice - Kalisz Centrum",
+    "power": "line",
+    "voltage": "110000"
+  }
+},
+{
+  "type": "way",
+  "id": 1009285759,
+  "bounds": {
+    "minlat": 51.7495784,
+    "minlon": 18.0686599,
+    "maxlat": 51.7496191,
+    "maxlon": 18.0687237
+  },
+  "nodes": [
+    9312284262,
+    9312284263,
+    9312284264,
+    9312284265,
+    9312284262
+  ],
+  "geometry": [
+    { "lat": 51.7496191, "lon": 18.0686600 },
+    { "lat": 51.7496190, "lon": 18.0687237 },
+    { "lat": 51.7495784, "lon": 18.0687235 },
+    { "lat": 51.7495785, "lon": 18.0686599 },
+    { "lat": 51.7496191, "lon": 18.0686600 }
+  ],
+  "tags": {
+    "amenity": "fountain"
+  }
+},
+{
+  "type": "way",
+  "id": 1180768050,
+  "bounds": {
+    "minlat": 51.7553690,
+    "minlon": 18.0768395,
+    "maxlat": 51.7554110,
+    "maxlon": 18.0769074
+  },
+  "nodes": [
+    10966312057,
+    10966312056,
+    10966312055,
+    10966312054,
+    10966312053,
+    10966312052,
+    10966312051,
+    10966312050,
+    10966312049,
+    10966312048,
+    10966312047,
+    10966312046,
+    10966312045,
+    10966312044,
+    10966312043,
+    10966312057
+  ],
+  "geometry": [
+    { "lat": 51.7553866, "lon": 18.0768395 },
+    { "lat": 51.7553953, "lon": 18.0768403 },
+    { "lat": 51.7554032, "lon": 18.0768467 },
+    { "lat": 51.7554087, "lon": 18.0768578 },
+    { "lat": 51.7554110, "lon": 18.0768715 },
+    { "lat": 51.7554096, "lon": 18.0768856 },
+    { "lat": 51.7554048, "lon": 18.0768975 },
+    { "lat": 51.7553974, "lon": 18.0769052 },
+    { "lat": 51.7553887, "lon": 18.0769074 },
+    { "lat": 51.7553802, "lon": 18.0769037 },
+    { "lat": 51.7553734, "lon": 18.0768948 },
+    { "lat": 51.7553694, "lon": 18.0768821 },
+    { "lat": 51.7553690, "lon": 18.0768679 },
+    { "lat": 51.7553721, "lon": 18.0768547 },
+    { "lat": 51.7553783, "lon": 18.0768446 },
+    { "lat": 51.7553866, "lon": 18.0768395 }
+  ],
+  "tags": {
+    "amenity": "fountain"
+  }
+},
+{
+  "type": "way",
+  "id": 1227870820,
+  "bounds": {
+    "minlat": 51.7614462,
+    "minlon": 18.1119029,
+    "maxlat": 51.7615386,
+    "maxlon": 18.1119360
+  },
+  "nodes": [
+    9202411486,
+    10709890718,
+    9202411487,
+    9202411488
+  ],
+  "geometry": [
+    { "lat": 51.7615386, "lon": 18.1119360 },
+    { "lat": 51.7615096, "lon": 18.1119139 },
+    { "lat": 51.7614782, "lon": 18.1119029 },
+    { "lat": 51.7614462, "lon": 18.1119036 }
+  ],
+  "tags": {
+    "highway": "secondary",
+    "junction": "roundabout",
+    "lanes": "2",
+    "maxspeed": "50",
+    "name": "Rondo Ojca Stefana Dzierżka",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 1227870821,
+  "bounds": {
+    "minlat": 51.7615386,
+    "minlon": 18.1119360,
+    "maxlat": 51.7616016,
+    "maxlon": 18.1120736
+  },
+  "nodes": [
+    9202411485,
+    10960456190,
+    10856214076,
+    9202411486
+  ],
+  "geometry": [
+    { "lat": 51.7616016, "lon": 18.1120736 },
+    { "lat": 51.7615881, "lon": 18.1120195 },
+    { "lat": 51.7615667, "lon": 18.1119726 },
+    { "lat": 51.7615386, "lon": 18.1119360 }
+  ],
+  "tags": {
+    "highway": "secondary",
+    "junction": "roundabout",
+    "lanes": "2",
+    "maxspeed": "50",
+    "name": "Rondo Ojca Stefana Dzierżka",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 1227870826,
+  "bounds": {
+    "minlat": 51.7613388,
+    "minlon": 18.1119036,
+    "maxlat": 51.7614462,
+    "maxlon": 18.1120226
+  },
+  "nodes": [
+    9202411488,
+    9202411489,
+    9202411490,
+    9202411491,
+    9202411493
+  ],
+  "geometry": [
+    { "lat": 51.7614462, "lon": 18.1119036 },
+    { "lat": 51.7614134, "lon": 18.1119168 },
+    { "lat": 51.7613836, "lon": 18.1119421 },
+    { "lat": 51.7613582, "lon": 18.1119780 },
+    { "lat": 51.7613388, "lon": 18.1120226 }
+  ],
+  "tags": {
+    "highway": "secondary",
+    "junction": "roundabout",
+    "lanes": "2",
+    "maxspeed": "50",
+    "name": "Rondo Ojca Stefana Dzierżka",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 1328624035,
+  "bounds": {
+    "minlat": 51.7626750,
+    "minlon": 18.0899327,
+    "maxlat": 51.7626917,
+    "maxlon": 18.0899595
+  },
+  "nodes": [
+    12292351865,
+    12292351848,
+    12292351864,
+    12292351849,
+    12292351863,
+    12292351850,
+    12292351866,
+    12292351851,
+    12292351862,
+    12292351846,
+    12292351861,
+    12292351847,
+    12292351865
+  ],
+  "geometry": [
+    { "lat": 51.7626773, "lon": 18.0899559 },
+    { "lat": 51.7626811, "lon": 18.0899595 },
+    { "lat": 51.7626856, "lon": 18.0899595 },
+    { "lat": 51.7626894, "lon": 18.0899560 },
+    { "lat": 51.7626917, "lon": 18.0899498 },
+    { "lat": 51.7626917, "lon": 18.0899426 },
+    { "lat": 51.7626895, "lon": 18.0899363 },
+    { "lat": 51.7626856, "lon": 18.0899327 },
+    { "lat": 51.7626812, "lon": 18.0899327 },
+    { "lat": 51.7626773, "lon": 18.0899362 },
+    { "lat": 51.7626751, "lon": 18.0899424 },
+    { "lat": 51.7626750, "lon": 18.0899496 },
+    { "lat": 51.7626773, "lon": 18.0899559 }
+  ],
+  "tags": {
+    "artwork_type": "statue",
+    "name": "Flora",
+    "tourism": "artwork"
+  }
+},
+{
+  "type": "way",
+  "id": 1332068015,
+  "bounds": {
+    "minlat": 51.7634825,
+    "minlon": 18.0925380,
+    "maxlat": 51.7635515,
+    "maxlon": 18.0926519
+  },
+  "nodes": [
+    12324563144,
+    12324563143,
+    12324563142,
+    12324563141,
+    12324563144
+  ],
+  "geometry": [
+    { "lat": 51.7635515, "lon": 18.0926118 },
+    { "lat": 51.7635241, "lon": 18.0926519 },
+    { "lat": 51.7634825, "lon": 18.0925781 },
+    { "lat": 51.7635100, "lon": 18.0925380 },
+    { "lat": 51.7635515, "lon": 18.0926118 }
+  ],
+  "tags": {
+    "artist_name": "Jan Kucz",
+    "historic": "memorial",
+    "inscription": "Prawo do życia Nie jest tylko kwestią światopoglądu Nie jest tylko prawem religijnym Ale jest prawem człowieka",
+    "material": "bronze",
+    "memorial": "statue",
+    "name": "Jan Paweł II",
+    "start_date": "1999-05-30",
+    "subject:wikidata": "Q989",
+    "wikidata": "Q11823246",
+    "wikipedia": "pl:Pomnik Jana Pawła II w Kaliszu"
+  }
+}
+
+  ]
+}

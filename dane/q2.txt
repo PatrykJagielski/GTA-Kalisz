@@ -1,0 +1,8 @@
+[out:json][timeout:60];
+(
+  nwr["amenity"="fountain"](51.7480,18.0660,51.7750,18.1120);
+  nwr["name"~"Noc|Dzie",i](51.7480,18.0660,51.7750,18.1120);
+  nwr["tourism"="artwork"](51.7480,18.0660,51.7750,18.1120);
+  nwr["historic"="memorial"](51.7480,18.0660,51.7750,18.1120);
+);
+out body geom;
