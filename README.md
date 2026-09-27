@@ -74,6 +74,28 @@ Po zmianie `deploy/docker-compose.yml` lub `deploy/nginx/site.conf` (i przy pier
 
 Konfiguracja nginx jest najpierw sprawdzana (`nginx -t`) w osobnym kontenerze, dopiero potem podmieniana.
 
+### Automatycznie (GitHub Actions)
+
+Workflow `.github/workflows/deploy.yml` uruchamia `./deploy.sh` po każdym pushu do `main`, a z `--config`, jeśli push zmienił coś w `deploy/`. Można go też uruchomić ręcznie: Actions → Deploy → Run workflow (z opcją `--config`). W pull requestach robi tylko lint i build. Wdrożenia idą po kolei, nigdy dwa naraz; nieudany lint lub build zatrzymuje wdrożenie, zanim cokolwiek trafi na serwer.
+
+Jednorazowo trzeba dodać sekrety w Settings → Secrets and variables → Actions:
+
+| Sekret | Wartość |
+| --- | --- |
+| `MIKRUS_HOST` | host SSH Mikrusa, np. `srv12.mikr.us` |
+| `MIKRUS_PORT` | port SSH Mikrusa |
+| `MIKRUS_SSH_KEY` | klucz prywatny przeznaczony tylko do wdrożeń |
+| `MIKRUS_KNOWN_HOSTS` | wynik `ssh-keyscan -p <port> <host>` (odcisk serwera; bez niego połączenie jest odrzucane) |
+| `MIKRUS_USER` | opcjonalnie, domyślnie `root` |
+
+```bash
+ssh-keygen -t ed25519 -N '' -C gta-deploy -f gta-deploy            # osobny klucz dla GitHuba
+ssh-copy-id -i gta-deploy.pub -p <port> root@<host>                # albo dopisać do /root/.ssh/authorized_keys
+ssh-keyscan -p <port> <host>                                       # -> MIKRUS_KNOWN_HOSTS (sprawdź odcisk z serwerem)
+```
+
+Zawartość `gta-deploy` wklej do `MIKRUS_SSH_KEY`, a lokalną kopię usuń.
+
 Kontener `gtakalisz-web` (nginx, system plików tylko do odczytu, bez dodatkowych uprawnień, limit 64 MB RAM) nasłuchuje tylko na `127.0.0.1:8083` i `172.17.0.1:8083`. Ruch publiczny wchodzi przez tunel Cloudflare `warta-tunnel` z trasą `gta.patrykjagielski.tech → http://172.17.0.1:8083`.
 
 ## Sterowanie
