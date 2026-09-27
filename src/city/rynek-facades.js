@@ -14,7 +14,7 @@ const PLAN = [
   { H: RYNEK_H, shop: [7, 38, true], kordon: 46, floors: [[62, 86, 'hood'], [98, 119, 'sill']], frieze: 125, panel: true },
   { H: HOLE_H, shop: [8, 44, true], kordon: 52, floors: [[64, 95, 'tri'], [108, 134, 'hood'], [142, 162, 'sill']], frieze: 165, rust: true },
 ];
-export const RYNEK_VARIANTS = PLAN.length;
+export const RYNEK_VARIANTS = PLAN.length, RYNEK_PLAN = PLAN;
 
 export function rynekFacade(variant, lit) {
   const P = PLAN[variant], R = rng(90 + variant);

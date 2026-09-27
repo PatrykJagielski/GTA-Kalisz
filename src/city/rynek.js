@@ -3,6 +3,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { M4, instanced } from '../core/geometry.js';
 import { arrGeo, newArr, pushWalls } from './mesh.js';
 import { roofShape } from './roofs.js';
+import { rynekBenches, rynekFacadeDetails, rynekGlowM } from './rynek-details.js';
 import { HOLE_H, RYNEK_H, RYNEK_VARIANTS, rynekFacade } from './rynek-facades.js';
 import { ringArea2 } from './spatial.js';
 
@@ -48,6 +49,8 @@ export function rynekPlan(rings) {
     f.variant = f.hole ? RYNEK_VARIANTS - 1 : (k * 3) % (RYNEK_VARIANTS - 1);
     f.col = new THREE.Color(f.hole ? '#efe6d2' : PALETTE[(k * 4) % PALETTE.length]).multiplyScalar(1.25);
     f.roof = new THREE.Color(TILES[(k * 5) % TILES.length]);
+    f.bal = !f.hole && k % 2 === 1;                                                     // co drugi dom: balkon na I piętrze
+    f.french = !f.hole && k % 4 === 0;                                                  // co czwarty: balustradki w oknach II piętra
     plan.set(f.bi, f);
   });
   return plan;
@@ -61,7 +64,7 @@ export function rynekKit() {
     for (const t of [map, lit]) t.wrapT = THREE.ClampToEdgeWrapping;
     mats.push(new THREE.MeshStandardMaterial({ map, vertexColors: true, roughness: 0.88, emissive: 0xffffff, emissiveMap: lit, emissiveIntensity: 0 }));
   }
-  return { mats, fronts: mats.map(() => newArr()), dormers: [], dormerCol: [], dormerRoof: [], portico: [] };
+  return { mats, glowM: rynekGlowM(), fronts: mats.map(() => newArr()), faces: [], dormers: [], dormerCol: [], dormerRoof: [], portico: [] };
 }
 
 // kamienica przy Rynku: front z elewacją rynkową, reszta ścian jak w starówce, dach mansardowy (gmach: kopertowy)
@@ -71,10 +74,11 @@ export function rynekHouse(f, ring, free, x) {
   for (let i = 0; i < ring.length; i += 2) {
     if (!f.front[i / 2]) continue;
     const j = (i + 2) % ring.length, x0 = ring[i], z0 = ring[i + 1], x1 = ring[j], z1 = ring[j + 1], len = Math.hypot(x1 - x0, z1 - z0);
-    const u1 = Math.max(1, Math.round(len / (f.hole ? HOLE_AXIS : AXIS))) / 4, nx = sg * (z1 - z0) / len, nz = -sg * (x1 - x0) / len;
+    const axes = Math.max(1, Math.round(len / (f.hole ? HOLE_AXIS : AXIS))), u1 = axes / 4, nx = sg * (z1 - z0) / len, nz = -sg * (x1 - x0) / len;
     const a = [x0, y0, z0, 0, 0], b = [x1, y0, z1, u1, 0], c = [x1, h, z1, u1, 1], d = [x0, h, z0, 0, 1];
     for (const v of sg > 0 ? [a, c, b, a, d, c] : [a, b, c, a, c, d]) { A.pos.push(v[0], v[1], v[2]); A.nor.push(nx, 0, nz); A.uv.push(v[3], v[4]); A.col.push(col.r, col.g, col.b); }
     if (f.hole && i === f.i) x.kit.portico.push([x0, z0, x1, z1, nx, nz]);
+    x.kit.faces.push({ x0, z0, x1, z1, nx, nz, len, axes, variant: f.variant, col, bal: f.bal && len >= 60, french: f.french });
   }
   pushWalls(x.walls, ring, false, y0, h, (u, v) => [u / 160, 1 - (H - v) / 132], col, f.front);
   const { faces, gables, top } = f.hole ? roofShape(ring, free, h, 0.75, 55) : roofShape(ring, free, h, 3.5, 44, { d: 6, s2: 0.42 });
@@ -96,8 +100,9 @@ export function rynekHouse(f, ring, free, x) {
   return top;
 }
 
-// lukarny mansardowe (lokalnie: +x na zewnątrz, 0 = lico ściany na wysokości okapu) i kolumnada gmachu Holewińskiego
-export function rynekMeshes(kit, add) {
+// lukarny mansardowe (lokalnie: +x na zewnątrz, 0 = lico ściany na wysokości okapu), detale elewacji, ławki
+// i kolumnada gmachu Holewińskiego
+export function rynekMeshes(kit, add, solid) {
   kit.mats.forEach((m, v) => add(arrGeo(kit.fronts[v]), m));
   const std = o => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85, ...o });
   const body = new THREE.BoxGeometry(12, 15, 13).translate(-8.5, 12.5, 0);
@@ -105,7 +110,7 @@ export function rynekMeshes(kit, add) {
   const cap = new THREE.ExtrudeGeometry(new THREE.Shape([new THREE.Vector2(-8, 20), new THREE.Vector2(8, 20), new THREE.Vector2(0, 26)]), { depth: 18.5, bevelEnabled: false })
     .rotateY(Math.PI / 2).translate(-20, 0, 0);
   const out = [instanced(body, std(), kit.dormers, kit.dormerCol), instanced(win, std({ color: 0x34475a, roughness: 0.3 }), kit.dormers),
-    instanced(cap, std({ roughness: 0.9 }), kit.dormers, kit.dormerRoof)];
+    instanced(cap, std({ roughness: 0.9 }), kit.dormers, kit.dormerRoof), ...rynekFacadeDetails(kit.faces, kit.glowM), ...rynekBenches(RYNEK, solid)];
   const stone = [], cols = [];
   for (const [x0, z0, x1, z1, nx, nz] of kit.portico) {
     const len = Math.hypot(x1 - x0, z1 - z0), tx = (x1 - x0) / len, tz = (z1 - z0) / len, ang = Math.atan2(-tz, tx);
