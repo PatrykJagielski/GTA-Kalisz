@@ -10,7 +10,7 @@ import { HEAD, R, blocked, carGap, carPoint, placePerson, showPerson } from './p
 /* ================= pieszo: wysiadanie i wsiadanie, chodzenie, bieg, skok ================= */
 // me: x, z = stopy postaci (dm), y = wysokość stóp, vy = prędkość w pionie, psi = kurs, air = w powietrzu
 export const me = { x: 0, z: 0, y: 0, vy: 0, psi: 0, air: false };
-const WALK = 15, RUN = 48, BACK = 9;           // dm/s: ok. 5,4 km/h, 17 km/h, cofanie
+const WALK = 20 / 0.36, RUN = 30 / 0.36, BACK = 7 / 0.36;   // dm/s: chód 20 km/h, bieg 30 km/h, cofanie 7 km/h
 const TURN = 2.8;                              // rad/s
 const JUMP = 36, GRAVITY = 98;                 // wyskok ok. 66 cm
 const REACH = 14;                              // z tej odległości od auta (dm) da się wsiąść
