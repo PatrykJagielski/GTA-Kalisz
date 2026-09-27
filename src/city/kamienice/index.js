@@ -43,7 +43,7 @@ function build(F, S, B, solid, cafes) {
       if (open) arcs.push([x0, x1, y1, o.inner]);
     }
   }
-  if (arcs.length) arcade(c, arcs, S);
+  if (arcs.length) arcade(c, arcs, S, solid, F.hit);
   if (S.cartouche) {                                                                     // kartusz nad drzwiami
     const x = P(S.cartouche[0]), y = S.cartouche[1];
     box(c, x - 4.5, x + 4.5, y - 3, y + 2.5, 0, 0.7, S.trim);

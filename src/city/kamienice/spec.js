@@ -35,7 +35,7 @@ export const KAMIENICE = [
     ],
     columns: [0.232, 0.292, 0.5, 0.56], colTop: 28, platform: [0.065, 0.83],
     signs: [{ x: [0.6, 0.83], y: [41.5, 48], fg: '#6b4c33', font: '700 {}px Georgia, serif', lines: [['SALON FIRAN', 0.85, 0.55]] }, plate(0.012, 0.062, 44)],
-    cafe: [0.78, 1.54],                                                                 // dwa parasole na styku z Pod Filarami
+    cafe: [0.35, 1.1],                                                                  // dwa parasole, wejścia w podcień sąsiada wolne
   },
   {
     name: 'Pod Filarami', mid: [-578, -22], seed: 2, wall: '#f2cbbb', base: '#c28f86', groundTop: 62, trim: '#f7e9e2', frame: '#f8f5f2', eave: 175,
@@ -58,7 +58,7 @@ export const KAMIENICE = [
         ['SKRZYDEŁKA', 0.1, 0.66], ['ZAPRASZAMY', 0.07, 0.86, '#f2d15c']] },
     ],
     blades: [{ x: 0.7, y: 42, w: 7, h: 7, round: true, bg: '#5a1d26', fg: '#f1dcc0', font: 'italic 700 {}px Georgia, serif', lines: [['Perfumeria', 0.18, 0.5]] }],
-    boards: [0.1, 0.19], basket: [0.4, 37],
+    boards: [0.1, 0.3], basket: [0.4, 37],                                              // potykacze przed filarami
   },
   {
     name: 'Żak', mid: [-494, -92], seed: 3, wall: '#f2dcae', base: null, groundTop: 0, trim: '#f8f0dd', frame: '#6a4631', eave: 175,

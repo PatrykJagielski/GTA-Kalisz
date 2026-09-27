@@ -21,9 +21,10 @@ export const box = (c, x0, x1, y0, y1, z0, z1, color, list) =>
   put(c, new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0).translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), color, list);
 // szyba: część okien świeci nocą, witryny (lit) zawsze
 const pane = (c, x0, x1, y0, y1, z, lit) => box(c, x0, x1, y0, y1, z, z + 0.1, '#ffffff', lit || c.n++ * 7 % 10 < 4 ? 'glow' : 'glass');
-// przeszkoda: prostokąt lokalny x0..x1 × z0..z1
+// prostokąt lokalny x0..x1 × z0..z1 jako pierścień na mapie; solidRect = przeszkoda
+const worldRing = (c, x0, x1, z0, z1) => [[x0, z0], [x1, z0], [x1, z1], [x0, z1]].flatMap(([x, z]) => { const v = new THREE.Vector3(x, 0, z).applyMatrix4(c.M); return [v.x, v.z]; });
 export function solidRect(c, x0, x1, z0, z1, solid) {
-  const ring = [[x0, z0], [x1, z0], [x1, z1], [x0, z1]].flatMap(([x, z]) => { const v = new THREE.Vector3(x, 0, z).applyMatrix4(c.M); return [v.x, v.z]; });
+  const ring = worldRing(c, x0, x1, z0, z1);
   const xs = ring.filter((_, i) => i % 2 === 0), zs = ring.filter((_, i) => i % 2), b = [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)];
   gridPut(solid, b[0], b[1], b[2], b[3], { p: [ring], b });
 }
@@ -103,11 +104,13 @@ export function archRecess(c, x0, x1, y0, top, rise, D, S, o) {
   for (const x of dw ? [xc - dw / 2, xc + dw / 2] : [xc]) box(c, x - 0.4, x + 0.4, y0, tt, -D, -D + 0.7, fr);
   if (dw) { box(c, xc - dw / 2, xc + dw / 2, y0, y0 + 9, -D, -D + 0.5, fr); box(c, xc - 0.3, xc + 0.3, y0, tt, -D, -D + 0.8, fr); }
 }
-// podcień: filary między łukami, przejście w głębi (ściana z drzwiami albo witryną, strop, boki, posadzka)
-export function arcade(c, arcs, S, D = 22, P = 6) {
+// podcień: filary między łukami, przejście w głębi (ściana z drzwiami albo witryną, strop, boki, posadzka);
+// przejście jest dziurą w bryle kolizji kamienicy (hit), filary osobnymi przeszkodami, więc da się wejść pod łuki
+export function arcade(c, arcs, S, solid, hit, D = 22, P = 6) {
   const a = arcs[0][0] - 2.5, b = arcs[arcs.length - 1][1] + 2.5, inner = '#9c8a6c', top = arcs[0][2] + 1;
   const piers = [[a, arcs[0][0]], ...arcs.slice(1).map((q, i) => [arcs[i][1], q[0]]), [arcs[arcs.length - 1][1], b]];
-  for (const [p, q] of piers) box(c, p, q, 0, top, -P, -0.2, S.base);
+  for (const [p, q] of piers) { box(c, p, q, 0, top, -P, -0.2, S.base); solidRect(c, p, q, -P, 1, solid); }
+  hit.p.push(worldRing(c, a, b, -D, 1));
   box(c, a, b, 0, top + 1, -D - 1, -D, inner); box(c, a, b, top, top + 1, -D, -P, inner);
   box(c, a - 1, a, 0, top + 1, -D, -P, inner); box(c, b, b + 1, 0, top + 1, -D, -P, inner); box(c, a, b, 0, CURB, -D, 0, '#b3ada2');
   for (const [x0, x1, , k] of arcs) {

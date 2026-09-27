@@ -72,8 +72,9 @@ export function buildBuildings(D, R, add) {
     const r1 = R(), r2 = R(), walls = old ? PAL.old : PAL.wall[kind], roofPal = pitched ? PAL.tiles : PAL.roof[kind];
     const col = new THREE.Color(walls[Math.floor(r1 * walls.length)]), roof = new THREE.Color(roofPal[Math.floor(r2 * roofPal.length)]);
     if (rynek.has(bi)) {                                                                   // pierzeje Głównego Rynku: model osobny
-      gridPut(solid, bx0, bz0, bx1, bz1, { p: [ring], b: [bx0, bz0, bx1, bz1] });
-      chimneysOn(rynekHouse(rynek.get(bi), ring, freeEdges(ring, ring, index, 12), RX)); return;
+      const hit = { p: [ring], b: [bx0, bz0, bx1, bz1] };                                  // kamienice/ mogą wyciąć w nim podcień
+      gridPut(solid, bx0, bz0, bx1, bz1, hit);
+      chimneysOn(rynekHouse(rynek.get(bi), ring, freeEdges(ring, ring, index, 12), RX, hit)); return;
     }
     const y0 = minh > 0 ? minh : -2, arr = old ? bArr[3] : kind === 3 ? bArr[1] : kind === 2 ? bArr[2] : bArr[0];
     const H = h - y0, topUV = (u, v) => [u / 160, 1 - (H - v) / 132];                    // kamienica: okna liczone od okapu

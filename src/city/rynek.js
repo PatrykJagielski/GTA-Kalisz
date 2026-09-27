@@ -65,10 +65,10 @@ export function rynekKit() {
 
 // kamienica przy Rynku: front z elewacją rynkową (odcinki po ok. 6 osi), reszta ścian jak w starówce, dach mansardowy;
 // kamienice odtworzone ze zdjęć (kamienice/spec.js) dostają własny front, wysokość okapu i kolor
-// x = { kit, walls, gable, tiles, roofs, flatCol, pushPoly, inConvex }; zwraca punkty kalenicy (kominy)
+// x = { kit, walls, gable, tiles, roofs, flatCol, pushPoly, inConvex }, hit = bryła kolizji; zwraca punkty kalenicy (kominy)
 const color = k => new THREE.Color(PALETTE[(k * 5) % PALETTE.length]).multiplyScalar(1.12);
 const frontSpec = (ring, i) => { const j = (i + 2) % ring.length; return kamienica((ring[i] + ring[j]) / 2, (ring[i + 1] + ring[j + 1]) / 2); };
-export function rynekHouse(f, ring, free, x) {
+export function rynekHouse(f, ring, free, x, hit) {
   let own = null;
   for (let i = 0; i < ring.length && !own; i += 2) if (f.front[i / 2]) own = frontSpec(ring, i);
   const h = own ? own.eave : RYNEK_H, y0 = -2, H = h - y0, sg = ringArea2(ring) > 0 ? 1 : -1, kit = x.kit, col = own ? new THREE.Color(own.wall) : color(kit.houses);
@@ -78,7 +78,7 @@ export function rynekHouse(f, ring, free, x) {
     const tx = (ring[j] - x0) / len, tz = (ring[j + 1] - z0) / len, nx = sg * tz, nz = -sg * tx;
     const axes = Math.max(1, Math.round(len / AXIS)), m = Math.max(1, Math.round(axes / HOUSE)), aw = len / axes, spec = frontSpec(ring, i);
     if (spec) {                                                                          // numeracja kamienic jak bez niej: reszta Rynku bez zmian
-      kit.houses += m; kit.real.push({ x0, z0, x1: ring[j], z1: ring[j + 1], nx, nz, len, spec }); continue;
+      kit.houses += m; kit.real.push({ x0, z0, x1: ring[j], z1: ring[j + 1], nx, nz, len, spec, hit }); continue;
     }
     for (let s = 0, done = 0; s < m; s++) {
       const n = Math.floor(axes * (s + 1) / m) - done, k = kit.houses++, variant = (k * 3) % RYNEK_VARIANTS, c = color(k), A = kit.fronts[variant];
