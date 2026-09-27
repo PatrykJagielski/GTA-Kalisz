@@ -5,16 +5,16 @@ import { rng } from '../core/random.js';
 import { scene } from '../core/renderer.js';
 import { speckle } from '../core/textures.js';
 import { CURB } from './config.js';
-import { PAL, facade } from './facades.js';
+import { buildBuildings } from './buildings.js';
 import { buildFountain } from './landmarks/fountain.js';
 import { buildGarnizon } from './landmarks/garnizon.js';
 import { buildJozef } from './landmarks/jozef.js';
 import { buildKolegiata } from './landmarks/kolegiata.js';
 import { buildMural } from './landmarks/mural.js';
-import { NAR, buildNarozna } from './landmarks/narozna.js';
+import { buildNarozna } from './landmarks/narozna.js';
 import { buildRatusz } from './landmarks/ratusz.js';
-import { arrGeo, flatGeo, newArr, pushRoof, pushWalls } from './mesh.js';
-import { gridPut, indexPolys, ringBox } from './spatial.js';
+import { arrGeo, flatGeo, newArr, pushWalls } from './mesh.js';
+import { gridPut, indexPolys } from './spatial.js';
 
 /* ================= Kalisz: miasto z danych OpenStreetMap ================= */
 export function buildCity(D) {
@@ -59,24 +59,9 @@ export function buildCity(D) {
   group.add(instanced(new THREE.PlaneGeometry(30, 1.5).rotateX(-Math.PI / 2), paintM, dash));
   group.add(instanced(new THREE.PlaneGeometry(5, 26).rotateX(-Math.PI / 2), paintM, zebra));
 
-  // budynki: ściany z oknami (kolor z palety), płaskie dachy; kolizja dla wszystkiego, co stoi na ziemi
-  const solid = new Map(), bArr = [newArr(), newArr(), newArr()], roofs = newArr();
-  const winUV = (u, v) => [u / 160, v / 132], blankUV = () => [0.01, 0.01];
-  let narRing = null;
-  for (const b of D.buildings) {
-    const h = b[0], minh = b[1], kind = b[2], ring = b.slice(3);
-    if (ring[0] === NAR.first[0] && ring[1] === NAR.first[1]) { narRing = ring; continue; }   // kamienica na rogu: model osobny
-    const col = new THREE.Color(PAL.wall[kind][Math.floor(R() * PAL.wall[kind].length)]);
-    const roof = new THREE.Color(PAL.roof[kind][Math.floor(R() * PAL.roof[kind].length)]);
-    const y0 = minh > 0 ? minh : -2, arr = kind === 3 ? bArr[1] : kind === 2 ? bArr[2] : bArr[0];
-    pushWalls(arr, ring, false, y0, h, kind === 2 ? blankUV : winUV, col);
-    pushRoof(roofs, ring, h, roof);
-    if (minh < 25) { const bb = ringBox(ring); gridPut(solid, bb[0], bb[1], bb[2], bb[3], { p: [ring], b: bb }); }
-  }
-  const facM = new THREE.MeshStandardMaterial({ map: facade(false), vertexColors: true, roughness: 0.85, emissive: 0xffffff, emissiveMap: facade(false, true), emissiveIntensity: 0 });
-  const glassM = new THREE.MeshStandardMaterial({ map: facade(true), vertexColors: true, roughness: 0.35, metalness: 0.3, emissive: 0xffffff, emissiveMap: facade(true, true), emissiveIntensity: 0 });
-  add(arrGeo(bArr[0]), facM); add(arrGeo(bArr[1]), glassM); add(arrGeo(bArr[2]), facM);
-  add(arrGeo(roofs), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }));
+  // budynki: ściany z oknami, dachy (spadziste nad kamienicami i domami), lukarny, kominy; kolizja dla wszystkiego, co stoi na ziemi
+  const { facM, glassM, oldM, narRing, solid, meshes } = buildBuildings(D, R, add);
+  group.add(...meshes);
   const ratM = (D.ratusz ? buildRatusz(D.ratusz, group, solid) : []).concat(D.kolegiata ? buildKolegiata(D.kolegiata, group, solid) : [], D.garnizon ? buildGarnizon(D.garnizon, group, solid) : [], buildMural(group));
   const posts = new Map();
   const fountain = D.fountain ? buildFountain(D.fountain, group, solid, posts) : null;
@@ -159,6 +144,6 @@ export function buildCity(D) {
 
   scene.add(group);
   const start = D.start;
-  return { group, solid, posts, segs, names: D.names, lampHeadM, facM, glassM, ratM, fountain, map, MS, bounds: D.bounds,
+  return { group, solid, posts, segs, names: D.names, lampHeadM, facM, glassM, oldM, ratM, fountain, map, MS, bounds: D.bounds,
     blockG: indexPolys(D.blocks), greenG: indexPolys(D.green), start };
 }

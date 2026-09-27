@@ -14,7 +14,7 @@ Kod gry to moduły ES w `src/` (jednostka świata = 1 dm; x = wschód, z = połu
 | `src/core/` | renderer, scena, kamera i światła (`renderer.js`), stan gry, DOM, motyw, pomocnicze bryły (`geometry.js`), tekstury canvas, RNG |
 | `src/car/` | część wspólna aut: bryła z profili (`makeProfile`, `loft`), dekale, wnętrze i koła z parametrami, tablice; `index.js` = lista aut, auto na scenie (`rig`) i aktywny model (`active`) |
 | `src/car/models/` | modele: `audi-a4/` i `bmw-e63/`; każdy opisuje wymiary, krzywe nadwozia, osiągi, skrzynię, brzmienie silnika, kamerę kierowcy i obrys kolizji oraz buduje własne detale (grill, lampy, felgi) |
-| `src/city/` | Kalisz z danych miasta: `build.js` (`buildCity`), indeks przestrzenny, siatki z wielokątów OSM, elewacje, nazwy ulic, niebo dzień/noc |
+| `src/city/` | Kalisz z danych miasta: `build.js` (`buildCity`), `buildings.js` (budynki: elewacje, lukarny, kominy), `roofs.js` (dachy spadziste z obrysów OSM), indeks przestrzenny, siatki, tekstury elewacji i dachówki, nazwy ulic, niebo dzień/noc |
 | `src/city/landmarks/` | zabytki: ratusz, fontanna Noce i Dnie, kolegiata, kościół garnizonowy, mural (sgraffito), Plac św. Józefa z pomnikiem Jana Pawła II, kamienica na rogu |
 | `src/drive/` | jazda: fizyka i zawieszenie, kolizje, skrzynia biegów, kamery, HUD, minimapa, dźwięk silnika; `index.js` = jeden krok jazdy |
 | `src/game/` | wczytywanie mapy, wybór auta (`cars.js`), start i pauza, klawiatura i dotyk, przyciski, dzień/noc, ustawienie dźwięku, utrata kontekstu WebGL, pętla |
