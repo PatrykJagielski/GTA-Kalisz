@@ -23,7 +23,7 @@ export function paintNet() {
   $('mOnline').textContent = t; $('pOnline').textContent = t;
   $('mNet').dataset.status = net.status;
   const hud = $('dNet');
-  hud.hidden = net.status !== 'on'; hud.textContent = `Online: ${net.n}`;
+  hud.hidden = net.status !== 'on'; hud.textContent = `Online: ${net.n}${net.rtt ? ` · ${Math.round(net.rtt)} ms` : ''}`;
   $('dChat').hidden = net.status !== 'on';
 }
 function say(t) {

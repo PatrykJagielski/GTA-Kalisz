@@ -3,6 +3,7 @@ import { camera } from '../core/renderer.js';
 import { drive, st } from '../drive/state.js';
 import { makeAvatar, removeAvatar, setCarModel, setLabel } from './avatar.js';
 import { chatLine } from './chat.js';
+import { predict } from './predict.js';
 import { updateRemoteSound } from './sound.js';
 import { net } from './state.js';
 
@@ -12,11 +13,15 @@ import { net } from './state.js';
 //   [x, z, y, psi]                                  na ziemi, jak me w foot/index.js
 //   [x, z, y, psi, auto, lx, lz, ly, lpsi]          na aucie gracza „auto”: położenie w układzie tego auta, więc
 //                                                   postać jedzie z autem tak, jak to auto widać u odbiorcy
-// p = id kierowcy, u którego gracz jedzie jako pasażer (0 = nie jedzie).
-// Stany przychodzą ok. 15 razy na sekundę, nierówno. Każdy ma czas nadawcy k (ms), więc gracza pokazujemy
-// DELAY za nadawcą i wygładzamy między dwoma stanami, które obejmują ten moment; gdy nowego stanu brak, auto
-// jedzie dalej z ostatnią prędkością (najdłużej MAX_AHEAD), a potem stoi.
-const DELAY = 150, MAX_AHEAD = 250;            // ms
+// p = id kierowcy, u którego gracz jedzie jako pasażer (0 = nie jedzie), q = ping gracza do serwera (ms).
+// Stany przychodzą ok. 30 razy na sekundę, nierówno. Każdy ma czas nadawcy k (ms), więc gracza pokazujemy o.delay
+// za nadawcą i wygładzamy między dwoma stanami, które obejmują ten moment. o.delay dopasowuje się do łącza: odstęp
+// między stanami plus 95. centyl spóźnień pakietów (40–250 ms; w górę szybko, w dół powoli). Gdy nowego stanu brak,
+// auto jedzie dalej modelem rowerowym (najdłużej MAX_AHEAD), a potem stoi.
+// Zderzenia (drive/traffic.js) liczą się z przewidywanym położeniem cudzego auta „teraz” (o.hit), a nie z tym,
+// które widać na ekranie: inaczej przy uderzeniu auta wjeżdżałyby na siebie o drogę przejechaną w czasie opóźnienia.
+const DELAY_START = 150, DELAY_MIN = 40, DELAY_MAX = 250, MAX_AHEAD = 250, PREDICT_MAX = 300;   // ms
+const JITTER_N = 60;                           // ostatnich pakietów do liczenia spóźnień (ok. 2 s)
 const KEEP = 30;                               // stanów w buforze (ok. 2 s)
 const LABEL_FAR = 3000;                        // dm: dalej nick nie jest pokazywany
 const CAR_LABEL = 17, PERSON_LABEL = 21;       // dm nad podłożem
@@ -24,35 +29,43 @@ const others = new Map();                      // id → gracz
 let myRiders = new Set();                      // kto jedzie jako pasażer w moim aucie (komunikat w czacie)
 
 function add(id) {
-  const o = { id, a: makeAvatar(), buf: [], off: null, spin: 0, pose: null, foot: null, ride: 0 };
+  const o = { id, a: makeAvatar(), buf: [], off: null, delay: DELAY_START, late: [], gap: 33, rtt: 0, spin: 0, pose: null, foot: null, ride: 0 };
   others.set(id, o);
   return o;
 }
 function remove(o) { removeAvatar(o.a); others.delete(o.id); }
 export const nickOf = id => net.roster.get(id) || `Gracz ${id}`;
 
-// stan pokoju z serwera (siebie nie pokazujemy)
-export function applyWorld(list, now) {
-  const seen = new Set(), riders = new Set();
-  for (const [id, car, k, s, f, p = 0] of list) {
+// przesunięcie zegara nadawcy (najmniejsze opóźnienie pakietu, powoli w górę: dryf zegarów) i bufor dopasowany do łącza
+function timing(o, k, now) {
+  const lat = now - k, last = o.buf[o.buf.length - 1];
+  o.off = o.off === null || lat < o.off ? lat : o.off + (lat - o.off) * 0.002;
+  o.late.push(lat - o.off);
+  if (o.late.length > JITTER_N) o.late.shift();
+  if (last) o.gap += (Math.min(k - last.k, 200) - o.gap) * 0.1;
+  const sorted = [...o.late].sort((a, b) => a - b), p95 = sorted[Math.floor(sorted.length * 0.95)];
+  const target = Math.min(DELAY_MAX, Math.max(DELAY_MIN, o.gap + p95 + 10));
+  o.delay += (target - o.delay) * (target > o.delay ? 0.3 : 0.03);   // lepiej chwilę później niż szarpnięcie
+}
+// stany graczy z serwera: pojedynczy ('u', od razu) albo wszystkie ('w', raz na sekundę); siebie nie pokazujemy
+export function applyStates(list, now) {
+  for (const [id, car, k, s, f, p = 0, q = 0] of list) {
     if (id === net.id) continue;
-    seen.add(id);
     const o = others.get(id) || add(id);
     setCarModel(o.a, car);
-    o.ride = p;
-    if (p === net.id) riders.add(id);
+    if (p === net.id && !myRiders.has(id)) { myRiders.add(id); chatLine('', `${nickOf(id)} jedzie z Tobą jako pasażer`); }
+    if (p !== net.id && myRiders.has(id)) { myRiders.delete(id); chatLine('', `${nickOf(id)} wysiada z Twojego auta`); }
+    o.ride = p; o.rtt = q;
     const last = o.buf[o.buf.length - 1];
-    if (last && k <= last.k) continue;         // serwer rozsyła ostatni stan, dopóki gracz nie przyśle nowego
-    // przesunięcie zegara nadawcy względem naszego: najmniejsze opóźnienie, powoli doganiane w górę
-    const off = now - k;
-    o.off = o.off === null || off < o.off ? off : o.off + (off - o.off) * 0.02;
+    if (last && k <= last.k) continue;         // pełny stan powtarza to, co już przyszło
+    timing(o, k, now);
     o.buf.push({ k, s, f });
     if (o.buf.length > KEEP) o.buf.shift();
   }
-  for (const o of others.values()) if (!seen.has(o.id)) remove(o);
-  for (const id of riders) if (!myRiders.has(id)) chatLine('', `${nickOf(id)} jedzie z Tobą jako pasażer`);
-  for (const id of myRiders) if (!riders.has(id) && seen.has(id)) chatLine('', `${nickOf(id)} wysiada z Twojego auta`);
-  myRiders = riders;
+}
+// po zmianie składu pokoju: kto wyszedł, znika
+export function keepOnly(roster) {
+  for (const o of [...others.values()]) if (!roster.has(o.id)) { myRiders.delete(o.id); remove(o); }
 }
 export function clearOthers() {
   for (const o of [...others.values()]) remove(o);
@@ -64,6 +77,7 @@ export function clearOthers() {
 const lerp = (a, b, t) => a + (b - a) * t;
 const mix = (a, b, u) => a.map((v, j) => lerp(v, b[j], u));
 const sameSpot = (a, b) => a && b && a.length === b.length && a[4] === b[4];   // obie na ziemi albo na tym samym aucie
+const wheelbase = o => o.a.model.dims.axF - o.a.model.dims.axR;
 function sample(o, t) {                        // { s, f } w chwili t (czas nadawcy)
   const b = o.buf;
   let i = b.length - 1;
@@ -73,9 +87,15 @@ function sample(o, t) {                        // { s, f } w chwili t (czas nada
     const u = (t - A.k) / (B.k - A.k);
     return { s: mix(A.s, B.s, u), f: sameSpot(A.f, B.f) ? mix(A.f, B.f, u) : (u < 0.5 ? A.f : B.f) };
   }
-  const s = [...A.s], dt = Math.min(Math.max(t - A.k, 0), MAX_AHEAD) / 1000;
-  s[0] += Math.cos(s[2]) * s[7] * dt; s[1] -= Math.sin(s[2]) * s[7] * dt;
-  return { s, f: A.f };
+  return { s: predict(A.s, wheelbase(o), Math.min(Math.max(t - A.k, 0), MAX_AHEAD) / 1000), f: A.f };
+}
+// położenie auta „teraz” u nadawcy, do zderzeń: ostatni stan przesunięty o jego wiek i drogę pakietu
+// nadawca → serwer → my (połowa pingu każdego z nas)
+function predictedHit(o, now, rear, hx, hz) {
+  const last = o.buf[o.buf.length - 1], rtt = net.rtt || 80;
+  const ahead = Math.min(PREDICT_MAX, Math.max(0, now - o.off - last.k) + (rtt + (o.rtt || rtt)) / 2) / 1000;
+  const [x, z, psi] = predict(last.s, wheelbase(o), ahead);
+  return { cx: x + Math.cos(psi) * rear, cz: z - Math.sin(psi) * rear, psi, hx, hz };
 }
 function ownPose() {
   const { REAR } = active.geo;
@@ -95,7 +115,7 @@ export function updateOthers(dt, now) {
   for (const o of others.values()) {
     if (!o.buf.length) continue;
     const { rig, wheels, model } = o.a;
-    const { s: [x, z, psi, y, pitch, roll, steer, v, rpm = 0, gas = 0, horn = 0], f } = sample(o, now - o.off - DELAY);
+    const { s: [x, z, psi, y, pitch, roll, steer, v, rpm = 0, gas = 0, horn = 0], f } = sample(o, now - o.off - o.delay);
     const rear = -model.dims.axR, prev = o.pose;
     o.pose = { cx: x + Math.cos(psi) * rear, cz: z - Math.sin(psi) * rear, psi, y };
     o.f = f;
@@ -105,7 +125,7 @@ export function updateOthers(dt, now) {
     for (const { w, spin, front } of wheels) { spin.rotation.z = o.spin; if (front) w.rotation.y = steer; }
     const move = prev ? [o.pose.cx - prev.cx, o.pose.cz - prev.cz, psi - prev.psi, y - prev.y] : [0, 0, 0, 0];
     const [hx, hz] = model.hit.box;
-    cars.push({ id: o.id, ...o.pose, hx, hz, v, model, rig, move });
+    cars.push({ id: o.id, ...o.pose, hx, hz, v, model, rig, move, hit: predictedHit(o, now, rear, hx, hz) });
     sounds.push({ id: o.id, x: o.pose.cx, z: o.pose.cz, model, rpm, load: gas, horn: horn > 0.5, engine: !f && !o.ride && rpm > 0 });
     if (o.ride) riders.set(o.ride, [...(riders.get(o.ride) || []), nickOf(o.id)]);
   }
@@ -126,13 +146,13 @@ export function updateOthers(dt, now) {
   drive.traffic = { cars, people };
   updateRemoteSound(sounds);
 }
-// gdzie są inni: { id, x, z, foot, ride, model } (x, z = postać albo środek auta; pasażer = auto kierowcy)
+// gdzie są inni: { id, x, z, foot, ride, model, rtt, delay } (x, z = postać albo środek auta; pasażer = auto kierowcy)
 export function othersWhere() {
   const out = [];
   for (const o of others.values()) {
     if (!o.pose) continue;
     const at = o.ride ? others.get(o.ride)?.pose || (o.ride === net.id ? ownPose() : o.pose) : o.pose;
-    out.push({ id: o.id, x: o.foot ? o.foot[0] : at.cx, z: o.foot ? o.foot[1] : at.cz, foot: !!o.foot, ride: o.ride, model: o.a.model });
+    out.push({ id: o.id, x: o.foot ? o.foot[0] : at.cx, z: o.foot ? o.foot[1] : at.cz, foot: !!o.foot, ride: o.ride, model: o.a.model, rtt: o.rtt, delay: o.delay });
   }
   return out;
 }

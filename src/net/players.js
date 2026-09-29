@@ -17,12 +17,13 @@ export function paintPlayers() {
   if (net.status !== 'on' || net.roster.size < 2) { list.hidden = true; return; }
   const [mx, mz] = myPlace(), where = new Map(othersWhere().map(w => [w.id, w]));
   const rows = [...net.roster].map(([id, nick]) => {
-    if (id === net.id) return { nick, what: drive.ride ? `ty, pasażer u: ${net.roster.get(drive.ride.id) || '?'}` : 'ty', d: -1 };
+    const ping = ms => ms ? ` · ${Math.round(ms)} ms` : '';
+    if (id === net.id) return { nick, what: (drive.ride ? `ty, pasażer u: ${net.roster.get(drive.ride.id) || '?'}` : 'ty') + ping(net.rtt), d: -1 };
     const w = where.get(id);
     if (!w) return { nick, what: 'w menu', d: Infinity };
     const d = Math.hypot(w.x - mx, w.z - mz) / 10;                  // m
     const what = w.ride === net.id ? 'jedzie z Tobą' : w.ride ? `pasażer u: ${net.roster.get(w.ride) || '?'}` : w.foot ? 'pieszo' : w.model.name;
-    return { nick, what: w.ride === net.id ? what : `${what} · ${far(d)}`, d };
+    return { nick, what: (w.ride === net.id ? what : `${what} · ${far(d)}`) + ping(w.rtt), d };
   }).sort((a, b) => a.d - b.d);
   list.replaceChildren(...rows.map(({ nick, what }) => {
     const li = document.createElement('li');

@@ -4,10 +4,12 @@ import { drive, st } from './state.js';
 
 /* ---------- inni gracze jako przeszkody: auta (prostokąty) i piesi (koła) ---------- */
 // drive.traffic uzupełnia co klatkę net/remote.js:
-//   cars   = [{ cx, cz, psi, hx, hz, v }]  środek auta, kurs, pół długości i szerokości (hit.box modelu), prędkość
+//   cars   = [{ cx, cz, psi, hx, hz, v, hit }]  środek auta, kurs, pół długości i szerokości (hit.box modelu), prędkość;
+//            hit = { cx, cz, psi, hx, hz } położenie przewidziane na „teraz” (net/remote.js) — z nim liczą się zderzenia
 //   people = [[x, z, y]]                   stopy postaci
 // Każdy gracz rozwiązuje zderzenia tylko dla siebie: odsuwa własne auto i zmienia jego prędkość, a drugi gracz robi
-// to samo u siebie. Cudze auto widzimy ok. 150 ms wstecz, więc przy uderzeniu auta mogą na chwilę na siebie wejść.
+// to samo u siebie. Cudze auto na ekranie jest trochę opóźnione, a zderzenie liczy się z przewidzianym (hit), więc
+// przy gwałtownym manewrze drugiego gracza odbicie może nastąpić kilkadziesiąt centymetrów przed widocznym autem.
 const PERSON_R = 2.2;                          // dm, jak R w foot/person.js
 const BOUNCE = 0.3;                            // sprężystość zderzenia aut (0 = bez odbicia)
 
@@ -42,11 +44,11 @@ export function hitsPeople(cx, cz, psi) {
 export function bumpCars(cx, cz) {
   let hit = 0;
   for (const o of drive.traffic.cars) {
-    const c = overlap(self(cx, cz, st.psi), o);
+    const c = overlap(self(cx, cz, st.psi), o.hit);
     if (!c) continue;
     const px = c.nx * (c.depth + 0.3), pz = c.nz * (c.depth + 0.3);
     if (!hits(cx + px, cz + pz, st.psi)) { st.x += px; st.z += pz; cx += px; cz += pz; }
-    const fx = Math.cos(st.psi), fz = -Math.sin(st.psi), ox = Math.cos(o.psi) * o.v, oz = -Math.sin(o.psi) * o.v;
+    const fx = Math.cos(st.psi), fz = -Math.sin(st.psi), ox = Math.cos(o.hit.psi) * o.v, oz = -Math.sin(o.hit.psi) * o.v;
     const rel = (fx * st.v - ox) * c.nx + (fz * st.v - oz) * c.nz;           // < 0: auta zbliżają się
     if (rel < 0) {
       const j = -(1 + BOUNCE) / 2 * rel;                                     // równe masy
