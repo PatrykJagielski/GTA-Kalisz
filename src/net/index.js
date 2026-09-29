@@ -23,8 +23,16 @@ function sendState() {
   const inCar = S.driving && !drive.onFoot, gas = inCar && readInput(drive.keys).gas ? 1 : 0;
   const s = [r1(st.x), r1(st.z), r3(st.psi), r1(st.y), r3(st.pitch), r3(st.roll), r3(st.steer), r1(st.v),
     inCar ? Math.round(st.rpm) : 0, gas, hornPressed() ? 1 : 0];
-  const f = drive.onFoot ? [r1(me.x), r1(me.z), r1(me.y), r3(me.psi)] : 0;
-  ws.send(JSON.stringify({ t: 's', k: Math.round(performance.now()), c: active.model.id, s, f }));
+  const p = drive.ride ? drive.ride.id : 0;
+  ws.send(JSON.stringify({ t: 's', k: Math.round(performance.now()), c: active.model.id, s, f: p ? 0 : footState(), p }));
+}
+// postać: na ziemi [x, z, y, psi]; na aucie innego gracza dodatkowo jego id i położenie w układzie tego auta
+function footState() {
+  if (!drive.onFoot) return 0;
+  const f = [r1(me.x), r1(me.z), r1(me.y), r3(me.psi)], c = me.on;
+  if (!c) return f;
+  const dx = me.x - c.cx, dz = me.z - c.cz, co = Math.cos(c.psi), s = Math.sin(c.psi);
+  return [...f, c.id, r1(dx * co - dz * s), r1(dx * s + dz * co), r1(me.y - c.y), r3(me.psi - c.psi)];
 }
 function onMessage(e) {
   let m;

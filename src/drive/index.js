@@ -1,6 +1,7 @@
 import { S } from '../core/state.js';
 import { othersWhere } from '../net/remote.js';
 import { me, paintDoor, updateFoot } from '../foot/index.js';
+import { updateRide } from '../foot/ride.js';
 import { updateAudio } from './audio.js';
 import { updateCamera } from './camera.js';
 import { updateGearbox } from './gearbox.js';
@@ -17,7 +18,7 @@ export function updateDrive(dt) {
   paintDoor();
   if (drive.onFoot) {
     const car = stepCar(dt, PARKED);
-    updateFoot(dt);
+    if (!drive.ride || !updateRide(dt, me)) updateFoot(dt);                        // pasażer u innego gracza albo pieszo
     drawMinimap(me.x, me.z, me.psi, car, othersWhere());
     updateStreetName(dt, me.x, me.z);
   } else {

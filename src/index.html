@@ -181,6 +181,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
   .dh-left{bottom:calc(90px + env(safe-area-inset-bottom,0px))}
 }
 /* pieszo: bez prędkościomierza, przycisk skoku zamiast niczego */
+.riding .dh-touch,.riding .help-foot,.drive-hud:not(.riding) .help-ride,
 .on-foot .dh-gauge,.on-foot .help-car,.on-foot .dh-touch .horn,.drive-hud:not(.on-foot) .help-foot,.drive-hud:not(.on-foot) .dh-touch .jump{display:none}
 @media (max-width:560px){
   .menu{justify-content:flex-end;gap:16px;background:linear-gradient(0deg,rgba(6,9,12,.9) 0,rgba(6,9,12,.6) 55%,rgba(6,9,12,.1) 100%)}
@@ -265,7 +266,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:2px 5px;border:1px solid var(--line);b
         <div class="dh-chat-log" id="dChatLog" aria-live="polite"></div>
         <div id="dChatBox" hidden><input id="dChatIn" maxlength="140" autocomplete="off" enterkeyhint="send" aria-label="Wiadomość do pokoju" placeholder="Wiadomość · Enter wysyła · Esc zamyka"></div>
       </div>
-      <div class="dh-help"><span class="help-car"><kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny · <kbd>H</kbd> klakson</span><span class="help-foot"><kbd>W</kbd> <kbd>S</kbd> naprzód i wstecz · <kbd>A</kbd> <kbd>D</kbd> obrót · <kbd>Shift</kbd> bieg · <kbd>Spacja</kbd> skok</span><br><kbd>F</kbd> wysiądź i wsiądź · <kbd>T</kbd> czat · <kbd>C</kbd> kamera · <kbd>R</kbd> start · <kbd>N</kbd> noc · <kbd>Esc</kbd> pauza</div>
+      <div class="dh-help"><span class="help-car"><kbd>W</kbd> <kbd>↑</kbd> gaz · <kbd>S</kbd> <kbd>↓</kbd> hamulec i wsteczny · <kbd>A</kbd> <kbd>D</kbd> skręt · <kbd>Spacja</kbd> ręczny · <kbd>H</kbd> klakson</span><span class="help-ride">Jedziesz jako pasażer · <kbd>F</kbd> wysiądź</span><span class="help-foot"><kbd>W</kbd> <kbd>S</kbd> naprzód i wstecz · <kbd>A</kbd> <kbd>D</kbd> obrót · <kbd>Shift</kbd> bieg · <kbd>Spacja</kbd> skok</span><br><kbd>F</kbd> wysiądź i wsiądź (przy cudzym aucie: jako pasażer) · <kbd>T</kbd> czat · <kbd>C</kbd> kamera · <kbd>R</kbd> start · <kbd>N</kbd> noc · <kbd>Esc</kbd> pauza</div>
     </div>
     <div class="dh-gauge"><b id="dSpeed">0</b><span class="u">km/h</span><div class="dh-rpm"><i id="dRpm"></i></div><span id="dGear">1 · 850 obr/min</span></div>
     <div class="dh-touch">

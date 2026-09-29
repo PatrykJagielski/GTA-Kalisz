@@ -4,11 +4,13 @@ import { V } from '../core/geometry.js';
 import { camera, controls } from '../core/renderer.js';
 import { startEngineSound, stopEngineSound } from '../drive/audio.js';
 import { drive, st } from '../drive/state.js';
-import { HEAD, R, blocked, carGap, carPoint, groundAt, onStairs, placePerson, showPerson } from './person.js';
+import { HEAD, R, blocked, carGap, carPoint, groundAt, onStairs, placePerson, remoteSupport, showPerson } from './person.js';
+import { board, nearOther, unboard } from './ride.js';
 
 /* ================= pieszo: wysiadanie i wsiadanie, chodzenie, bieg, skok ================= */
-// me: x, z = stopy postaci (dm), y = wysokość stóp, vy = prędkość w pionie, psi = kurs, air = w powietrzu
-export const me = { x: 0, z: 0, y: 0, vy: 0, psi: 0, air: false };
+// me: x, z = stopy postaci (dm), y = wysokość stóp, vy = prędkość w pionie, psi = kurs, air = w powietrzu,
+// on = auto innego gracza (z drive.traffic.cars), na którym postać stoi, albo null
+export const me = { x: 0, z: 0, y: 0, vy: 0, psi: 0, air: false, on: null };
 const WALK = 20 / 0.36, RUN = 30 / 0.36, BACK = 7 / 0.36;   // dm/s: chód 20 km/h, bieg 30 km/h, cofanie 7 km/h
 const TURN = 2.8;                              // rad/s
 const JUMP = 51, GRAVITY = 98;                 // wyskok ok. 1,3 m: wystarczy na murki fontanny (76 cm i 1,2 m)
@@ -38,12 +40,30 @@ export function leaveCar() {
 }
 export function enterCar(force = false) {
   if (!drive.onFoot || (!force && carGap(me.x, me.z) > REACH)) return;
+  if (drive.ride) unboard(me);                                                   // R w trakcie jazdy z kimś: wraca do siebie
   drive.onFoot = false;
   showPerson(false);
   $('driveHud').classList.remove('on-foot');
   if (!force) startEngineSound();
 }
-export function toggleCar() { if (drive.onFoot) enterCar(); else leaveCar(); }
+// F: wysiądź z własnego auta, wsiądź do własnego, a obok cudzego auta — na miejsce pasażera
+export function toggleCar() {
+  if (drive.ride) unboard(me);
+  else if (!drive.onFoot) leaveCar();
+  else if (carGap(me.x, me.z) <= REACH) enterCar();
+  else { const c = !me.air && nearOther(me.x, me.z); if (c) board(c); }
+}
+// stojąc na aucie innego gracza, postać jedzie razem z nim (przesunięcie i obrót auta od poprzedniej klatki)
+function carry() {
+  me.on = null;
+  if (me.air || !drive.traffic.cars.length) return;
+  const { top, car } = remoteSupport(me.x, me.z);
+  if (!car || Math.abs(top - me.y) > 1) return;
+  const [dx, dz, dpsi, dy] = car.move, rx = me.x - (car.cx - dx), rz = me.z - (car.cz - dz);
+  const c = Math.cos(dpsi), s = Math.sin(dpsi);
+  me.x = car.cx + rx * c + rz * s; me.z = car.cz - rx * s + rz * c; me.psi += dpsi; me.y += dy;
+  me.on = car;
+}
 
 function walk(dt, k) {
   const fwd = k.KeyW || k.ArrowUp || k.tgas, back = k.KeyS || k.ArrowDown || k.tbrake;
@@ -85,16 +105,17 @@ function followCamera(dt) {
 
 // jeden krok pieszego; zwraca pozycję i kurs dla minimapy i nazwy ulicy
 export function updateFoot(dt) {
+  carry();
   const g = walk(dt, drive.keys);
   placePerson(me, g);
   followCamera(dt);
-  const near = carGap(me.x, me.z) <= REACH;
+  const near = carGap(me.x, me.z) <= REACH || (!me.air && !!nearOther(me.x, me.z));
   if (door.disabled === near) door.disabled = !near;
   return me;
 }
 // napis na przycisku drzwi (w aucie zawsze aktywny)
 export function paintDoor() {
-  const t = drive.onFoot ? 'Wsiądź' : 'Wysiądź';
+  const t = drive.ride || !drive.onFoot ? 'Wysiądź' : carGap(me.x, me.z) > REACH && nearOther(me.x, me.z) ? 'Wsiądź jako pasażer' : 'Wsiądź';
   if (door.textContent !== t) door.textContent = t;
-  if (!drive.onFoot) door.disabled = false;
+  if (!drive.onFoot || drive.ride) door.disabled = false;
 }

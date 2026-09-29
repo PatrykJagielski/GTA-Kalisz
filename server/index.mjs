@@ -9,11 +9,13 @@
 // Protokół (JSON):
 //   połączenie       /ws?room=<pokój>&nick=<nick>               nick od razu, żeby wejście do pokoju było już z nim
 //   serwer → gracz   {t:'hi', id, room}                         po połączeniu
-//                    {t:'w', n, p:[[id, auto, k, s, f], …]}     stan pokoju: n = liczba połączonych, p = gracze w grze
+//                    {t:'w', n, p:[[id, auto, k, s, f, p], …]}  stan pokoju: n = liczba połączonych, p = gracze w grze
 //                    {t:'r', r:[[id, nick], …]}                 skład pokoju: po wejściu, wyjściu i zmianie nicku
 //                    {t:'c', id, text}                          wiadomość czatu (także do nadawcy: potwierdzenie)
-//   gracz → serwer   {t:'s', k, c, s:[x, z, psi, y, pitch, roll, steer, v, rpm, gaz, klakson], f:[x, z, y, psi] | 0}
-//                    k = czas nadawcy (ms), c = id auta, f = postać, jeśli gracz wysiadł (s z 8 liczbami: starszy klient)
+//   gracz → serwer   {t:'s', k, c, s:[x, z, psi, y, pitch, roll, steer, v, rpm, gaz, klakson], f, p}
+//                    k = czas nadawcy (ms), c = id auta, s z 8 liczbami: starszy klient;
+//                    f = postać, jeśli gracz wysiadł: [x, z, y, psi] albo na cudzym aucie [x, z, y, psi, id auta, lx, lz, ly, lpsi], inaczej 0;
+//                    p = id kierowcy, u którego gracz jedzie jako pasażer (0 albo brak = nie jedzie)
 //                    {t:'n', name}                              nick (do 16 znaków; pusty = „Gracz <id>”)
 //                    {t:'c', text}                              czat (do 140 znaków, najwyżej co 0,7 s)
 import { createServer } from 'node:http';
@@ -38,8 +40,10 @@ let nextId = 1;
 const finite = (a, n) => Array.isArray(a) && a.length === n && a.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1e7);
 function parseState(m) {
   if (!Number.isFinite(m.k) || typeof m.c !== 'string' || !CAR_RE.test(m.c) || !(finite(m.s, 11) || finite(m.s, 8))) return null;
-  if (m.f !== 0 && !finite(m.f, 4)) return null;
-  return { car: m.c, state: [m.k, m.s, m.f] };
+  if (m.f !== 0 && !finite(m.f, 4) && !finite(m.f, 9)) return null;
+  const p = m.p === undefined ? 0 : m.p;
+  if (!Number.isInteger(p) || p < 0 || p > 1e9) return null;
+  return { car: m.c, state: [m.k, m.s, m.f, p] };
 }
 // nick i czat: bez znaków sterujących i niewidocznych, pojedyncze spacje, najwyżej max znaków (nie bajtów)
 function clean(text, max) {

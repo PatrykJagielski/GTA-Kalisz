@@ -35,5 +35,9 @@ export function cycleCam() {
   drive.cam = order[(order.indexOf(drive.cam) + 1) % order.length];
   if (drive.cam === 'orbit') controls.target.copy(rig.position).y += 7;
   applyCameraMode();
-  hud.cam.textContent = 'Kamera: ' + CAMS[drive.cam];
+  paintCam();
+}
+// napis przycisku kamery; jako pasażer (foot/ride.js) widok z fotela obok kierowcy
+export function paintCam() {
+  hud.cam.textContent = 'Kamera: ' + (drive.ride && drive.cam === 'driver' ? 'pasażer' : CAMS[drive.cam]);
 }

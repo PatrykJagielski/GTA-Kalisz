@@ -7,7 +7,7 @@ import { GRID, cellOf, polyHas } from '../city/spatial.js';
 import { heightOf, surfaceAt } from '../drive/collision.js';
 import { drive, st } from '../drive/state.js';
 import { trafficBlocks } from '../drive/traffic.js';
-import { carTopAt } from './car-top.js';
+import { carTopAt, othersTopAt } from './car-top.js';
 
 /* ---------- postać pieszego: prosta bryła bez animacji, kolizje z miastem i autem ---------- */
 // układ postaci jak auta: x = przód, z = w bok; obrót wokół osi Y o kurs psi
@@ -60,15 +60,27 @@ export function carPoint(lx, lz) {
 export function onStairs(x, z, y) { const f = drive.city.inside?.floorAt(x, z, y); return f !== null && f !== undefined; }
 const RING = [[R, 0], [-R, 0], [0, R], [0, -R], [0.7 * R, 0.7 * R], [0.7 * R, -0.7 * R], [-0.7 * R, 0.7 * R], [-0.7 * R, -0.7 * R]];
 // wysokość, na której stoi postać (stopy na wysokości y): jezdnia, chodnik, trawnik, murki i niecki fontanny,
-// schody i piętra wieży ratusza albo wierzch auta
+// schody i piętra wieży ratusza albo wierzch auta, własnego lub innego gracza
 // (auto: najwyższy punkt pod obrysem postaci, żeby nie wchodziła w karoserię i mogła stać na krawędzi dachu)
 export function groundAt(x, z, y = 0) {
   const f = drive.city.fountain, h = f && f.floorAt(x, z), i = drive.city.inside?.floorAt(x, z, y);
   const g = i !== null && i !== undefined ? i : h === null || h === undefined ? heightOf(surfaceAt(x, z), x, z) : h;
-  if (carGap(x, z) > R) return g;
-  let top = carTopAt(x, z);
-  for (const [ox, oz] of RING) top = Math.max(top, carTopAt(x + ox, z + oz));
+  let top = 0;
+  if (carGap(x, z) <= R) {
+    top = carTopAt(x, z);
+    for (const [ox, oz] of RING) top = Math.max(top, carTopAt(x + ox, z + oz));
+  }
+  if (drive.traffic.cars.length) top = Math.max(top, remoteSupport(x, z).top);
   return Math.max(g, top);
+}
+// najwyższy wierzch auta innego gracza pod obrysem postaci i to auto ({ top: 0, car: null }, gdy żadnego)
+export function remoteSupport(x, z) {
+  let best = othersTopAt(x, z);
+  for (const [ox, oz] of RING) {
+    const t = othersTopAt(x + ox, z + oz);
+    if (t.top > best.top) best = t;
+  }
+  return best;
 }
 // bryły miasta bez fontanny: na nią da się wskoczyć (wysokość z groundAt); w wieży ratusza ściany z ratusz-walk.js
 function solidAt(x, z, y) {

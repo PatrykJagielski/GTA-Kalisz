@@ -56,11 +56,10 @@ export function bumpCars(cx, cz) {
   }
   return hit;
 }
-// pieszy (stopy na wysokości y) w cudzym aucie albo w cudzej postaci
+// pieszy (stopy na wysokości y) w cudzej postaci; cudze auta zatrzymują pieszego tak jak własne, przez wysokość
+// ich wierzchu (foot/person.js groundAt), więc da się na nie wskoczyć
 export function trafficBlocks(x, z, y) {
-  const { cars, people } = drive.traffic;
-  return cars.some(c => inCar(c, x, z, PERSON_R)) ||
-    people.some(([px, pz, py]) => Math.abs(py - y) < 15 && (px - x) ** 2 + (pz - z) ** 2 < (2 * PERSON_R) ** 2);
+  return drive.traffic.people.some(([px, pz, py]) => Math.abs(py - y) < 15 && (px - x) ** 2 + (pz - z) ** 2 < (2 * PERSON_R) ** 2);
 }
 // wolne miejsce na start obok zajętego: w bok, potem do tyłu (środek auta i kurs); bez innych graczy — start
 export function freeSpot(cx, cz, psi) {
