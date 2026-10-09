@@ -40,7 +40,14 @@ export function setupAudio() {
   const turbo = ctx.createOscillator(); turbo.type = 'sine';
   const turboG = ctx.createGain(); turboG.gain.value = 0; turbo.connect(turboG); turboG.connect(master);
   turbo.start();
-  drive.audio = { ctx, master, src: null, snd: null, lp, body, hp, clatter, turbo, turboG, load: 0 };
+  // pisk opon w poślizgu: szum przez wąski filtr pasmowy
+  const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), nd = noise.getChannelData(0), R = rng(77);
+  for (let i = 0; i < nd.length; i++) nd[i] = R() * 2 - 1;
+  const hiss = ctx.createBufferSource(); hiss.buffer = noise; hiss.loop = true;
+  const squeal = ctx.createBiquadFilter(); squeal.type = 'bandpass'; squeal.frequency.value = 950; squeal.Q.value = 9;
+  const squealG = ctx.createGain(); squealG.gain.value = 0;
+  hiss.connect(squeal); squeal.connect(squealG); squealG.connect(master); hiss.start();
+  drive.audio = { ctx, master, src: null, snd: null, lp, body, hp, clatter, turbo, turboG, squeal, squealG, load: 0 };
   setEngineSound();
   return drive.audio;
 }
@@ -70,6 +77,9 @@ export function updateAudio(gas, dt) {
   au.clatter.gain.setTargetAtTime(snd.clatter * (1 - au.load * 0.55) * (rpm < 1800 ? 1 : 0.6), t, 0.05);
   au.turbo.frequency.setTargetAtTime(1900 + rpm * 1.1, t, 0.1);
   au.turboG.gain.setTargetAtTime(boost * snd.turbo, t, 0.15);
+  const skid = Math.min(1, Math.max(Math.abs(Math.sin(st.slip)) * 2.5, (1 - st.grip) * 0.6)) * Math.min(1, Math.abs(st.v) / 120);
+  au.squeal.frequency.setTargetAtTime(850 + skid * 250 + Math.sin(t * 23) * 40, t, 0.05);
+  au.squealG.gain.setTargetAtTime(skid * 0.9, t, 0.06);
   if (t > (au.startUntil || 0)) au.master.gain.setTargetAtTime(drive.sound ? 0.55 : 0, t, 0.08);   // nie przerywaj rozruchu
 }
 function playStarter() {

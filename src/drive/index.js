@@ -9,6 +9,7 @@ import { updateHorn } from './horn.js';
 import { updateHud, updateStreetName } from './hud.js';
 import { drawMinimap } from './minimap.js';
 import { readInput, stepCar } from './physics.js';
+import { updateSkids } from './skids.js';
 import { drive, st } from './state.js';
 
 /* ================= jazda: jeden krok gry w aucie albo pieszo ================= */
@@ -18,12 +19,14 @@ export function updateDrive(dt) {
   paintDoor();
   if (drive.onFoot) {
     const car = stepCar(dt, PARKED);
+    updateSkids();
     if (!drive.ride || !updateRide(dt, me)) updateFoot(dt);                        // pasażer u innego gracza albo pieszo
     drawMinimap(me.x, me.z, me.psi, car, othersWhere());
     updateStreetName(dt, me.x, me.z);
   } else {
     const input = readInput(drive.keys);
     const { cx, cz } = stepCar(dt, input);
+    updateSkids();
     updateGearbox(dt, input.gas);
     updateHud(input.gas);
     updateCamera(dt, cx, cz);

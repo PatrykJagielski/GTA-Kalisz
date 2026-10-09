@@ -13,6 +13,13 @@ import { bumpCars, freeSpot, hitsPeople } from './traffic.js';
 const CURB_LOSS = 0.98;                        // każde uderzenie kół o krawężnik zabiera 2% prędkości
 const MAX_STEP = 5;                            // najdłuższy krok ruchu (dm): przy dużej prędkości krok dzieli się na części,
                                                // żeby auto nie przeskoczyło przez wąską przeszkodę
+// poślizg na ręcznym: zablokowany tył traci przyczepność (st.grip), auto obraca się mocniej i z bezwładnością (st.yaw),
+// a kierunek jazdy zostaje w tyle za maską (st.slip = kurs − kierunek ruchu); po puszczeniu spacji opony łapią stopniowo
+const DRIFT_MIN = 55;                          // dm/s (~20 km/h): wolniej ręczny tylko hamuje
+const DRIFT_GRIP = 0.15;                       // przyczepność tyłu na zablokowanych kołach (1 = pełna)
+const GRIP_LOSS = 6, GRIP_BACK = 1.6;          // 1/s: jak szybko tył traci przyczepność i jak szybko ją odzyskuje
+const OVERSTEER = 1.4;                         // o ile mocniej auto skręca, gdy tył ucieka
+const SCRUB = 55;                              // dm/s²: hamowanie opon sunących bokiem (przy poślizgu 90°)
 
 // sterowanie z klawiatury (strzałki, WASD, spacja) i przycisków dotykowych
 export function readInput(k) {
@@ -45,7 +52,8 @@ function suspension(cx, cz, dt, jump) {
 export function resetCar() {
   const { REAR } = active.geo, [x0, z0, psi0] = drive.city.start, psi = psi0 + Math.PI;   // start obrócony o 180°
   const [x, z] = freeSpot(x0, z0, psi);                                          // gra online: obok auta, które stoi na starcie
-  Object.assign(st, { x: x - Math.cos(psi) * REAR, z: z + Math.sin(psi) * REAR, psi, v: 0, steer: 0, gear: 1, rpm: active.model.gears.idle });
+  Object.assign(st, { x: x - Math.cos(psi) * REAR, z: z + Math.sin(psi) * REAR, psi, v: 0, steer: 0, gear: 1, rpm: active.model.gears.idle,
+    slip: 0, yaw: 0, grip: 1 });
   suspension(x, z, 0, true); placeCar();
   camera.position.set(x - Math.cos(psi) * 90, 34, z + Math.sin(psi) * 90); drive.last.set(x, 0, z);
 }
@@ -75,7 +83,9 @@ function move(dt, input) {
     if (vmax) a *= Math.min(1, Math.max(0, (vmax - st.v * KMH) / 4));             // ogranicznik: napęd słabnie w ostatnich 4 km/h
   }
   if (brake) a -= st.v > 1 ? 90 : (st.v > -70 ? 26 : 0);                          // hamulec, potem wsteczny do ~25 km/h
-  if (input.handbrake) a -= Math.sign(st.v) * 70;
+  const sliding = input.handbrake && st.v > DRIFT_MIN;
+  if (input.handbrake) a -= Math.sign(st.v) * (sliding ? 30 : 70);                // w poślizgu blokuje się tylko tył
+  a -= Math.sign(st.v) * Math.abs(Math.sin(st.slip)) * SCRUB;
   // trawa: mały opór przy ruszaniu, rosnący z prędkością (maks. ok. 38 km/h), zawsze słabszy niż napęd
   const drag = Math.sign(st.v) * (roll + air * st.v * st.v + drive.grass * (6 + Math.abs(st.v) * 0.37));
   let v = st.v + (a - drag) * dt;
@@ -84,13 +94,24 @@ function move(dt, input) {
   const maxSteer = 0.6 / (1 + Math.abs(v) / 200);
   st.steer += (input.steer * maxSteer - st.steer) * Math.min(1, dt * 5);
   const ox = st.x, oz = st.z, op = st.psi;
-  st.psi += v / WB * Math.tan(st.steer) * dt;                                     // model rowerowy: obrót wokół tylnej osi
-  st.x += Math.cos(st.psi) * v * dt; st.z -= Math.sin(st.psi) * v * dt;
+  // model rowerowy: obrót wokół tylnej osi; w poślizgu mocniejszy, z bezwładnością i wokół środka auta (tył ucieka na zewnątrz)
+  st.grip += ((sliding ? DRIFT_GRIP : 1) - st.grip) * Math.min(1, dt * (sliding ? GRIP_LOSS : GRIP_BACK));
+  if (st.grip > 0.99) st.grip = 1;
+  const turn = v / WB * Math.tan(st.steer) * (1 + (1 - st.grip) * OVERSTEER);
+  st.yaw = st.grip === 1 ? turn : st.yaw + (turn - st.yaw) * (1 - Math.exp(-dt * (2.5 + 40 * st.grip ** 3)));
+  const piv = (1 - st.grip) / (1 - DRIFT_GRIP) * WB / 2, px = st.x + Math.cos(st.psi) * piv, pz = st.z - Math.sin(st.psi) * piv;
+  st.psi += st.yaw * dt;
+  st.x = px - Math.cos(st.psi) * piv; st.z = pz + Math.sin(st.psi) * piv;
+  // kierunek ruchu dogania maskę: powoli, gdy tył się ślizga, w ułamku sekundy przy pełnej przyczepności
+  st.slip = (st.slip + (st.grip === 1 ? 0 : st.yaw * dt)) * Math.exp(-dt * (1.2 + 60 * st.grip ** 4));
+  if (Math.abs(st.slip) > Math.PI / 2) { st.slip -= Math.sign(st.slip) * Math.PI; st.v = v = -v; }   // obrót o ponad 90°: auto sunie tyłem
+  const dir = st.psi - st.slip;
+  st.x += Math.cos(dir) * v * dt; st.z -= Math.sin(dir) * v * dt;
   let cx = st.x + Math.cos(st.psi) * REAR, cz = st.z - Math.sin(st.psi) * REAR;
   const ocx = ox + Math.cos(op) * REAR, ocz = oz - Math.sin(op) * REAR;
   // blokuj tylko wjazd w przeszkodę (także w pieszego innego gracza); jeśli auto już o coś zahacza, zawsze może się wycofać
   if ((hits(cx, cz, st.psi) && !hits(ocx, ocz, op)) || (hitsPeople(cx, cz, st.psi) && !hitsPeople(ocx, ocz, op))) {
-    st.x = ox; st.z = oz; st.psi = op; st.v = Math.abs(v) < 8 ? 0 : -v * 0.25;
+    st.x = ox; st.z = oz; st.psi = op; st.v = Math.abs(v) < 8 ? 0 : -v * 0.25; st.slip = st.yaw = 0;
     cx = st.x + Math.cos(st.psi) * REAR; cz = st.z - Math.sin(st.psi) * REAR;
   }
   const bump = bumpCars(cx, cz);                                                // auta innych graczy: odsunięcie i odbicie
