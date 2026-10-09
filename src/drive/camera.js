@@ -8,8 +8,8 @@ import { drive, st } from './state.js';
 const CAMS = { chase: 'za autem', driver: 'kierowca', orbit: 'swobodna' };
 const tmpA = V(), tmpB = V(), tmpC = V();             // wektory robocze: bez alokacji co klatkę
 export function updateCamera(dt, cx, cz) {
-  const fx = Math.cos(st.psi), fz = -Math.sin(st.psi);
   if (drive.cam === 'chase') {
+    const h = st.psi - st.slip * 0.7, fx = Math.cos(h), fz = -Math.sin(h);      // w poślizgu kamera patrzy raczej tam, dokąd auto jedzie
     // kamera goni auto; powyżej ~110 km/h szybciej, żeby nie zostawała dalej niż przy tej prędkości
     const follow = 3.5 * Math.max(1, Math.abs(st.v) / 300);
     camera.position.lerp(tmpA.set(cx - fx * 80, 30, cz - fz * 80), 1 - Math.exp(-dt * follow));
