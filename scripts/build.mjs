@@ -81,7 +81,8 @@ html = html.replace('</body>', `<script type="module" src="${jsFile}"></script>\
 const inline = (tag) => [...html.matchAll(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'g'))].map(m => cspHash(m[1]));
 const csp = [
   "default-src 'none'",
-  `script-src 'self' ${inline('script').join(' ')}`,
+  // static.cloudflareinsights.com: Cloudflare Web Analytics (skrypt wstrzykuje Cloudflare, dane idą na /cdn-cgi/rum, czyli 'self')
+  `script-src 'self' ${inline('script').join(' ')} https://static.cloudflareinsights.com`,
   `style-src 'self' ${inline('style').join(' ')} https://fonts.googleapis.com`,
   'font-src https://fonts.gstatic.com',
   "img-src 'self' data: blob:",
