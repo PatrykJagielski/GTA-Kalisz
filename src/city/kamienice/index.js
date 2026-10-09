@@ -29,7 +29,7 @@ function build(F, S, B, solid, cafes) {
   for (const [i, x0, x1, D, plants] of bal) balcony3d(c, P(x0), P(x1), S.floors[i].y[0] - 8, D, S, plants);
   for (const [y0, y1, d, f0 = 0, f1 = 1, col = S.trim] of S.bands) box(c, P(f0), P(f1), y0, y1, 0, d, col);
   if (S.dentils) for (let x = 0.8; x < len - 1.2; x += 2.2) box(c, x, x + 1.1, S.dentils[0], S.dentils[1], 0, 1.6, S.trim);
-  for (const [f0, f1] of S.strips || []) box(c, P(f0), P(f1), -2, S.dentils ? S.dentils[0] : S.eave, 0, 0.9, S.trim);   // pilastry na narożach
+  for (const [f0, f1] of S.strips || []) box(c, P(f0), P(f1), S.stripY0 ?? -2, S.dentils ? S.dentils[0] : S.eave, 0, 0.9, S.trim);   // pilastry, lizeny
 
   // parter
   for (const o of S.ground) {
@@ -38,7 +38,7 @@ function build(F, S, B, solid, cafes) {
     if (o.k === 'door') { holes.push([x0, x1, y0, y1]); door3d(c, x0, x1, y0, y1, S); }
     if (o.k === 'arch' || o.k === 'arcade') {
       const rise = o.rise || (x1 - x0) / 2, open = o.k === 'arcade';
-      arches.push([x0, x1, open ? -2 : y0, y1, rise]);
+      arches.push([x0, x1, open ? -2 : y0, y1, rise, o.ring]);
       archRecess(c, x0, x1, open ? CURB : y0, y1, rise, open ? 6 : 2.4, S, o);
       if (open) arcs.push([x0, x1, y1, o.inner]);
     }
@@ -56,7 +56,12 @@ function build(F, S, B, solid, cafes) {
     put(c, new THREE.CylinderGeometry(2.2, 1.4, 2.2, 10).translate(x, y - 2, -2.5), '#5a4632');
     box(c, x - 0.1, x + 0.1, y + 2, 45.5, -2.6, -2.4, '#2a2c2f', 'iron');
   }
-  for (const f of S.medallions || []) medallion(c, P(f), S.medY, 3.3, '#f1ece6');
+  for (const f of S.medallions || []) medallion(c, P(f), S.medY, 3.3, S.medColor || '#f1ece6');
+  for (const [f0, f1, y, d = 9, col = '#ece6d6'] of S.awnings || []) {                // markizy: płótno skośnie od ściany i falbana
+    const a = Math.atan2(5, d), l = Math.hypot(5, d);
+    put(c, new THREE.BoxGeometry(P(f1) - P(f0), 0.3, l).rotateX(a).translate((P(f0) + P(f1)) / 2, y - 2.5, d / 2), col);
+    box(c, P(f0), P(f1), y - 7, y - 5, d - 0.2, d, col);
+  }
   if (S.columns) {                                                                       // podest i pary kolumn między łukami
     const [p0, p1] = S.platform.map(P), cols = S.columns.map(P), y0 = CURB + 1.2;
     box(c, p0, p1, 0, y0, 0, 5.5, '#8d4d3c'); solidRect(c, p0, p1, 0, 5.5, solid);
@@ -74,7 +79,10 @@ function build(F, S, B, solid, cafes) {
       put(c, new THREE.SphereGeometry(1.9, 12, 8).translate(x, yb + h + 1.8, 0), '#948e84');
     });
   }
-  for (const s of S.signs || []) sign(c, P(s.x[0]), P(s.x[1]), s.y[0], s.y[1], 0.4, s);
+  for (const s of S.signs || []) {                                                     // w = stała szerokość (dm) wokół ułamka x
+    const [a, b] = s.w ? [P(s.x) - s.w / 2, P(s.x) + s.w / 2] : s.x.map(P);
+    sign(c, a, b, s.y[0], s.y[1], s.z || 0.4, s);
+  }
   for (const s of S.blades || []) {                                                     // wysięgniki: szyld z obu stron
     const x = P(s.x), o = s.w / 2 + 1.2;
     box(c, x - 0.3, x + 0.3, s.y + s.h / 2 + 0.2, s.y + s.h / 2 + 0.8, 0, o + s.w / 2, '#2a2c2f', 'iron');

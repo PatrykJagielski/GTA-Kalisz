@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { M4, instanced } from '../core/geometry.js';
 import { arrGeo, newArr, pushWalls } from './mesh.js';
+import { realFront, zamkowaFronts } from './kamienice/fronts.js';
 import { kamieniceMeshes } from './kamienice/index.js';
 import { kamienica } from './kamienice/spec.js';
 import { roofShape } from './roofs.js';
@@ -90,7 +91,9 @@ export function rynekHouse(f, ring, free, x, hit) {
       done += n;
     }
   }
-  pushWalls(x.walls, ring, false, y0, h, (u, v) => [u / 160, 1 - (H - v) / 132], col, f.front);
+  const zam = zamkowaFronts(ring);                                                     // narożna kamienica z drugim frontem od Zamkowej
+  if (zam) for (const [i, spec] of zam.list) kit.real.push(realFront(ring, i, spec, hit));
+  pushWalls(x.walls, ring, false, y0, h, (u, v) => [u / 160, 1 - (H - v) / 132], col, zam ? f.front.map((v, k) => v || zam.skip[k]) : f.front);
   const { faces, gables, top } = roofShape(ring, free, h, 3.5, 62, { d: 6, s2: 0.75 });
   for (const fc of faces) x.pushPoly(fc.n[1] > 0.999 ? x.roofs : x.tiles, fc.pts, fc.n, fc.uv, fc.n[1] > 0.999 ? x.flatCol : f.roof);
   for (const q of gables) {                                                            // ściana ogniowa nad dachem niższego sąsiada

@@ -17,14 +17,16 @@ export function archDims(x0, x1, top, rise) {
   return { xc: (x0 + x1) / 2, sp: top - rise, R, cy: top - R, a0: Math.asin(Math.min(1, (R - rise) / R)) };
 }
 
-// tynk frontu (y od -2 do top): kolor ścian i parteru, cienie pod gzymsami, ciemne wnęki okien (szyby są w 3D);
-// łuki (arches: [x0, x1, y0, top, rise]) i niebo nad skrajnymi osiami przy attyce są przezroczyste
+// tynk frontu (y od -2 do top): kolor ścian i parteru, pasy innego koloru (panels), cienie pod gzymsami, ciemne wnęki
+// okien (szyby są w 3D); łuki (arches: [x0, x1, y0, top, rise, kolor opaski]) i niebo nad skrajnymi osiami przy attyce
+// są przezroczyste
 export function facadeTex(S, len, holes, arches) {
   const top = S.top || S.eave, [c, g] = cnv(Math.ceil(len * PX), Math.ceil((top + 2) * PX)), R = rng(70 + S.seed);
   const X = x => x * PX, Y = y => (top - y) * PX;
   const rect = (x0, x1, y0, y1, col) => { g.fillStyle = col; g.fillRect(X(x0), Y(y1), X(x1 - x0), Y(y0) - Y(y1)); };
   rect(0, len, -2, top, S.wall);
   if (S.base) rect(0, len, -2, S.groundTop, S.base);
+  for (const [f0, f1, col, y0 = S.groundTop || -2, y1 = top] of S.panels || []) rect(f0 * len, f1 * len, y0, y1, col);   // ryzality, sąsiednie domy
   for (let i = 0; i < 2600; i++) {                                                        // nierówny tynk
     const v = (R() - 0.5) * 0.09; g.fillStyle = v > 0 ? `rgba(255,255,255,${v})` : `rgba(0,0,0,${-v})`;
     g.fillRect(R() * c.width, R() * c.height, 2 + R() * 7, 2 + R() * 7);
@@ -41,11 +43,13 @@ export function facadeTex(S, len, holes, arches) {
     g.fillStyle = gr; g.fillRect(X(f0 * len), Y(y0), X((f1 - f0) * len), X(d * 1.8));
   }
   for (const [x0, x1, y0, y1] of holes) rect(x0 - 0.2, x1 + 0.2, y0 - 0.2, y1 + 0.2, '#1e262d');
-  g.globalCompositeOperation = 'destination-out';
-  for (const [x0, x1, y0, t, rise] of arches) {
+  const arch = (x0, x1, y0, t, rise) => {
     const { xc, sp, R: r, cy, a0 } = archDims(x0, x1, t, rise);
     g.beginPath(); g.moveTo(X(x0), Y(y0)); g.lineTo(X(x0), Y(sp)); g.arc(X(xc), Y(cy), X(r), a0 - Math.PI, -a0); g.lineTo(X(x1), Y(y0)); g.fill();
-  }
+  };
+  for (const [x0, x1, y0, t, rise, ring] of arches) if (ring) { g.fillStyle = ring; arch(x0 - 1.6, x1 + 1.6, y0, t + 1.6, rise + 1.6); }   // opaska łuku
+  g.globalCompositeOperation = 'destination-out';
+  for (const [x0, x1, y0, t, rise] of arches) arch(x0, x1, y0, t, rise);
   if (S.attic) { g.fillRect(0, 0, X(S.attic[0] * len), Y(S.eave)); g.fillRect(X(S.attic[1] * len), 0, c.width, Y(S.eave)); }
   g.globalCompositeOperation = 'source-over';
   return tex(c);

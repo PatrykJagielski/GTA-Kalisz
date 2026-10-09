@@ -3,6 +3,7 @@ import { M4, instanced } from '../core/geometry.js';
 import { rng } from '../core/random.js';
 import { PAL, facade, oldFacade, tileTex } from './facades.js';
 import { NAR } from './landmarks/narozna.js';
+import { realFront, zamkowaFronts } from './kamienice/fronts.js';
 import { arrGeo, newArr, pushRoof, pushWalls } from './mesh.js';
 import { roofShape } from './roofs.js';
 import { rynekHouse, rynekKit, rynekMeshes, rynekPlan } from './rynek.js';
@@ -64,13 +65,13 @@ export function buildBuildings(D, R, add) {
   const RX = { kit, walls: bArr[3], gable: bArr[2], tiles, roofs, flatCol, pushPoly, inConvex };
   let narRing = null;
   D.buildings.forEach((b, bi) => {
-    const h = b[0], minh = b[1], kind = b[2], ring = rings[bi];
+    const minh = b[1], kind = b[2], ring = rings[bi], zam = zamkowaFronts(ring), h = zam ? zam.eave : b[0];   // Zamkowa: wysokość z frontu
     if (ring[0] === NAR.first[0] && ring[1] === NAR.first[1]) { narRing = ring; return; }   // kamienica na rogu: model osobny
     const [bx0, bz0, bx1, bz1] = ringBox(ring), area = Math.abs(ringArea2(ring)) / 2;
-    const pitched = minh === 0 && (kind === 1 || (kind === 0 && h <= 170 && area <= 150000));
+    const pitched = minh === 0 && (kind === 1 || (kind === 0 && b[0] <= 170 && area <= 150000));
     const old = pitched && kind === 0 && Math.hypot((bx0 + bx1) / 2, (bz0 + bz1) / 2) < OLD_TOWN;
     const r1 = R(), r2 = R(), walls = old ? PAL.old : PAL.wall[kind], roofPal = pitched ? PAL.tiles : PAL.roof[kind];
-    const col = new THREE.Color(walls[Math.floor(r1 * walls.length)]), roof = new THREE.Color(roofPal[Math.floor(r2 * roofPal.length)]);
+    const col = new THREE.Color(zam ? zam.wall : walls[Math.floor(r1 * walls.length)]), roof = new THREE.Color(roofPal[Math.floor(r2 * roofPal.length)]);
     if (rynek.has(bi)) {                                                                   // pierzeje Głównego Rynku: model osobny
       const hit = { p: [ring], b: [bx0, bz0, bx1, bz1] };                                  // kamienice/ mogą wyciąć w nim podcień
       gridPut(solid, bx0, bz0, bx1, bz1, hit);
@@ -78,8 +79,10 @@ export function buildBuildings(D, R, add) {
     }
     const y0 = minh > 0 ? minh : -2, arr = old ? bArr[3] : kind === 3 ? bArr[1] : kind === 2 ? bArr[2] : bArr[0];
     const H = h - y0, topUV = (u, v) => [u / 160, 1 - (H - v) / 132];                    // kamienica: okna liczone od okapu
-    pushWalls(arr, ring, false, y0, h, old ? topUV : kind === 2 ? blankUV : winUV, col);
-    if (minh < 25) gridPut(solid, bx0, bz0, bx1, bz1, { p: [ring], b: [bx0, bz0, bx1, bz1] });
+    const hit = { p: [ring], b: [bx0, bz0, bx1, bz1] };
+    pushWalls(arr, ring, false, y0, h, old ? topUV : kind === 2 ? blankUV : winUV, col, zam && zam.skip);
+    if (zam) for (const [i, spec] of zam.list) kit.real.push(realFront(ring, i, spec, hit));   // front ze zdjęć zamiast ściany
+    if (minh < 25) gridPut(solid, bx0, bz0, bx1, bz1, hit);
     if (!pitched) { pushRoof(roofs, ring, h, roof); return; }
 
     const slope = kind === 1 ? 0.9 : 0.72 + RR() * 0.22, rise = kind === 1 ? 50 : 55 + RR() * 30;

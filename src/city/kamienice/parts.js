@@ -95,6 +95,19 @@ export function archRecess(c, x0, x1, y0, top, rise, D, S, o) {
   put(c, new THREE.CylinderGeometry(R, R, D, 20, 1, true, a0 + Math.PI / 2, Math.PI - 2 * a0).rotateX(Math.PI / 2).translate(xc, cy, -D / 2), rev);
   if (o.k === 'arcade') return;
   box(c, x0 - 0.3, x0, y0, sp, -D, 0, rev); box(c, x1, x1 + 0.3, y0, sp, -D, 0, rev); box(c, x0, x1, y0 - 0.6, y0, -D, 0.6, S.trim);
+  if (o.wood || o.gate) {                                                               // drewniane drzwi albo brama z kratą, w łuku naświetle
+    const cap = new THREE.Shape(); cap.moveTo(x1, sp); cap.absarc(xc, cy, R, a0, Math.PI - a0, false); cap.lineTo(x1, sp);
+    put(c, new THREE.ShapeGeometry(cap, 12).translate(0, 0, -D), '#ffffff', o.gate ? 'glass' : 'glow');
+    box(c, x0, x1, sp - 0.6, sp + 0.4, -D, -D + 0.7, fr);
+    if (o.gate) {
+      box(c, x0, x1, y0, sp - 0.6, -D - 6, -D - 5.8, '#2b2723');                         // ciemna sień za kratą
+      railPlane(c, x1 - x0, sp - 0.6 - y0, g => g.translate(xc, (y0 + sp - 0.6) / 2, -D + 0.4));
+    } else {
+      box(c, x0, x1, y0, sp - 0.6, -D, -D + 0.4, o.frame || WOOD);
+      for (const x of [xc - (x1 - x0) / 4, xc + (x1 - x0) / 4]) box(c, x - (x1 - x0) / 6, x + (x1 - x0) / 6, y0 + 4, sp - 5, -D + 0.4, -D + 0.8, '#4f311e');
+    }
+    return;
+  }
   const shape = new THREE.Shape(); shape.moveTo(x0, y0); shape.lineTo(x1, y0); shape.lineTo(x1, sp); shape.absarc(xc, cy, R, a0, Math.PI - a0, false); shape.lineTo(x0, y0);
   put(c, new THREE.ShapeGeometry(shape, 16).translate(0, 0, -D), '#ffffff', 'glow');
   put(c, new THREE.TorusGeometry(R - 0.4, 0.45, 5, 18, Math.PI - 2 * a0).rotateZ(a0).translate(xc, cy, -D + 0.3), fr);
