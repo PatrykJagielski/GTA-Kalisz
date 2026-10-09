@@ -2,7 +2,8 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
-  { ignores: ['dist/', 'dist-server/', 'node_modules/'] },
+  // .claude/: worktree z sesji Claude Code (pełne kopie repozytorium)
+  { ignores: ['dist/', 'dist-server/', 'node_modules/', '.claude/'] },
   js.configs.recommended,
   {
     files: ['src/**/*.js'],
