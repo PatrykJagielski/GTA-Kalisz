@@ -37,6 +37,7 @@ export function facadeTex(S, len, holes, arches) {
     g.fillStyle = gr; g.fillRect(X(x), Y(y1), X(1 + R() * 7), X(h));
   }
   rect(0, len, -2, 3, shade(S.base || S.wall, 0.8));                                   // cokół
+  for (const [y0, y1, f0 = 0, f1 = 1] of S.rustic || []) for (let y = y0 + 4.5; y < y1; y += 4.5) rect(f0 * len, f1 * len, y - 0.35, y, 'rgba(40,32,24,.28)');   // boniowanie
   for (const [y0, , d, f0 = 0, f1 = 1] of S.bands) {                                     // cień pod gzymsem
     const gr = g.createLinearGradient(0, Y(y0), 0, Y(y0 - d * 1.8));
     gr.addColorStop(0, 'rgba(0,0,0,.24)'); gr.addColorStop(1, 'rgba(0,0,0,0)');

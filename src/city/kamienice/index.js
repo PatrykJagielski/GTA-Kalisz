@@ -62,11 +62,16 @@ function build(F, S, B, solid, cafes) {
     put(c, new THREE.BoxGeometry(P(f1) - P(f0), 0.3, l).rotateX(a).translate((P(f0) + P(f1)) / 2, y - 2.5, d / 2), col);
     box(c, P(f0), P(f1), y - 7, y - 5, d - 0.2, d, col);
   }
-  if (S.columns) {                                                                       // podest i pary kolumn między łukami
-    const [p0, p1] = S.platform.map(P), cols = S.columns.map(P), y0 = CURB + 1.2;
-    box(c, p0, p1, 0, y0, 0, 5.5, '#8d4d3c'); solidRect(c, p0, p1, 0, 5.5, solid);
-    cols.forEach(x => column(c, x, y0, S.colTop, 2.8, 2.1, S.trim));
-    for (let i = 0; i + 1 < cols.length; i += 2) box(c, cols[i] - 3.6, cols[i + 1] + 3.6, S.colTop, S.colTop + 2.6, 0, 5.4, S.trim);
+  if (S.columns) {                                                                       // pary kolumn: na podeście albo od colBase (wielki porządek)
+    const cols = S.columns.map(P), y0 = S.colBase ?? CURB + 1.2, r = S.colR || 2.1, z = r + 0.7;
+    if (S.platform) { const [p0, p1] = S.platform.map(P); box(c, p0, p1, 0, y0, 0, 5.5, '#8d4d3c'); solidRect(c, p0, p1, 0, 5.5, solid); }
+    cols.forEach(x => column(c, x, y0, S.colTop, z, r, S.trim));
+    for (let i = 0; i + 1 < cols.length; i += 2) box(c, cols[i] - 3.6, cols[i + 1] + 3.6, S.colTop, S.colTop + 2.6, 0, 2 * z - 0.2, S.trim);
+  }
+  for (const [f0, f1, h, y = S.eave, d = 3, lun] of S.pediments || []) {               // trójkątne frontony, lun = lunetka w tympanonie
+    const a = P(f0), b = P(f1), sh = new THREE.Shape([new THREE.Vector2(a, y), new THREE.Vector2(b, y), new THREE.Vector2((a + b) / 2, y + h)]);
+    put(c, new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false }), S.trim);
+    if (lun) put(c, new THREE.CircleGeometry(h * 0.3, 16, 0, Math.PI).translate((a + b) / 2, y + 1.2, d + 0.05), '#2a3440');
   }
   if (S.attic) {                                                                         // górna kondygnacja i attyka z kulami
     const [a, b] = S.attic.map(P), yb = S.top, hs = [9, 11, 13, 11, 9];

@@ -3,7 +3,7 @@ import { M4, instanced } from '../core/geometry.js';
 import { rng } from '../core/random.js';
 import { PAL, facade, oldFacade, tileTex } from './facades.js';
 import { NAR } from './landmarks/narozna.js';
-import { realFront, zamkowaFronts } from './kamienice/fronts.js';
+import { photoFronts, realFront } from './kamienice/fronts.js';
 import { arrGeo, newArr, pushRoof, pushWalls } from './mesh.js';
 import { roofShape } from './roofs.js';
 import { rynekHouse, rynekKit, rynekMeshes, rynekPlan } from './rynek.js';
@@ -65,7 +65,7 @@ export function buildBuildings(D, R, add) {
   const RX = { kit, walls: bArr[3], gable: bArr[2], tiles, roofs, flatCol, pushPoly, inConvex };
   let narRing = null;
   D.buildings.forEach((b, bi) => {
-    const minh = b[1], kind = b[2], ring = rings[bi], zam = zamkowaFronts(ring), h = zam ? zam.eave : b[0];   // Zamkowa: wysokość z frontu
+    const minh = b[1], kind = b[2], ring = rings[bi], zam = photoFronts(ring), h = zam ? zam.eave : b[0];   // front ze zdjęć: wysokość z niego
     if (ring[0] === NAR.first[0] && ring[1] === NAR.first[1]) { narRing = ring; return; }   // kamienica na rogu: model osobny
     const [bx0, bz0, bx1, bz1] = ringBox(ring), area = Math.abs(ringArea2(ring)) / 2;
     const pitched = minh === 0 && (kind === 1 || (kind === 0 && b[0] <= 170 && area <= 150000));
@@ -81,7 +81,7 @@ export function buildBuildings(D, R, add) {
     const H = h - y0, topUV = (u, v) => [u / 160, 1 - (H - v) / 132];                    // kamienica: okna liczone od okapu
     const hit = { p: [ring], b: [bx0, bz0, bx1, bz1] };
     pushWalls(arr, ring, false, y0, h, old ? topUV : kind === 2 ? blankUV : winUV, col, zam && zam.skip);
-    if (zam) for (const [i, spec] of zam.list) kit.real.push(realFront(ring, i, spec, hit));   // front ze zdjęć zamiast ściany
+    if (zam) for (const [a, e, spec] of zam.list) kit.real.push(realFront(ring, a, e, spec, hit));   // front ze zdjęć zamiast ściany
     if (minh < 25) gridPut(solid, bx0, bz0, bx1, bz1, hit);
     if (!pitched) { pushRoof(roofs, ring, h, roof); return; }
 
