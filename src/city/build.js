@@ -6,6 +6,7 @@ import { scene } from '../core/renderer.js';
 import { speckle } from '../core/textures.js';
 import { CURB } from './config.js';
 import { buildBuildings } from './buildings.js';
+import { buildMarianska } from './marianska.js';
 import { buildFountain } from './landmarks/fountain.js';
 import { buildGarnizon } from './landmarks/garnizon.js';
 import { buildJozef } from './landmarks/jozef.js';
@@ -67,6 +68,7 @@ export function buildCity(D) {
   const posts = new Map();
   const fountain = D.fountain ? buildFountain(D.fountain, group, solid, posts) : null;
   buildJozef(D, group, solid, posts);
+  buildMarianska(group);
   if (narRing) buildNarozna(group, solid, narRing);
   // wieże kościołów z hełmem
   const towerM = new THREE.MeshStandardMaterial({ color: 0xc9b89c, roughness: 0.85 }), spireM = new THREE.MeshStandardMaterial({ color: 0x4f6b62, roughness: 0.5, metalness: 0.4 });
