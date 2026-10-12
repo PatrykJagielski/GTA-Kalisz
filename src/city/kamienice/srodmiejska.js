@@ -1,6 +1,6 @@
 import { nr } from './zamkowa-kit.js';
 
-/* ---------- ulica Śródmiejska: początek od Rynku (od ul. Złotej) do skrzyżowania z ul. Kolegialną ---------- */
+/* ---------- ulica Śródmiejska: pierwsze ok. 170 m od Rynku (dalsza część ulicy poza listą frontów) ---------- */
 // Według Street View (2024-2025), format jak w zamkowa-kit.js. Opisy od lewej do prawej patrząc z jezdni na elewację
 // (pierzeja NW = prawa strona, idąc od Rynku, pierzeja SE = lewa); `house` uzupełnia piętra, gzymsy, okap i ziarno.
 const PITCH = 37;
