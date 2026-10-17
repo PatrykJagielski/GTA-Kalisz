@@ -1,3 +1,8 @@
+import { RYNEK_NE } from './rynek-ne.js';
+import { RYNEK_NW } from './rynek-nw.js';
+import { RYNEK_SE } from './rynek-se.js';
+import { RYNEK_SW } from './rynek-sw.js';
+
 /* ---------- kamienice Głównego Rynku odtworzone ze zdjęć 1:1 (Street View i widok z lotu ptaka) ---------- */
 // Pierzeja północno-zachodnia między Złotą a Piskorzewską, od lewej patrząc z płyty Rynku: Salon Firan (róg Złotej),
 // Pod Filarami (Główny Rynek 1), Żak (2), Bank Millennium (3, róg Piskorzewskiej). Zamiast typowej elewacji Rynku
@@ -16,7 +21,7 @@ const plate = (x0, x1, y) => ({ x: [x0, x1], y: [y, y + 3], bg: '#d8d4c9', fg: '
 const MILL = { bg: '#c3213f', border: '#f5f5f5', lit: true, font: '700 {}px Arial, sans-serif', lines: [['Millennium', 0.44, 0.42], ['bank', 0.24, 0.78, '#fff', '400 {}px Arial, sans-serif']] };
 const ZAK = '#2c3a51';
 
-export const KAMIENICE = [
+const NW_PIERZEJA = [
   {
     name: 'Salon Firan', mid: [-682, 68], seed: 1, wall: '#efece3', base: '#b3bd8c', groundTop: 60, trim: '#f8f6ef', frame: '#f4f2ec',
     eave: 155, top: 191, dormers: false,
@@ -93,6 +98,8 @@ export const KAMIENICE = [
     signs: [plate(0.905, 0.965, 45)],
   },
 ];
+
+export const KAMIENICE = [...NW_PIERZEJA, ...RYNEK_NW, ...RYNEK_NE, ...RYNEK_SE, ...RYNEK_SW];
 
 // kamienica, której front ma środek w (x, z)
 export const kamienica = (x, z) => KAMIENICE.find(k => Math.hypot(k.mid[0] - x, k.mid[1] - z) < 20) || null;
