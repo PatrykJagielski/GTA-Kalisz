@@ -14,7 +14,7 @@ const FRONTS = [
   {
     // jasnozielona kamienica z kolumną balkonów z roślinami, łukowymi witrynami lokali i drewnianymi drzwiami
     name: 'Parczewskiego, zielona kamienica', mid: [-2604, 218], seed: 202, wall: '#c3d6b8', base: '#a9c19c', groundTop: 52, trim: '#eef3e6', frame: '#f4f2ec', eave: 172,
-    axes: ax(8), floors: [{ y: [14, 44], w: 9 }, ...rows(3, 9.5, { hood: 'hood' })], bands: [[50, 55, 2.4], [164, 168, 1.6], [168, 172, 3.8]],
+    axes: ax(8), floors: [{ y: [14, 44], w: 9 }, ...rows(3, 9.5).map(r => ({ ...r, hood: 'hood' }))], bands: [[50, 55, 2.4], [164, 168, 1.6], [168, 172, 3.8]],
     balconies: [[1, 0.35, 0.45, 8, true], [2, 0.35, 0.45, 8, true], [1, 0.8, 0.9, 8, true]],
     ground: [arch(0.04, 0.2), arch(0.26, 0.36, { wood: true, rise: 6 }), arch(0.72, 0.9)],
   },

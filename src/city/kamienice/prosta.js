@@ -16,6 +16,7 @@ export const PROSTA = [
     name: 'Szary domek', mid: [3616, -6734], seed: 162, wall: '#aeab9c', base: '#8f8c7e', groundTop: 18, trim: '#8f8c7e', frame: '#e9e6dc', eave: 75,
     axes: [0.15, 0.5],
     floors: [WIN([20, 52], 14, 'ear')],
+    bands: [],
     ground: [],
   },
   {
@@ -34,6 +35,7 @@ export const PROSTA = [
     name: 'Dom z oficyną', mid: [3912, -6845], seed: 164, wall: '#c9b8a8', base: '#a8988a', groundTop: 36, trim: '#a8988a', frame: '#b89b7a', eave: 120,
     axes: [0.55, 0.88],
     floors: [WIN([30, 50], 10, 'ear'), WIN([76, 100], 10, 'ear')],
+    bands: [],
     ground: [],
   },
 ];
