@@ -1,17 +1,25 @@
 import { ringArea2 } from '../spatial.js';
 import { JOZEFA } from './jozefa.js';
+import { SUKIENNICZA } from './sukiennicza.js';
 import { ZAMKOWA_NW } from './zamkowa-nw.js';
 import { ZAMKOWA_SE } from './zamkowa-se.js';
 
 /* ---------- fronty kamienic odtworzonych ze zdjęć: krawędź obrysu OSM → opis z danymi (mid = środek krawędzi) ---------- */
 // Opis ze span = [[x, z], [x, z]] (w kolejności obrysu) zastępuje całą elewację wzdłuż tego odcinka: wszystkie krawędzie
 // obrysu leżące przy nim (ząbki pilastrów, płytkie ryzality) giną pod jednym frontem.
-const ALL = [...ZAMKOWA_NW, ...ZAMKOWA_SE, ...JOZEFA], SPANS = ALL.filter(s => s.span), NEAR = 8;
+const ALL = [...ZAMKOWA_NW, ...ZAMKOWA_SE, ...JOZEFA, ...SUKIENNICZA], SPANS = ALL.filter(s => s.span), NEAR = 8;
 export const nearMid = (list, x, z) => list.find(k => !k.span && Math.hypot(k.mid[0] - x, k.mid[1] - z) < 20) || null;
 export const edgeMid = (ring, i) => { const j = (i + 2) % ring.length; return [(ring[i] + ring[j]) / 2, (ring[i + 1] + ring[j + 1]) / 2]; };
 function offSpan([[ax, az], [bx, bz]], x, z) {                                       // odległość punktu od odcinka span
   const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
   return Math.hypot(x - ax - dx * t, z - az - dz * t);
+}
+
+// opis z pieces = [[szerokość dm, opis], ...] dzieli jedną krawędź obrysu na kilka kamienic (ostatnia bierze resztę): fronty od a do b
+function split([ax, az], [bx, bz], s) {
+  const len = Math.hypot(bx - ax, bz - az), at = d => [ax + (bx - ax) * d / len, az + (bz - az) * d / len];
+  let d0 = 0;
+  return s.pieces.map(([w, spec], i, all) => { const d1 = i === all.length - 1 ? len : d0 + w, f = [at(d0), at(d1), spec]; d0 = d1; return f; });
 }
 
 // front dla kamieniceMeshes od punktu a do b (kolejność obrysu), normalna na zewnątrz obrysu
@@ -26,7 +34,7 @@ export function photoFronts(ring) {
   const list = [], skip = [], pt = i => [ring[i % ring.length], ring[(i + 1) % ring.length]];
   for (let i = 0; i < ring.length; i += 2) {
     const s = nearMid(ALL, ...edgeMid(ring, i));
-    skip.push(!!s); if (s) list.push([pt(i), pt(i + 2), s]);
+    skip.push(!!s); if (s) list.push(...(s.pieces ? split(pt(i), pt(i + 2), s) : [[pt(i), pt(i + 2), s]]));
   }
   for (const s of SPANS) {
     let hits = 0;
