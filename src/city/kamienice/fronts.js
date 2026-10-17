@@ -1,12 +1,13 @@
 import { ringArea2 } from '../spatial.js';
 import { JOZEFA } from './jozefa.js';
+import { PODGORZE } from './podgorze.js';
 import { ZAMKOWA_NW } from './zamkowa-nw.js';
 import { ZAMKOWA_SE } from './zamkowa-se.js';
 
 /* ---------- fronty kamienic odtworzonych ze zdjęć: krawędź obrysu OSM → opis z danymi (mid = środek krawędzi) ---------- */
 // Opis ze span = [[x, z], [x, z]] (w kolejności obrysu) zastępuje całą elewację wzdłuż tego odcinka: wszystkie krawędzie
 // obrysu leżące przy nim (ząbki pilastrów, płytkie ryzality) giną pod jednym frontem.
-const ALL = [...ZAMKOWA_NW, ...ZAMKOWA_SE, ...JOZEFA], SPANS = ALL.filter(s => s.span), NEAR = 8;
+const ALL = [...ZAMKOWA_NW, ...ZAMKOWA_SE, ...JOZEFA, ...PODGORZE], SPANS = ALL.filter(s => s.span), NEAR = 8;
 export const nearMid = (list, x, z) => list.find(k => !k.span && Math.hypot(k.mid[0] - x, k.mid[1] - z) < 20) || null;
 export const edgeMid = (ring, i) => { const j = (i + 2) % ring.length; return [(ring[i] + ring[j]) / 2, (ring[i + 1] + ring[j + 1]) / 2]; };
 function offSpan([[ax, az], [bx, bz]], x, z) {                                       // odległość punktu od odcinka span
