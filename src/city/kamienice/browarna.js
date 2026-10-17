@@ -48,7 +48,7 @@ const FRONTS = [
   },
   {
     // biały blok z brunatnym cokołem i kratami w oknach piwnicznych, przy Kazimierzowskiej
-    name: 'Browarna, biały blok NE', mid: [1168, 1912], seed: 148, wall: '#e8e5de', base: '#573a30', groundTop: 52, trim: '#f2efe8', frame: '#f4f2ec', eave: 170,
+    name: 'Browarna, biały blok NE', mid: [1168, 1912], seed: 148, wall: '#e8e5de', base: '#d9d5cb', groundTop: 52, trim: '#f2efe8', frame: '#f4f2ec', eave: 170,
     axes: ax(7), floors: fl(3, 9.5), bands: [[50, 54, 2.2], [166, 170, 3.4]], ground: [],
   },
   {
