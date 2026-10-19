@@ -2,7 +2,10 @@ import * as THREE from 'three';
 import { rng } from '../../core/random.js';
 
 /* ---------- tekstury kamienic: tynk frontu, szyldy, kuta balustrada ---------- */
-const PX = 5;                                                                            // pikseli na dm elewacji
+// pikseli na dm elewacji; tynk jest gładki, a okna i gzymsy są w 3D, więc wystarczy mała rozdzielczość. Przy 5 px/dm
+// ~600 frontów zajmowało ~1,7 GB pamięci canvasów i iOS ubijał kartę, na telefonie dajemy 1,2 px/dm (~100 MB)
+const MOBILE = matchMedia('(pointer:coarse)').matches || /iPhone|iPad|iPod|Android/.test(navigator.userAgent) || (navigator.deviceMemory || 8) <= 4;
+const PX = MOBILE ? 1.2 : 3;
 const cnv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; };
 const tex = (c, repeat) => {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
@@ -29,7 +32,7 @@ export function facadeTex(S, len, holes, arches) {
   for (const [f0, f1, col, y0 = S.groundTop || -2, y1 = top] of S.panels || []) rect(f0 * len, f1 * len, y0, y1, col);   // ryzality, sąsiednie domy
   for (let i = 0; i < 2600; i++) {                                                        // nierówny tynk
     const v = (R() - 0.5) * 0.09; g.fillStyle = v > 0 ? `rgba(255,255,255,${v})` : `rgba(0,0,0,${-v})`;
-    g.fillRect(R() * c.width, R() * c.height, 2 + R() * 7, 2 + R() * 7);
+    g.fillRect(R() * c.width, R() * c.height, (0.4 + R() * 1.4) * PX, (0.4 + R() * 1.4) * PX);
   }
   if (S.stains) for (let i = 0; i < 46; i++) {                                           // zacieki na zaniedbanym tynku
     const x = R() * len, y1 = S.groundTop + 8 + R() * (S.eave - S.groundTop - 8), h = 12 + R() * 45, gr = g.createLinearGradient(0, Y(y1), 0, Y(y1 - h));
@@ -58,7 +61,7 @@ export function facadeTex(S, len, holes, arches) {
 
 // szyld w×h dm: tło, ramka, wiersze [tekst, wysokość i środek jako ułamek wysokości, kolor, krój '… {}px …']; round = tarcza
 export function signTex(w, h, s) {
-  const k = 24, [c, g] = cnv(Math.round(w * k), Math.round(h * k)), W = c.width, H = c.height;
+  const k = MOBILE ? 12 : 24, [c, g] = cnv(Math.round(w * k), Math.round(h * k)), W = c.width, H = c.height;
   if (s.bg) {
     g.fillStyle = s.bg;
     if (s.round) { g.beginPath(); g.arc(W / 2, H / 2, Math.min(W, H) / 2 - 2, 0, 7); g.fill(); } else g.fillRect(0, 0, W, H);
